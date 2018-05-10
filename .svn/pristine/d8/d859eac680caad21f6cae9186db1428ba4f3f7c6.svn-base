@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerCashoutBatchDao">
+	<resultMap id="subMerCashoutBatch" type="com.bypay.domain.SubMerCashoutBatch">
+		<result property="batchId" column="BATCH_ID" />
+		<result property="batchTime" column="BATCH_TIME" />
+		<result property="orderAmt" column="ORDER_AMT" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="finishTime" column="FINISH_TIME" />
+		<result property="TransFee" column="TRANS_FEE" />
+		<result property="orderCount" column="ORDER_COUNT" />
+		<result property="status" column="STATUS" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	
+	<sql id="baseColumn">
+		BATCH_TIME, ORDER_AMT,	
+		CREATE_DATE,FINISH_TIME,TRANS_FEE,ORDER_COUNT,STATUS,RESERVED1,RESERVED2,reserved3	
+	</sql>
+	
+	<select id="selectSubMerCashoutBatch" resultMap="subMerCashoutBatch">
+		SELECT * FROM SUB_MER_CASHOUT_BATCH
+	</select>
+	<insert id="insertSubMerCashoutBatch" parameterType="com.bypay.domain.SubMerCashoutBatch">
+		insert into SUB_MER_CASHOUT_BATCH(
+		<include refid="baseColumn" />
+		) values(#{batchTime},#{orderAmt},#{createDate},#{finishTime},#{TransFee},#{orderCount},#{status},
+		#{reserved1},#{reserved2},#{reserved3})
+		<selectKey resultType="java.lang.String" keyProperty="batchId">  
+        	select last_insert_id() as batchId from SUB_MER_CASHOUT_BATCH limit 1  
+   	    </selectKey>
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectSubMerCashoutBatchList"  resultMap="subMerCashoutBatch" parameterType="java.util.Map">
+			select * from SUB_MER_CASHOUT_BATCH 
+			<where>
+			<if test="subMerCashoutBatch.createDate!=null and subMerCashoutBatch.createDate!=''">
+				AND CREATE_DATE=#{subMerCashoutBatch.createDate}
+			</if>
+			</where>
+			<if test="page!='-1' and pageSize!='-1'">
+			limit #{page},#{pageSize}
+			</if>
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectSubMerCashoutBatchCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.SubMerCashoutBatch">
+		SELECT COUNT(*) from SUB_MER_CASHOUT_BATCH 
+		<where>
+			<if test="subMerCashoutBatch.createDate!=null and subMerCashoutBatch.createDate!=''">
+				AND CREATE_DATE=#{subMerCashoutBatch.createDate}
+			</if>
+			</where>
+		</select>
+	
+	<!-- 删除样式 -->
+	<delete id="deleteSubMerCashoutBatch" parameterType="com.bypay.domain.SubMerCashoutBatch">
+		delete  from SUB_MER_CASHOUT_BATCH where ID=#{id}
+	</delete>
+	
+	<update id="updateSubMerCashoutBatch" parameterType="com.bypay.domain.SubMerCashoutBatch">
+		update SUB_MER_CASHOUT_BATCH 
+		<set>
+		<if test="status != null and status != ''">
+			STATUS = #{status},
+		</if>
+		<if test="finishTime != null and finishTime != ''">
+			FINISH_TIME = #{finishTime},
+		</if>
+		<if test="reserved1 != null and reserved1 != ''">
+			RESERVED1 = #{reserved1},
+		</if>
+		</set>
+			where BATCH_ID=#{batchId}
+	</update>
+	
+</mapper>

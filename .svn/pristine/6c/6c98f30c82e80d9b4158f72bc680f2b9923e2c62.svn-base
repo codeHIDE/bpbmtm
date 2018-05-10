@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.ChannelMerInfoDao">
+	<resultMap id="channelMerInfo" type="com.bypay.domain.ChannelMerInfo">
+		<result property="chId" column="chId" />
+		<result property="chName" column="chName" />
+		<result property="chMerId" column="chMerId" />
+		<result property="chTermId" column="chTermId" />
+		<result property="chSeriId" column="chSeriId" />
+		<result property="chBatchId" column="chBatchId" />
+		<result property="chTermSeqId" column="chTermSeqId" />
+		<result property="chStat" column="chStat" />
+		<result property="chType" column="chType" />
+		<result property="chAddId" column="chAddId" />
+		<result property="chFeeId" column="chFeeId" />
+		<result property="oprId" column="oprId" />
+		<result property="provId" column="provId" />
+		<result property="chZMK" column="chZMK" />
+		<result property="chZPK" column="chZPK" />
+		<result property="chZAK" column="chZAK" />
+		<result property="chZEK" column="chZEK" />
+		<result property="chEncKey" column="chEncKey" />
+		<result property="openDate" column="openDate" />
+		<result property="transAmtPool" column="transAmtPool" />
+		<result property="lastUpdTs" column="lastUpdTs" />
+		<result property="t0Fee" column="t0Fee" />
+		<result property="t0Rate" column="t0Rate" />
+	</resultMap>
+
+	<select id="selectChannelMerInfo"  resultMap="channelMerInfo" parameterType="java.util.Map">
+		SELECT *
+		FROM channel_mer_info
+		WHERE 1=1
+		<if test="channelMerInfo.chMerId != null and channelMerInfo.chMerId  != '' ">
+		AND chMerId = #{channelMerInfo.chMerId}
+		</if>
+		<if test="channelMerInfo.chTermId != null and channelMerInfo.chTermId  != '' ">
+		AND chTermId = #{channelMerInfo.chTermId}
+		</if>
+		ORDER BY chAddId desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectChannelMerInfoCount" resultType="int" parameterType="java.util.Map">
+		SELECT  COUNT(*)
+		FROM channel_mer_info
+		WHERE 1=1
+		<if test="channelMerInfo.chMerId != null and channelMerInfo.chMerId  != '' ">
+		AND chMerId = #{channelMerInfo.chMerId}
+		</if>
+		<if test="channelMerInfo.chTermId != null and channelMerInfo.chTermId  != '' ">
+		AND chTermId = #{channelMerInfo.chTermId}
+		</if>
+	</select>
+	
+	<insert id="insertChannelMerInfo"  parameterType="com.bypay.domain.ChannelMerInfo" >
+	 	INSERT INTO channel_mer_info (chName,chMerId,chTermId,chSeriId,chBatchId,chTermSeqId,chStat,chType,chAddId,chFeeId,openDate,chZMK,t0Fee,t0Rate)
+	 	values (#{chName},#{chMerId},#{chTermId},#{chSeriId},#{chBatchId},#{chTermSeqId},#{chStat},#{chType},#{chAddId},#{chFeeId},#{openDate},#{chZMK},#{t0Fee}*100,#{t0Rate})
+	</insert>
+	
+	<select id="selectChannelMerInfoByMerId"  parameterType="com.bypay.domain.ChannelMerInfo"  resultMap="channelMerInfo" >
+			SELECT * FROM channel_mer_info WHERE chMerId = #{chMerId}
+			<if test="chTermId != null and chTermId  != '' ">
+				AND chTermId = #{chTermId}
+			</if>
+	</select>
+	
+	<select id="selectChannelMerInfoById"  parameterType="com.bypay.domain.ChannelMerInfo"  resultMap="channelMerInfo" >
+			SELECT * FROM channel_mer_info WHERE chId = #{chId}
+	</select>
+	
+	<update id="updateChannelMerInfo"  parameterType="com.bypay.domain.ChannelMerInfo" >
+	 	UPDATE channel_mer_info SET 
+	 	chName=#{chName},chMerId=#{chMerId},chTermId=#{chTermId},chSeriId=#{chSeriId},chZMK=#{chZMK},chAddId=#{chAddId},chType=#{chType},
+	 	chFeeId=#{chFeeId},t0Fee=#{t0Fee}*100,t0Rate=#{t0Rate} 
+	 	WHERE chId=#{chId}
+	</update>
+	
+	<select id="selectChannelMerInfoByFee" parameterType="java.util.Map"  resultMap="channelMerInfo" >
+		SELECT chId,t0Fee,chName FROM channel_mer_info WHERE
+		t0Rate=#{t0Rate}
+		AND chAddId=#{chAddId}
+	</select>
+	
+</mapper>

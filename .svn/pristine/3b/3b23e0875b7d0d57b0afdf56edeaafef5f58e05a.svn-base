@@ -1,0 +1,63 @@
+package com.bypay.dao.impl;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.MerTerminalInfoDao;
+import com.bypay.domain.MerTerminalInfo;
+import com.bypay.domain.TractInfo;
+
+@Repository("merTerminalInfoDao")
+public class MerTerminalInfoDaoImpl implements MerTerminalInfoDao{
+
+	@Inject
+	private SqlSessionTemplate sqlSessionTemplate;
+	
+	//添加
+	@Override
+	public int insertMerTerminalInfo(MerTerminalInfo merTerminalInfo) {
+		return sqlSessionTemplate.insert("insertMerTerminalInfo", merTerminalInfo);
+	}
+
+	//查询所有机构终端
+	@Override
+	public List<MerTerminalInfo> selectMerTerminalInfoList(Map map) {
+		return (List<MerTerminalInfo>) sqlSessionTemplate.selectList("selectMerTerminalInfoList", map);
+	}
+	
+	//查询终端的条数分页用
+	@Override
+	public int selectMerTerminalInfoCount(MerTerminalInfo merTerminalInfo) {
+		return (Integer) sqlSessionTemplate.selectOne("selectMerTerminalInfoCount", merTerminalInfo);
+	}
+
+	/**
+	 * 获取机构终端信息
+	 */
+	@Override
+	public MerTerminalInfo selectMerTerminalInfo(MerTerminalInfo merTerminalInfo) {
+		return (MerTerminalInfo) sqlSessionTemplate.selectOne("selectMerTerminalInfo", merTerminalInfo);
+	}
+
+	@Override
+	public MerTerminalInfo selectMerTerminalInfoOne(
+			MerTerminalInfo merTerminalInfo) {
+		return (MerTerminalInfo) sqlSessionTemplate.selectOne("selectMerTerminalInfoOne",merTerminalInfo);
+	}
+
+	@Override
+	public int updateMerTerminalInfo(MerTerminalInfo merTerminalInfo) {
+		return sqlSessionTemplate.update("updateMerTerminalInfo", merTerminalInfo);
+	}
+
+	@Override
+	public MerTerminalInfo selectMaxIdMerTerminalInfo(MerTerminalInfo terminalInfo) {
+		return (MerTerminalInfo) sqlSessionTemplate.selectOne("selectMaxIdMerTerminalInfo", terminalInfo);
+	}
+
+}

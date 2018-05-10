@@ -1,0 +1,1003 @@
+package com.bypay.domain;
+
+import com.bypay.util.BaseExcel;
+
+public class OrderInfo extends BaseExcel implements java.io.Serializable {
+
+	private String orderId;
+	private String batchId; // 批次流水
+	private String terminalId; // 终端号
+	private String subMerId; // 子商户号
+	private String merSysId; // 机构商号
+	private String agentIdL1; // 一级代理商号
+	private String agentIdL2; // 二级代理商号
+	private String transMerId; // 交易商户号
+	private String transTerId; // 交易终端号
+	private String transType; // 交易类型   01消费，04消费撤销，05消费退款，06转账，07还款，08余额查询，09手机充值
+	private String terminalType; // 终端产品类型
+	private String busType; // 业务类型
+	private String merOrderId; // 商户订单号
+	private String merOrderTime; // 商户订单时间
+	private String merAmt; // 余额查询为0，不得出现负值及值为0的情况
+	private String orderFee; // 手续费，如转账，信用卡还款
+	private String currency; // 币种，默认人民币
+	private String orderDesc; // 订单描述
+	private String orderOverTime;// 订单超时时间
+	private String orderStatus; // 订单状态 0未支付，1支付成功，2支付失败，3处理中，4冻结
+	private String refundStatus; // 退款状态 0 1
+	private String orgOrderId; // 原订单号
+	private String orgOrderAmt; // 原订单金额
+	private String cardNo; // 卡号（脱敏）
+	private String cardType; // 卡类型
+	private String issueBankId; // 发卡行号
+	private String issueBankName;// 发卡行名称
+	private String accountName; // 帐户名
+	private String userMobile; // 用户手机号
+	private String account2No; // 账号2
+	private String account2Name; // 帐户名2
+	private String account2Bank; // 发卡行2
+	private String backUrl; // 后台通知地址
+	private String createTime; // 创建时间
+	private String transTime; // 交易时间
+	private String finshTime; // 完成时间
+	private String userIp; // IP地址
+	private String batchNo; // 批次号
+	private String refferNo; // 参考号
+	private String authNo; // 授权号
+	private String voucherNo; // 凭证书
+	private String settleAmt; // 结算金额
+	private String settleDate; // 结算日期
+	private String settleCur; // 结算币种
+	private String settleConver_rate;// 结算费率
+	private String transFee; // 手续费
+	private String traceNo; // 交易号
+	private String qid; // 交易流水号
+	private String respCode; // 返回码
+	private String respDesc; // 返回描述
+	private String remark; // 备注
+	private String reserved; // 扩展
+	private String ext; // 存放明文卡号及密文密码（与业务平台加密）例：卡号|密码
+	private String fullCardNo;//全卡号（非脱敏）
+	private String orderRateType;//费率类型
+	private String finishTime;
+	private String address;
+	//辅助字段
+	private String clearAmt;
+	private String shortName; // 商户简称
+	private String shipmentStatus; // 出货状态
+	//历史导出用到的----
+		//订单清算清分表
+		private String osfeeRate;//交易手续费--手续费率
+		private String ostransFee;//扩展--总手续费
+		//订单分润明细表
+		private String merRate;//机构费率--代理商费率
+		private String merProfit;//机构利润--代理分润
+		//子商户设备信息表
+		private String tsn;//TSN--终端号
+
+	private String startTime; // 开始时间
+	private String endTime; // 结束时间
+	
+	private int settleStatus;		//是否已代付标识	 1代付成功 2冲正成功3冲正失败
+	private int signStatus;		//签名状态,1错误签名,2正确签名,3补签,4签名,9未签名
+	
+//	private SubMerInfo subMerInfo;
+//	private OrderProfit orderProfit;
+//	private SubMerTerminal subMerTerminal;
+	//-----------------将数字转为具体类型-----------
+	private String transTypes;//交易类型
+	private String orderStatuss;//交易状态
+	private String cardTypes;//卡类型
+	private String orderRateTypes;//费率类型
+	private String terminalTypes;//终端机型
+	private String payAmt;		//代付金额
+	
+	
+	private OrderProfit orderProfit;
+	
+//	public String getTerminalTypes() {
+//		String str = "";
+//		if(null != subMerTerminal) {
+//			str = subMerTerminal.getTsn();
+//		}
+//		if(null != str && !"".equals(str)) {
+//			String strs = str.substring(2, 4);
+//			if("10".equals(strs)) {
+//				terminalTypes = "MOPS";
+//			}
+//			if("13".equals(strs)) {
+//				terminalTypes = "BBOPS";
+//			}
+//		}
+//		return terminalTypes;
+//	}
+	
+	public void setTerminalTypes(String terminalTypes) {
+		this.terminalTypes = terminalTypes;
+	}
+
+//	public String getTsn() {
+//		if(null != subMerTerminal) {
+//			tsn = subMerTerminal.getTsn();
+//		}
+//		return tsn;
+//	}
+	
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getTransTerId() {
+		return transTerId;
+	}
+
+	public int getSignStatus() {
+		return signStatus;
+	}
+
+	public void setSignStatus(int signStatus) {
+		this.signStatus = signStatus;
+	}
+
+	public String getPayAmt() {
+		return payAmt;
+	}
+
+	public void setPayAmt(String payAmt) {
+		this.payAmt = payAmt;
+	}
+
+	public void setTransTerId(String transTerId) {
+		this.transTerId = transTerId;
+	}
+
+	public void setTsn(String tsn) {
+		this.tsn = tsn;
+	}
+
+//	public String getMerRate() {
+//		if(null != orderProfit) {
+//			merRate = orderProfit.getMerRate();
+//		}
+//		return merRate;
+//	}
+
+	public void setMerRate(String merRate) {
+		this.merRate = merRate;
+	}
+
+//	public String getMerProfit() {
+//		if(null != orderProfit) {
+//			merProfit = orderProfit.getMerProfit();
+//		}
+//		return merProfit;
+//	}
+
+	public int getSettleStatus() {
+		return settleStatus;
+	}
+
+	public void setSettleStatus(int settleStatus) {
+		this.settleStatus = settleStatus;
+	}
+
+	public void setMerProfit(String merProfit) {
+		this.merProfit = merProfit;
+	}
+
+//	public SubMerTerminal getSubMerTerminal() {
+//		return subMerTerminal;
+//	}
+//
+//	public void setSubMerTerminal(SubMerTerminal subMerTerminal) {
+//		this.subMerTerminal = subMerTerminal;
+//	}
+
+	public String getOrderRateTypes() {
+		if("01".equals(orderRateType)){
+			orderRateTypes = "扣率";
+		}
+		if("02".equals(orderRateType)){
+			orderRateTypes = "封顶";
+		}
+		if("03".equals(orderRateType)){
+			orderRateTypes = "T+0扣率";
+		}
+		if("04".equals(orderRateType)){
+			orderRateTypes = "T+0封顶";
+		}
+		if("05".equals(orderRateType)){
+			orderRateTypes = "积分";
+		}
+		return orderRateTypes;
+	}
+
+	public String getFinishTime() {
+		return finishTime;
+	}
+
+	public void setFinishTime(String finishTime) {
+		this.finishTime = finishTime;
+	}
+
+	public String getMerRate() {
+		return merRate;
+	}
+
+	public String getMerProfit() {
+		return merProfit;
+	}
+
+	public String getTsn() {
+		return tsn;
+	}
+
+	public String getTerminalTypes() {
+		return terminalTypes;
+	}
+
+	public void setOrderRateTypes(String orderRateTypes) {
+		this.orderRateTypes = orderRateTypes;
+	}
+
+	public String getOrderRateType() {
+		return orderRateType;
+	}
+
+	public void setOrderRateType(String orderRateType) {
+		this.orderRateType = orderRateType;
+	}
+
+	public String getOsfeeRate() {
+		return osfeeRate;
+	}
+
+	public void setOsfeeRate(String osfeeRate) {
+		this.osfeeRate = osfeeRate;
+	}
+
+	public String getOstransFee() {
+		return ostransFee;
+	}
+
+	public void setOstransFee(String ostransFee) {
+		this.ostransFee = ostransFee;
+	}
+
+	public String getFullCardNo() {
+		return fullCardNo;
+	}
+
+	public void setFullCardNo(String fullCardNo) {
+		this.fullCardNo = fullCardNo;
+	}
+
+	public String getClearAmt() {
+		return clearAmt;
+	}
+
+	public void setClearAmt(String clearAmt) {
+		this.clearAmt = clearAmt;
+	}
+
+//	public SubMerInfo getSubMerInfo() {
+//		return subMerInfo;
+//	}
+//
+//	public void setSubMerInfo(SubMerInfo subMerInfo) {
+//		this.subMerInfo = subMerInfo;
+//	}
+//
+//	public OrderProfit getOrderProfit() {
+//		return orderProfit;
+//	}
+//
+//	public void setOrderProfit(OrderProfit orderProfit) {
+//		this.orderProfit = orderProfit;
+//	}
+
+	public String getCardTypes() {
+		if("1".equals(cardType)) {
+			cardTypes = "借记卡";
+		}
+		if("2".equals(cardType)) {
+			cardTypes = "信用卡";
+		}
+		return cardTypes;
+	}
+
+	public void setCardTypes(String cardTypes) {
+		this.cardTypes = cardTypes;
+	}
+
+	public String getTransTypes() {
+		if ("01".equals(transType)) {
+			transTypes = "消费";
+		}
+		if ("04".equals(transType)) {
+			transTypes = "消费撤销";
+		}
+		if ("05".equals(transType)) {
+			transTypes = "消费退款";
+		}
+		if ("06".equals(transType)) {
+			transTypes = "转账";
+		}
+		if ("07".equals(transType)) {
+			transTypes = "还款";
+		}
+		if ("08".equals(transType)) {
+			transTypes = "余额查询";
+		}
+		if ("09".equals(transType)) {
+			transTypes = "手机充值";
+		}
+		return transTypes;
+	}
+
+	public void setTransTypes(String transTypes) {
+		this.transTypes = transTypes;
+	}
+
+	public String getOrderStatuss() {
+		if ("0".equals(orderStatus)) {
+			orderStatuss = "未支付";
+		}
+		if ("1".equals(orderStatus)) {
+			orderStatuss = "支付成功";
+		}
+		if ("2".equals(orderStatus)) {
+			orderStatuss = "支付失败";
+		}
+		if ("3".equals(orderStatus)) {
+			orderStatuss = "处理中";
+		}
+		if ("4".equals(orderStatus)) {
+			orderStatuss = "冻结";
+		}
+		return orderStatuss;
+	}
+
+	public void setOrderStatuss(String orderStatuss) {
+		this.orderStatuss = orderStatuss;
+	}
+
+	public String getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(String orderId) {
+		this.orderId = orderId;
+	}
+
+	public String getBatchId() {
+		return batchId;
+	}
+
+	public void setBatchId(String batchId) {
+		this.batchId = batchId;
+	}
+
+	public String getTerminalId() {
+		return terminalId;
+	}
+
+	public void setTerminalId(String terminalId) {
+		this.terminalId = terminalId;
+	}
+
+	public String getSubMerId() {
+		return subMerId;
+	}
+
+	public void setSubMerId(String subMerId) {
+		this.subMerId = subMerId;
+	}
+
+	public String getMerSysId() {
+		return merSysId;
+	}
+
+	public void setMerSysId(String merSysId) {
+		this.merSysId = merSysId;
+	}
+
+	public String getAgentIdL1() {
+		return agentIdL1;
+	}
+
+	public void setAgentIdL1(String agentIdL1) {
+		this.agentIdL1 = agentIdL1;
+	}
+
+	public String getAgentIdL2() {
+		return agentIdL2;
+	}
+
+	public void setAgentIdL2(String agentIdL2) {
+		this.agentIdL2 = agentIdL2;
+	}
+
+	public String getTransMerId() {
+		return transMerId;
+	}
+
+	public void setTransMerId(String transMerId) {
+		this.transMerId = transMerId;
+	}
+
+	public String getTransType() {
+		return transType;
+	}
+
+	public void setTransType(String transType) {
+		this.transType = transType;
+	}
+
+	public String getTerminalType() {
+		return terminalType;
+	}
+
+	public void setTerminalType(String terminalType) {
+		this.terminalType = terminalType;
+	}
+
+	public String getBusType() {
+		return busType;
+	}
+
+	public void setBusType(String busType) {
+		this.busType = busType;
+	}
+
+	public String getMerOrderId() {
+		return merOrderId;
+	}
+
+	public void setMerOrderId(String merOrderId) {
+		this.merOrderId = merOrderId;
+	}
+
+	public String getMerOrderTime() {
+		return merOrderTime;
+	}
+
+	public void setMerOrderTime(String merOrderTime) {
+		this.merOrderTime = merOrderTime;
+	}
+
+	public String getMerAmt() {
+		return merAmt;
+	}
+
+	public void setMerAmt(String merAmt) {
+		this.merAmt = merAmt;
+	}
+
+	public String getOrderFee() {
+		return orderFee;
+	}
+
+	public void setOrderFee(String orderFee) {
+		this.orderFee = orderFee;
+	}
+
+	public String getCurrency() {
+		return currency;
+	}
+
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	public String getOrderDesc() {
+		return orderDesc;
+	}
+
+	public void setOrderDesc(String orderDesc) {
+		this.orderDesc = orderDesc;
+	}
+
+	public String getOrderOverTime() {
+		return orderOverTime;
+	}
+
+	public void setOrderOverTime(String orderOverTime) {
+		this.orderOverTime = orderOverTime;
+	}
+
+	public String getOrderStatus() {
+		return orderStatus;
+	}
+
+	public void setOrderStatus(String orderStatus) {
+		this.orderStatus = orderStatus;
+	}
+
+	public String getRefundStatus() {
+		return refundStatus;
+	}
+
+	public void setRefundStatus(String refundStatus) {
+		this.refundStatus = refundStatus;
+	}
+
+	public String getOrgOrderId() {
+		return orgOrderId;
+	}
+
+	public void setOrgOrderId(String orgOrderId) {
+		this.orgOrderId = orgOrderId;
+	}
+
+	public String getOrgOrderAmt() {
+		return orgOrderAmt;
+	}
+
+	public void setOrgOrderAmt(String orgOrderAmt) {
+		this.orgOrderAmt = orgOrderAmt;
+	}
+
+	public String getCardNo() {
+		return cardNo;
+	}
+
+	public void setCardNo(String cardNo) {
+		this.cardNo = cardNo;
+	}
+
+	public String getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(String cardType) {
+		this.cardType = cardType;
+	}
+
+	public String getIssueBankId() {
+		return issueBankId;
+	}
+
+	public void setIssueBankId(String issueBankId) {
+		this.issueBankId = issueBankId;
+	}
+
+	public String getIssueBankName() {
+		return issueBankName;
+	}
+
+	public void setIssueBankName(String issueBankName) {
+		this.issueBankName = issueBankName;
+	}
+
+	public String getAccountName() {
+		return accountName;
+	}
+
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
+
+	public String getUserMobile() {
+		return userMobile;
+	}
+
+	public void setUserMobile(String userMobile) {
+		this.userMobile = userMobile;
+	}
+
+	public String getAccount2No() {
+		return account2No;
+	}
+
+	public void setAccount2No(String account2No) {
+		this.account2No = account2No;
+	}
+
+	public String getAccount2Name() {
+		return account2Name;
+	}
+
+	public void setAccount2Name(String account2Name) {
+		this.account2Name = account2Name;
+	}
+
+	public String getAccount2Bank() {
+		return account2Bank;
+	}
+
+	public void setAccount2Bank(String account2Bank) {
+		this.account2Bank = account2Bank;
+	}
+
+	public String getBackUrl() {
+		return backUrl;
+	}
+
+	public void setBackUrl(String backUrl) {
+		this.backUrl = backUrl;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getTransTime() {
+		return transTime;
+	}
+
+	public void setTransTime(String transTime) {
+		this.transTime = transTime;
+	}
+
+	public String getFinshTime() {
+		return finshTime;
+	}
+
+	public void setFinshTime(String finshTime) {
+		this.finshTime = finshTime;
+	}
+
+	public String getUserIp() {
+		return userIp;
+	}
+
+	public void setUserIp(String userIp) {
+		this.userIp = userIp;
+	}
+
+	public String getBatchNo() {
+		return batchNo;
+	}
+
+	public void setBatchNo(String batchNo) {
+		this.batchNo = batchNo;
+	}
+
+	public String getRefferNo() {
+		return refferNo;
+	}
+
+	public void setRefferNo(String refferNo) {
+		this.refferNo = refferNo;
+	}
+
+	public String getAuthNo() {
+		return authNo;
+	}
+
+	public void setAuthNo(String authNo) {
+		this.authNo = authNo;
+	}
+
+	public String getVoucherNo() {
+		return voucherNo;
+	}
+
+	public void setVoucherNo(String voucherNo) {
+		this.voucherNo = voucherNo;
+	}
+
+	public String getSettleAmt() {
+		return settleAmt;
+	}
+
+	public void setSettleAmt(String settleAmt) {
+		this.settleAmt = settleAmt;
+	}
+
+	public String getSettleDate() {
+		return settleDate;
+	}
+
+	public void setSettleDate(String settleDate) {
+		this.settleDate = settleDate;
+	}
+
+	public String getSettleCur() {
+		return settleCur;
+	}
+
+	public void setSettleCur(String settleCur) {
+		this.settleCur = settleCur;
+	}
+
+
+	public String getTransFee() {
+		return transFee;
+	}
+
+	public void setTransFee(String transFee) {
+		this.transFee = transFee;
+	}
+
+	public String getTraceNo() {
+		return traceNo;
+	}
+
+	public void setTraceNo(String traceNo) {
+		this.traceNo = traceNo;
+	}
+
+	public String getQid() {
+		return qid;
+	}
+
+	public void setQid(String qid) {
+		this.qid = qid;
+	}
+
+	public String getRespCode() {
+		return respCode;
+	}
+
+	public void setRespCode(String respCode) {
+		this.respCode = respCode;
+	}
+
+	public String getRespDesc() {
+		return respDesc;
+	}
+
+	public void setRespDesc(String respDesc) {
+		this.respDesc = respDesc;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getReserved() {
+		return reserved;
+	}
+
+	public void setReserved(String reserved) {
+		this.reserved = reserved;
+	}
+
+	public String getExt() {
+		return ext;
+	}
+
+	public void setExt(String ext) {
+		this.ext = ext;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
+	public String getShipmentStatus() {
+		return shipmentStatus;
+	}
+
+	public void setShipmentStatus(String shipmentStatus) {
+		this.shipmentStatus = shipmentStatus;
+	}
+
+	public String getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(String startTime) {
+		this.startTime = startTime;
+	}
+
+	public String getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(String endTime) {
+		this.endTime = endTime;
+	}
+
+	/*
+	 * ("订单号","商户简称","商户订单号","商户订单时间","通道商户号 ","交易金额","交易类型","交易状态"
+	 * ,"清算日期","清分日期","终端号") 获取值
+	 */// String[] names={"orderId","merShortName",
+	// "merAmt","merOrderId","merOrderTime","transType","orderStatus","errorDesc","cardNo","cardType"};
+	@Override
+	public String getCellValue(int i) {
+		switch (i) {
+		case 0:
+			return String.valueOf(orderId);
+		case 1:
+			return String.valueOf(subMerId);
+		case 2:
+			return String.valueOf(shortName);
+		case 3:
+			return String.valueOf(merOrderId);
+		case 4:
+			return String.valueOf(merOrderTime);
+		case 5:
+			return String.valueOf(merAmt);
+		case 6:
+			if ("01".equals(transType)) {
+				return "消费";
+			}
+			if ("04".equals(transType)) {
+				return "消费撤销";
+			}
+			if ("05".equals(transType)) {
+				return "消费退款";
+			}
+			if ("06".equals(transType)) {
+				return "转账";
+			}
+			if ("07".equals(transType)) {
+				return "还款";
+			}
+			if ("08".equals(transType)) {
+				return "余额查询";
+			}
+			if ("09".equals(transType)) {
+				return "手机充值";
+			}
+		case 7:
+			if ("0".equals(orderStatus)) {
+				return "未支付";
+			}
+			if ("1".equals(orderStatus)) {
+				return "支付成功";
+			}
+			if ("2".equals(orderStatus)) {
+				return "支付失败";
+			}
+			if ("3".equals(orderStatus)) {
+				return "处理中";
+			}
+			if ("4".equals(orderStatus)) {
+				return "冻结";
+			}
+		case 8:
+			return String.valueOf(respDesc);
+		case 9:
+			return String.valueOf(cardNo);
+		case 10:
+			return String.valueOf(cardType);
+
+		default:
+			return "";
+		}
+
+	}
+
+	// String[] columNames = {
+	// "订单号","商户号","商户简称","商户订单号","商户订单时间","通道商户号","交易金额","交易状态"};
+	public String getCellValues(int i) {
+		switch (i) {
+		case 0:
+			return String.valueOf(orderId);
+		case 1:
+			return String.valueOf(subMerId);
+		case 2:
+			return String.valueOf(shortName);
+		case 3:
+			return String.valueOf(merOrderId);
+		case 4:
+			return String.valueOf(merOrderTime);
+		case 5:
+			return String.valueOf(transMerId);
+		case 6:
+			return String.valueOf(merAmt);
+		case 7:
+			if ("0".equals(orderStatus)) {
+				return "未支付";
+			}
+			if ("1".equals(orderStatus)) {
+				return "支付成功";
+			}
+			if ("2".equals(orderStatus)) {
+				return "支付失败";
+			}
+			if ("3".equals(orderStatus)) {
+				return "处理中";
+			}
+			if ("4".equals(orderStatus)) {
+				return "冻结";
+			}
+		default:
+			return "";
+		}
+
+	}
+
+	public String getApplyCellValue(int i) {
+		switch (i) {
+		case 0:
+			return String.valueOf(orderId);
+		case 1:
+			return String.valueOf(subMerId);
+		case 2:
+			return String.valueOf(shortName);
+		case 3:
+			return String.valueOf(merOrderId);
+		case 4:
+			return String.valueOf(merOrderTime);
+		case 5:
+			return String.valueOf(merAmt);
+		case 6:
+			if ("01".equals(transType)) {
+				return "消费";
+			}
+			if ("04".equals(transType)) {
+				return "消费撤销";
+			}
+			if ("05".equals(transType)) {
+				return "消费退款";
+			}
+			if ("06".equals(transType)) {
+				return "转账";
+			}
+			if ("07".equals(transType)) {
+				return "还款";
+			}
+			if ("08".equals(transType)) {
+				return "余额查询";
+			}
+			if ("09".equals(transType)) {
+				return "手机充值";
+			}
+		case 7:
+			if ("0".equals(orderStatus)) {
+				return "未支付";
+			}
+			if ("1".equals(orderStatus)) {
+				return "支付成功";
+			}
+			if ("2".equals(orderStatus)) {
+				return "支付失败";
+			}
+			if ("3".equals(orderStatus)) {
+				return "处理中";
+			}
+			if ("4".equals(orderStatus)) {
+				return "冻结";
+			}
+		case 8:
+			return String.valueOf(respDesc);
+		case 9:
+			return String.valueOf(cardNo);
+		case 10:
+			return String.valueOf(cardType);
+
+		default:
+			return "";
+		}
+	}
+
+	public OrderProfit getOrderProfit() {
+		return orderProfit;
+	}
+
+	public void setOrderProfit(OrderProfit orderProfit) {
+		this.orderProfit = orderProfit;
+	}
+
+	public String getSettleConver_rate() {
+		return settleConver_rate;
+	}
+
+	public void setSettleConver_rate(String settleConverRate) {
+		settleConver_rate = settleConverRate;
+	}
+
+	
+	
+}

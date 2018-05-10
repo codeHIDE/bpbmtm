@@ -1,0 +1,564 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.OrderInfoDao">
+	<resultMap id="orderInfo" type="com.bypay.domain.OrderInfo">
+		<result property="orderId" column="ORDER_ID" />
+		<result property="batchId" column="BATCH_ID" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="agentIdL1" column="AGENT_ID_L1" />
+		<result property="agentIdL2" column="AGENT_ID_L2" />
+		<result property="transMerId" column="TRANS_MER_ID" />
+		<result property="transTerId" column="TRANS_TER_ID" />
+		<result property="transType" column="TRANS_TYPE" />
+		<result property="terminalType" column="TERMINAL_TYPE" />
+		<result property="merOrderId" column="MER_ORDER_ID" />
+		<result property="merOrderTime" column="MER_ORDER_TIME" />
+		<result property="merAmt" column="MER_AMT" />
+		<result property="orderFee" column="ORDER_FEE" />
+		<result property="currency" column="CURRENCY" />
+		<result property="orderDesc" column="ORDER_DESC" />
+		<result property="orderOverTime" column="ORDER_OVER_TIME" />
+		<result property="orderStatus" column="ORDER_STATUS" />
+		<result property="refundStatus" column="REFUND_STATUS" />
+		<result property="orgOrderId" column="ORG_ORDER_ID" />
+		<result property="orgOrder_amt" column="ORG_ORDER_AMT" />
+		<result property="cardNo" column="CARD_NO" />
+		<result property="cardType" column="CARD_TYPE" />
+		<result property="issueBankId" column="ISSUE_BANK_ID" />
+		<result property="issueBankName" column="ISSUE_BANK_NAME" />
+		<result property="userMobile" column="USER_MOBILE" />
+		<result property="backUrl" column="BACK_URL" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="transTime" column="TRANS_TIME" />
+		<result property="finshTime" column="FINISH_TIME" />
+		<result property="userIp" column="USER_IP" />
+		<result property="batchNo" column="BATCH_NO" />
+		<result property="refferNo" column="REFFER_NO" />
+		<result property="authNo" column="AUTH_NO" />
+		<result property="voucherNo" column="VOUCHER_NO" />
+		<result property="settleAmt" column="SETTLE_AMT" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="settleCur" column="SETTLE_CUR" />
+		<result property="settleConver_rate" column="SETTLE_CONVER_RATE" />
+		<result property="traceNo" column="TRACE_NO" />
+		<result property="qid" column="QID" />
+		<result property="respCode" column="RESP_CODE" />
+		<result property="respDesc" column="RESP_DESC" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<result property="ext" column="EXT" />
+		<result property="busType" column="BUS_TYPE"/>
+		<result property="accountName" column="ACCOUNT_NAME"/>
+		<result property="account2No" column="ACCOUNT2_NO"/>
+		<result property="account2Name" column="ACCOUNT2_NAME"/>
+		<result property="account2Bank" column="ACCOUNT2_BANK"/>
+		<result property="transFee" column="TRANS_FEE"/>
+		<result property="clearAmt" column="CLEAR_AMT"/>
+		<result property="shortName" column="SHORT_NAME"/>
+		<result property="shipmentStatus" column="SHIPMENT_STATUS"/>
+		<result property="fullCardNo" column="FULL_CARD_NO"/>
+		<result property="orderRateType" column="ORDER_RATE_TYPE"/>
+		<result property="osfeeRate" column="OSFEE_RATE"/>
+		<result property="ostransFee" column="OSTRANS_FEE"/>
+		<result property="finishTime" column="FINISH_TIME"/>
+		<result property="settleStatus" column="SETTLESTATUS"/>
+		<result property="payAmt" column="PAY_AMT"/>
+		<result property="signStatus" column="SIGNSTATUS"/>
+		
+		<!-- <association property="subMerTerminal" column="SUB_MER_ID" select="com.bypay.dao.impl.SubMerTerminalDaoImpl.selectTerminalBySubMerId"></association> -->
+		<!-- <association property="orderProfit" column="ORDER_ID" select="com.bypay.dao.impl.OrderProfitDaoImpl.selectOrderProfitByOrderId"></association>
+		<association property="subMerInfo" column="SUB_MER_ID" select="com.bypay.dao.impl.SubMerInfoDaoImpl.getSubMerInfoById"></association> -->
+	</resultMap>
+
+
+	<resultMap type="java.util.HashMap" id="sumInfo">
+		<result property="count" column="COUNT" />
+		<result property="sumMerAmt" column="SUM_MER_AMT" />
+		<result property="sumTransFee" column="SUM_TRANS_FEE" />
+	</resultMap>
+	<insert id="insertOrderInfo" parameterType="com.bypay.domain.OrderInfo">
+		INSERT INTO ORDER_INFO(ORDER_ID,BATCH_ID, TERMINAL_ID, SUB_MER_ID, MER_SYS_ID, AGENT_ID_L2, AGENT_ID_L1,
+		 TRANS_MER_ID, TRANS_TYPE, TERMINAL_TYPE, MER_ORDER_ID, MER_ORDER_TIME, MER_AMT, ORDER_FEE, 
+		 CURRENCY, ORDER_DESC, ORDER_OVER_TIME, ORDER_STATUS, REFUND_STATUS, CREATE_TIME, TRANS_TIME,
+		  FINISH_TIME, BATCH_NO, REFFER_NO, AUTH_NO, VOUCHER_NO, SETTLE_AMT, SETTLE_DATE, RESP_DESC,
+		  TRANS_FEE, BUS_TYPE) 
+    VALUES(#{orderId},#{batchId}, #{terminalId}, #{subMerId}, #{merSysId}, #{agentIdL2}, #{agentIdL1}, #{transMerId},
+     #{transType}, #{terminalType}, #{merOrderId}, #{merOrderTime}, #{merAmt}, #{orderFee}, #{currency},
+      #{orderDesc}, #{orderOverTime}, #{orderStatus}, #{refundStatus}, #{createTime}, #{transTime},
+       #{finishTime}, #{batchNo}, #{refferNo}, #{authNo}, #{voucherNo}, #{settleAmt}, #{settleDate},
+        #{respDesc}, #{transFee}, #{busType})
+	</insert>
+	<!-- 查询制定商户的成功消费订单 -->
+	<select id="selectOrderInfoBySubMerId" resultMap="orderInfo" parameterType="com.bypay.domain.OrderInfo">
+		SELECT * FROM ORDER_INFO
+		WHERE SUB_MER_ID = #{subMerId} AND SETTLE_DATE = #{settleDate} AND ORDER_STATUS = 1 AND TRANS_TYPE = '01'
+	</select>
+	<!-- 修改订单信息表的RESERVED字段为-1,表示此订单已标记过为异常 -->
+	<update id="updateOrderReserved" parameterType="java.lang.String">
+		update ORDER_INFO set RESERVED = '-1' where ORDER_ID = #{orderId}
+	</update>
+	
+	<update id="updateOrderSettle" parameterType="java.lang.String">
+		update ORDER_INFO set SETTLESTATUS = 1 where ORDER_ID = #{orderId}
+	</update>
+	<!-- 根据订单ID获取订单信息 -->
+	<select id="getOrderInfo" resultMap="orderInfo" parameterType="java.lang.String">
+		SELECT 
+		* 
+		FROM ORDER_INFO 
+		where ORDER_ID = #{orderId}
+	</select>
+	
+	
+	<update id="updateByOrder"
+		parameterType="com.bypay.domain.OrderInfo">
+		update ORDER_INFO SET ORDER_ID=#{orderId} 
+		<if test="refundStatus!=null and refundStatus!=''">
+		    ,REFUND_STATUS=#{refundStatus} 
+		</if>
+		<if test="signStatus!=null and signStatus!=''">
+		    ,SIGNSTATUS=#{signStatus} 
+		</if>
+		<if test="settleStatus!=null and settleStatus!=''">
+		    ,SETTLESTATUS=#{settleStatus} 
+		</if>
+		where ORDER_ID=#{orderId} 
+	</update>
+	
+	<!-- 查询当日交易的条数 -->
+	<select id="selectOrderTheDateCount" resultMap="sumInfo" parameterType="com.bypay.domain.OrderInfo">
+			select 
+			count(OI.ORDER_ID) as COUNT,
+	        SUM(OI.MER_AMT) as SUM_MER_AMT
+	        <if test="orderStatus!=null and orderStatus==1">
+				 , SUM(OS.TRANS_FEE) as SUM_TRANS_FEE 
+			</if>
+			from ORDER_INFO OI
+			<if test="orderStatus!=null and orderStatus==1">
+				inner join ORDER_STATICTIS OS on OS.ORDER_ID = OI.ORDER_ID 
+			</if>
+			<include refid="dayWhere"/>
+	</select>
+	<select id="selectOrderTheDateCountRate" resultMap="sumInfo" parameterType="com.bypay.domain.OrderInfo">
+			select 
+			count(OI.ORDER_ID) as COUNT,
+	        SUM(OI.MER_AMT) as SUM_MER_AMT
+	        <if test="orderStatus!=null and orderStatus==1">
+				 , SUM(OI.MER_AMT-OI.PAY_AMT) as SUM_TRANS_FEE 
+			</if>
+			from ORDER_INFO OI
+			<include refid="dayWhereRate"/>
+	</select>
+	<!-- 当天交易列 -->
+	<sql id="dayColumn">
+			OI.ORDER_ID, OI.SUB_MER_ID, OI.TRANS_MER_ID, OI.TRANS_TYPE, OI.MER_ORDER_ID,OI.REFUND_STATUS,
+			OI.MER_ORDER_TIME, OI.TRANS_MER_ID, OI.MER_AMT, OI.ORDER_STATUS, OI.CREATE_TIME,
+			OI.BUS_TYPE, OI.CARD_NO, OI.CARD_TYPE, OI.USER_MOBILE,OI.PAY_AMT,
+			OI.MER_SYS_ID, OI.TERMINAL_ID, OI.RESP_CODE,OI.RESP_DESC, OI.RESERVED, SMI.SHORT_NAME, OI.ORDER_RATE_TYPE,OI.RESP_CODE,OI.SETTLESTATUS   
+	</sql>
+	<!-- 查询当天交易信息 -->
+	<select id="selectOrderTheDate" resultMap="orderInfo" parameterType="java.util.Map">
+			select 
+			<include refid="dayColumn" />
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI on OI.SUB_MER_ID = SMI.SUB_MER_ID
+			<include refid="dayWhere"/>
+			limit #{page},#{pageSize}
+	</select>
+	<select id="selectOrderTheDateRate" resultMap="orderInfo" parameterType="java.util.Map">
+			select 
+			<include refid="dayColumn" />
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI on OI.SUB_MER_ID = SMI.SUB_MER_ID
+			<include refid="dayWhereRate"/>
+			limit #{page},#{pageSize}
+	</select>
+	<!-- 当天交易查询条件 -->
+	<sql id="dayWhere">
+			where
+				OI.CREATE_DATE = #{createDate} 
+			<if test="agentIdL1!=null and agentIdL1!=''">
+				AND  OI.AGENT_ID_L1 =#{agentIdL1}
+			</if>
+				<if test="agentIdL2!=null and agentIdL2!=''">
+				AND  OI.AGENT_ID_L2 =#{agentIdL2}
+			</if>
+			<if test="subMerId!=null and subMerId!=''">
+				AND OI.SUB_MER_ID=#{subMerId}
+			</if>
+			<if test="orderId!=null and orderId!=''">
+				AND OI.ORDER_ID=#{orderId}
+			</if>
+			<if test="merOrderId!=null and merOrderId!=''">
+				AND OI.MER_ORDER_ID=#{merOrderId}
+			</if>
+			<if test="transType!=null and transType!='' and transType!='-1'">
+				AND OI.TRANS_TYPE=#{transType}
+			</if>
+			<if test="orderStatus!=null and orderStatus!='' and orderStatus!='-1'">
+				AND OI.ORDER_STATUS=#{orderStatus}
+			</if>
+			<if test="userMobile!=null and userMobile!=''">
+				AND OI.USER_MOBILE=#{userMobile}
+			</if> 
+			<if test="merSysId!=null and merSysId!=''">
+				AND OI.MER_SYS_ID=#{merSysId}
+			</if>
+			<if test="terminalId!=null and terminalId!=''">
+				AND OI.TERMINAL_ID=#{terminalId}
+			</if>
+			<if test="cardNo!=null and cardNo!=''">
+				AND OI.FULL_CARD_NO=#{cardNo}
+			</if>
+			<if test="transMerId!=null and transMerId!=''">
+				AND OI.TRANS_MER_ID=#{transMerId}
+			</if>
+			<if test="orderRateType!=null and orderRateType!='-1'">
+				AND OI.ORDER_RATE_TYPE=#{orderRateType}
+			</if>
+			<if test="signStatus!=null and signStatus!='-1'">
+				AND OI.SIGNSTATUS=#{signStatus}
+			</if>
+			order by OI.ORDER_ID desc
+	</sql>
+	<sql id="dayWhereRate">
+			where
+				OI.CREATE_DATE = #{createDate} 
+			<if test="agentIdL1!=null and agentIdL1!=''">
+				AND  OI.AGENT_ID_L1 =#{agentIdL1}
+			</if>
+				<if test="agentIdL2!=null and agentIdL2!=''">
+				AND  OI.AGENT_ID_L2 =#{agentIdL2}
+			</if>
+			<if test="subMerId!=null and subMerId!=''">
+				AND OI.SUB_MER_ID=#{subMerId}
+			</if>
+			<if test="orderId!=null and orderId!=''">
+				AND OI.ORDER_ID=#{orderId}
+			</if>
+			<if test="merOrderId!=null and merOrderId!=''">
+				AND OI.MER_ORDER_ID=#{merOrderId}
+			</if>
+			<if test="transType!=null and transType!='' and transType!='-1'">
+				AND OI.TRANS_TYPE=#{transType}
+			</if>
+			<if test="orderStatus!=null and orderStatus!='' and orderStatus!='-1'">
+				AND OI.ORDER_STATUS=#{orderStatus}
+			</if>
+			<if test="userMobile!=null and userMobile!=''">
+				AND OI.USER_MOBILE=#{userMobile}
+			</if> 
+			<if test="merSysId!=null and merSysId!=''">
+				AND OI.MER_SYS_ID=#{merSysId}
+			</if>
+			<if test="terminalId!=null and terminalId!=''">
+				AND OI.TERMINAL_ID=#{terminalId}
+			</if>
+			<if test="cardNo!=null and cardNo!=''">
+				AND OI.FULL_CARD_NO=#{cardNo}
+			</if>
+			<if test="transMerId!=null and transMerId!=''">
+				AND OI.TRANS_MER_ID=#{transMerId}
+			</if>
+			<if test="orderRateType!=null and orderRateType!=''">
+				AND OI.ORDER_RATE_TYPE=#{orderRateType}
+			</if>
+			order by OI.ORDER_ID desc
+	</sql>
+	<!-- 历史交易列 -->
+	<sql id="historyColumn">
+			OI.ORDER_ID, OI.MER_ORDER_ID, OI.MER_ORDER_TIME, OI.MER_AMT,
+			OI.TRANS_TYPE, OI.ORDER_STATUS, OI.RESP_CODE,OI.RESP_DESC, OI.CARD_NO, OI.CARD_TYPE, 
+			OI.SUB_MER_ID, OI.TRANS_MER_ID, OI.MER_SYS_ID, OI.TERMINAL_ID, OI.REFUND_STATUS,
+			OI.RESERVED,OI.CREATE_TIME,OI.SETTLE_DATE, SMI.SHORT_NAME, OI.ORDER_RATE_TYPE,OI.SETTLESTATUS 
+	</sql>
+	<!-- 历史查询订单信息  -->
+	<select id="selecrOrderHistoryList"  resultMap="orderInfo" parameterType="java.util.Map">
+			select 
+			<include refid="historyColumn" />
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI on OI.SUB_MER_ID = SMI.SUB_MER_ID
+			<include refid="historyWhere"/>
+			limit #{page},#{pageSize}
+	</select>
+	<!-- 查询历史交易的条数 -->
+	<select id="selectOrderHistoryCount" resultMap="sumInfo" parameterType="java.util.Map">
+			select  
+			count(OI.ORDER_ID) as COUNT,
+	        SUM(OI.MER_AMT) as SUM_MER_AMT
+	        <if test="orderStatus!=null and orderStatus==1">
+	        	, SUM(OS.TRANS_FEE) as SUM_TRANS_FEE 
+			</if>
+			from ORDER_INFO OI
+			<if test="orderStatus!=null and orderStatus==1">
+				left join ORDER_STATICTIS OS on OS.ORDER_ID = OI.ORDER_ID 
+			</if>
+			<include refid="historyWhere"/>
+	</select>
+	<!-- 历史交易查询条件 -->
+	<sql id="historyWhere">
+			where OI.CREATE_TIME &#60;&#61; CURDATE()
+			<if test="agentIdL1!=null and agentIdL1!=''">
+				AND OI.AGENT_ID_L1 = #{agentIdL1}
+			</if>
+			<if test="agentIdL2!=null and agentIdL2!=''">
+				AND OI.AGENT_ID_L2 = #{agentIdL2}
+			</if>
+			<if test="subMerId!=null and subMerId!=''">
+				AND OI.SUB_MER_ID=#{subMerId}
+			</if>
+			<if test="orderId!=null and orderId!=''">
+				AND OI.ORDER_ID=#{orderId}
+			</if>
+			<if test="merOrderId!=null and merOrderId!=''">
+				AND OI.MER_ORDER_ID=#{merOrderId}
+			</if>
+			<if test="transType!=null and transType!='' and transType!='-1'">
+				AND OI.TRANS_TYPE=#{transType}
+			</if>
+			<if test="orderStatus!=null and orderStatus!='' and orderStatus!='-1'">
+				AND OI.ORDER_STATUS=#{orderStatus}
+			</if>
+			<if test="userMobile!=null and userMobile!=''">
+				AND OI.USER_MOBILE=#{userMobile}
+			</if> 
+			<if test="merSysId!=null and merSysId!=''">
+				AND OI.MER_SYS_ID=#{merSysId}
+			</if>
+			<if test="terminalId!=null and terminalId!=''">
+				AND OI.TERMINAL_ID=#{terminalId}
+			</if>
+			<if test="cardNo!=null and cardNo!=''">
+				AND OI.FULL_CARD_NO=#{cardNo}
+				<!-- AND OI.EXT like '%${cardNo}%' -->
+			</if>
+			<if test="refundStatus!=null and refundStatus!='' and refundStatus!='-1'">
+				AND OI.REFUND_STATUS=#{refundStatus}
+			</if>
+			<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+				AND OI.CREATE_TIME between #{startTime} and #{endTime}
+			</if>
+			<if test="transMerId!=null and transMerId!=''">
+				AND OI.TRANS_MER_ID=#{transMerId}
+			</if>
+			<if test="settleDate!=null and settleDate!=''">
+				AND OI.SETTLE_DATE = #{settleDate}
+			</if>
+			<if test="orderRateType!=null and orderRateType!='-1'">
+				AND OI.ORDER_RATE_TYPE=#{orderRateType}
+			</if>
+			<if test="signStatus!=null and signStatus!='-1'">
+				AND OI.SIGNSTATUS=#{signStatus}
+			</if>
+			order by OI.ORDER_ID desc
+	</sql>
+	
+	<!-- 转账交易列 -->
+	<sql id="transferColumn">
+			OI.ORDER_ID, OI.SUB_MER_ID, OI.TRANS_MER_ID, OI.TRANS_TYPE, OI.MER_ORDER_ID, OI.MER_ORDER_TIME,
+			OI.TRANS_MER_ID, OI.MER_AMT, OI.ORDER_STATUS, OI.CREATE_TIME, OI.BUS_TYPE, OI.CARD_NO, OI.CARD_TYPE,
+			SMI.SHORT_NAME, OI.USER_MOBILE, OI.TERMINAL_ID 
+	</sql>
+	<!-- 转账查询 -->
+	<select id="selectTransfer" resultMap="orderInfo" parameterType="java.util.Map">
+			select 
+			<include refid="transferColumn" />
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI
+			on SMI.SUB_MER_ID = OI.SUB_MER_ID
+			<include refid="transferWhere"/>
+			limit #{page},#{pageSize}
+	</select>
+	<!-- 查询转账的条数 -->
+	<select id="selectTransferCount" resultMap="sumInfo" parameterType="java.util.Map">
+			select 
+			count(OI.ORDER_ID) as COUNT,
+	        COALESCE(SUM(OI.MER_AMT),0) as SUM_MER_AMT,
+	        COALESCE(SUM(OI.TRANS_FEE),0) as SUM_TRANS_FEE 
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI 
+			on SMI.SUB_MER_ID = OI.SUB_MER_ID
+			<include refid="transferWhere"/>
+	</select>
+	<!-- 转账交易查询条件 -->
+	<sql id="transferWhere">
+			where  OI.TRANS_TYPE='06'
+			<if test="agentIdL1!=null and agentIdL1!=''">
+				AND OI.AGENT_ID_L1 = #{agentIdL1}
+			</if>
+			<if test="agentIdL2!=null and agentIdL2!=''">
+				AND OI.AGENT_ID_L2 = #{agentIdL2}
+			</if>
+			<if test="subMerId!=null and subMerId!=''">
+				AND OI.SUB_MER_ID=#{subMerId}
+			</if>
+			<if test="orderId!=null and orderId!=''">
+				AND OI.ORDER_ID=#{orderId}
+			</if>
+			<if test="terminalId!=null and terminalId!=''">
+				AND OI.TERMINAL_ID=#{terminalId}
+			</if>
+			<if test="cardNo!=null and cardNo!=''">
+				AND OI.FULL_CARD_NO=#{cardNo}
+				<!-- AND OI.EXT like '%${cardNo}%' -->
+			</if>
+			<if test="createTime!=null and createTime!=''">
+				AND date(OI.CREATE_TIME) = '${createTime}%'
+			</if>
+			<if test="orderStatus!=null and orderStatus!='' and orderStatus!='-1'">
+				AND OI.ORDER_STATUS=#{orderStatus}
+			</if>
+			order by OI.ORDER_ID desc
+	</sql>
+	
+	<!-- 应用交易查询的条数 -->
+	<select id="selectApplyCount" resultMap="sumInfo" parameterType="java.util.Map">
+			select 
+			count(OI.ORDER_ID) as COUNT,
+	        COALESCE(SUM(OI.MER_AMT),0) as SUM_MER_AMT,
+	        COALESCE(SUM(OI.TRANS_FEE),0) as SUM_TRANS_FEE 
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI
+			on SMI.SUB_MER_ID = OI.SUB_MER_ID 
+			left join ORDER_GOODS OG
+			on OG.ORDER_ID = OI.ORDER_ID
+			<include refid="applyWhere"/>
+	</select>
+	<!-- 应用交易列 -->
+	<sql id="applyColumn">
+			OI.ORDER_ID, OI.SUB_MER_ID, OI.TRANS_MER_ID, OI.TRANS_TYPE, OI.MER_ORDER_ID, OI.MER_ORDER_TIME,
+			OI.TRANS_MER_ID, OI.MER_AMT, OI.ORDER_STATUS, OI.CREATE_TIME, OI.BUS_TYPE, OI.CARD_NO,
+			OI.CARD_TYPE, SMI.SHORT_NAME, OI.USER_MOBILE, OI.MER_SYS_ID, OI.TERMINAL_ID, OI.RESP_DESC, 
+            OG.STATUS as SHIPMENT_STATUS
+	</sql>
+	<!-- 应用交易查询 -->
+	<select id="selectApplyList" resultMap="orderInfo" parameterType="java.util.Map">
+			select 
+			<include refid="applyColumn" />
+			from ORDER_INFO OI
+			left join SUB_MER_INFO SMI
+			on SMI.SUB_MER_ID = OI.SUB_MER_ID 
+			left join ORDER_GOODS OG
+			on OG.ORDER_ID = OI.ORDER_ID
+			<include refid="applyWhere"/>
+			limit #{page},#{pageSize}
+	</select>
+	<!-- 应用交易查询条件 -->
+	<sql id="applyWhere">
+			where 1=1
+			<if test="agentIdL1!=null and agentIdL1!=''">
+		        AND  OI.AGENT_ID_L1 = #{agentIdL1} 
+			</if>
+			<if test="agentIdL2!=null and agentIdL2!=''">
+		        AND  OI.AGENT_ID_L2 = #{agentIdL2} 
+			</if>
+			<if test="subMerId!=null and subMerId!=''">
+				AND OI.SUB_MER_ID=#{subMerId}
+			</if>
+			<if test="orderId!=null and orderId!=''">
+				AND OI.ORDER_ID=#{orderId}
+			</if>
+			<if test="merOrderId!=null and merOrderId!=''">
+				AND OI.MER_ORDER_ID=#{merOrderId}
+			</if>
+			<if test="userMobile!=null and userMobile!=''">
+				AND OI.USER_MOBILE=#{userMobile}
+			</if>
+			<if test="terminalId!=null and terminalId!=''">
+				AND OI.TERMINAL_ID=#{terminalId}
+			</if>
+			<if test="orderStatus!=null and orderStatus!='' and orderStatus!='-1'">
+				AND OI.ORDER_STATUS=#{orderStatus}
+			</if>
+			<if test="transType!=null and transType!=''">
+				AND OI.TRANS_TYPE=#{transType}
+			</if>
+			<if test="merSysId!=null and merSysId!=''">
+				AND OI.MER_SYS_ID=#{merSysId}
+			</if>
+			<if test="cardNo!=null and cardNo!=''">
+				AND OI.FULL_CARD_NO=#{cardNo}
+				<!-- 
+				AND OI.EXT like '%${cardNo}%' -->
+			</if>
+			<if test="busType!=null and busType!='' and busType!='-1'">
+				AND OI.BUS_TYPE=#{orderInfo.bus_type}
+			</if>
+			<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+				AND OI.CREATE_TIME between #{startTime} and #{endTime}
+			</if>
+			order by OI.ORDER_ID desc
+	  </sql>
+	
+	<!-- 交易详情列 -->
+	<sql id="orderDetailColumn">
+			OI.ORDER_ID, OI.ORDER_STATUS, OI.TRANS_MER_ID, OI.AGENT_ID, OI.SETTLE_CUR,
+			OI.CARD_TYPE, OS.TRANS_FEE, OS.AGENT1_PROFIT, OS.AGENT2_PROFIT, OS.TRACT_FEE,
+			OI.MER_AMT, OS.BYPAY_PROFIT, SMI.SHORT_NAME, SMI.SUB_MER_ID, OI.TERMINAL_ID,
+			OI.CARD_NO, OI.ISSUE_BANK_NAME, SMI.SETT_AGENCY, OI.TRANS_TYPE, OI.BATCH_NO,
+			OI.VOUCHER_NO, OI.AUTH_NO, OI.REFFER_NO, OI.SETTLE_DATE, OI.SETTLE_AMT, OI.REMARK
+	</sql>
+	<!-- 交易详情 -->
+	<select id="selectOrderDetail" resultMap="orderInfo" parameterType="java.util.Map">
+			select OS.TRANS_FEE,
+			OI.*,OS.CLEAR_AMT
+			from ORDER_INFO OI left join ORDER_STATICTIS OS on OS.ORDER_ID = OI.ORDER_ID 
+			where OI.ORDER_ID = #{orderId}
+	</select>
+	<!-- 交易列表  借口用 -->
+	<select id="selectEnquiryList" parameterType="java.util.Map" resultMap="orderInfo">
+		SELECT OI.SUB_MER_ID, OI.TRANS_TYPE, OI.QID, OI.MER_ORDER_ID, OI.MER_AMT, OI.TRANS_TIME, OI.CURRENCY FROM ORDER_INFO OI
+			LEFT JOIN SUB_MER_TERMINAL_INFO SMTI
+			ON SMTI.TERMINAL_ID = OI.TERMINAL_ID
+			WHERE SMTI.TSN = #{tsn} 
+		    AND OI.TRANS_TYPE != '08'
+		    <if test="orderInfo.subMerId != null and orderInfo.subMerId != ''">
+			AND OI.SUB_MER_ID = #{orderInfo.subMerId}
+			</if>
+			<if test="orderInfo.transType != null and orderInfo.transType != ''">
+			AND OI.TRANS_TYPE = #{orderInfo.transType}
+			</if>
+			<if test="beginTime != null and beginTime != ''">
+			AND OI.TRANS_TIME &lt;= #{beginTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+			AND OI.TRANS_TIME >= #{endTime}
+			</if>
+			ORDER BY ORDER_ID DESC
+			limit #{page},#{pageSize}
+	</select>
+		<!-- 交易列表总数  接口用 -->
+	<select id="selectEnquiryListCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(ORDER_ID) as ORDER_COUNT FROM ORDER_INFO OI
+			LEFT JOIN SUB_MER_TERMINAL_INFO SMTI
+			ON SMTI.TERMINAL_ID = OI.TERMINAL_ID
+			WHERE SMTI.TSN = #{tsn}
+		    AND OI.TRANS_TYPE != '08'
+		    <if test="orderInfo.subMerId != null and orderInfo.subMerId != ''">
+			AND OI.SUB_MER_ID = #{orderInfo.subMerId}
+			</if>
+			<if test="orderInfo.transType != null and orderInfo.transType != ''">
+			AND OI.TRANS_TYPE = #{orderInfo.transType}
+			</if>
+			<if test="beginTime != null and beginTime != ''">
+			AND OI.TRANS_TIME &lt;= #{beginTime}
+			</if>
+			<if test="endTime != null and endTime != ''">
+			AND OI.TRANS_TIME >= #{endTime}
+			</if>
+	</select>
+	
+	<resultMap type="java.util.HashMap" id="tractCost">
+		<result property="sum" column="TRACT_COST" />
+	</resultMap>
+	
+	<select id="selectTotalTractCost" resultMap="tractCost" parameterType="java.util.Map">
+			SELECT COALESCE(SUM(ORDER_PROFIT.TRACT_COST),0) as TRACT_COST FROM ORDER_INFO OI 
+			INNER JOIN ORDER_PROFIT ON ORDER_PROFIT.ORDER_ID = OI.ORDER_ID 
+			WHERE OI.TRANS_MER_ID = #{transMerId} AND OI.SETTLE_DATE = #{settleDate} AND OI.ORDER_STATUS = 1
+	</select>
+</mapper>
+

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerProfitApplyDao">
+	<resultMap id="merProfitApply" type="com.bypay.domain.MerProfitApply">
+		<result property="id" column="id" />
+		<result property="merSysId" column="merSysId" />
+		<result property="opIds" column="opIds" />
+		<result property="payMoney" column="payMoney" />
+		<result property="createTime" column="createTime" />
+		<result property="status" column="status" />
+		<result property="confirm" column="confirm" />
+		<result property="confirmTime" column="confirmTime" />
+		
+	</resultMap>
+
+	<insert id="insertApply"  parameterType="com.bypay.domain.MerProfitApply">
+		INSERT INTO MER_PROFIT_APPLY (merSysId,opIds,payMoney,createTime,status)
+		VALUES 
+		(#{merSysId},#{opIds},#{payMoney},NOW(),#{status})
+	</insert>
+	
+	<select id="selectMerProfitApplyCount"  resultType="int"   parameterType="java.util.Map">
+		SELECT count(*)
+		FROM MER_PROFIT_APPLY
+			<include refid="coreWhere"/>
+	</select>
+	
+	<select id="selectMerProfitApplyList"  resultMap="merProfitApply" parameterType="java.util.Map">
+		SELECT *
+		FROM MER_PROFIT_APPLY
+			<include refid="coreWhere"/>
+			<if test="page!=null and page!=''">
+				limit #{page},#{pageSize}
+			</if>
+	</select>
+	
+	<sql id="coreWhere">
+			WHERE 1=1
+			<if test="merSysId!=null and merSysId!=''">
+				AND merSysId=#{merSysId}
+			</if>
+			<if test="status!=null and status!=''">
+				AND status=#{status}
+			</if>
+			<if test="startTime!=null and startTime!=''">
+				AND createTime>=#{startTime}
+			</if>
+			<if test="endTime!=null and endTime!=''">
+				<![CDATA[
+				AND createTime<=#{endTime}
+				 ]]>
+			</if>
+			ORDER BY id desc	
+	</sql>
+	
+		<select id="selectApplyInfo"  resultMap="merProfitApply"   parameterType="com.bypay.domain.MerProfitApply">
+		SELECT *
+		FROM MER_PROFIT_APPLY
+		WHERE id=#{id}
+	</select>
+	
+</mapper>

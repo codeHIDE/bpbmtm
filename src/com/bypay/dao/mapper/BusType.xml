@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.BusTypeDao">
+	<resultMap id="busType" type="com.bypay.domain.BusType">
+		<result property="busId" column="BUS_ID" />
+		<result property="busName" column="BUS_NAME" />
+		<result property="busDesc" column="BUS_DESC" />
+		<result property="remark" column="REMARK" />
+		<result property="status" column="STATUS" />
+		<result property="type" column="TYPE" />
+	</resultMap>
+
+	<sql id="baseColumn">
+	</sql>
+	<select id="selectBusTypeAll" resultMap="busType">
+	SELECT BUS_ID,BUS_NAME FROM BUS_TYPE
+	</select>
+
+	<insert id="insertBusType" parameterType="com.bypay.domain.BusType">
+		insert into BUS_TYPE(
+		BUS_ID,BUS_NAME,BUS_DESC,REMARK,STATUS,TYPE)
+		values(#{busId},#{busName},#{busDesc},#{remark},#{status},#{type})
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectBusTypeList"  resultMap="busType" parameterType="java.util.Map">
+			select * from BUS_TYPE 
+			limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectBusTypeListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.BusType">
+		SELECT COUNT(1) from BUS_TYPE 
+	</select>
+	
+	<!-- 删除样式 -->
+		<delete id="deleteBusType" parameterType="com.bypay.domain.BusType">
+		delete  from BUS_TYPE where  BUS_ID=#{busId}
+	</delete>
+</mapper>

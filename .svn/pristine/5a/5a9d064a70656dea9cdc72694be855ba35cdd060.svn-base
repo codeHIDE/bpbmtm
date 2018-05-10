@@ -1,0 +1,107 @@
+package com.bypay.service;
+
+import com.bypay.domain.AccountManage;
+import com.bypay.domain.SubMerAuthInfo;
+import com.bypay.domain.SubMerTerminal;
+import com.bypay.domain.clientTool.AccountEnquiry;
+import com.bypay.domain.clientTool.AccountLogIn;
+import com.bypay.domain.clientTool.AccountRegist;
+import com.bypay.domain.clientTool.DrawMoneyRecord;
+import com.bypay.domain.clientTool.Enquiry;
+import com.bypay.domain.clientTool.OpenPurchase;
+import com.bypay.domain.clientTool.PhoneNumber;
+import com.bypay.domain.clientTool.QueryBalance;
+import com.bypay.domain.clientTool.SelectPassWord;
+import com.bypay.domain.clientTool.SettBank;
+import com.bypay.domain.clientTool.TerminalEnable;
+import com.bypay.domain.clientTool.TerminalValidate;
+
+public interface InterfaceService {
+
+	/**
+	 * 收款开通
+	 * @param openPurchase
+	 * @return
+	 */
+	Object openReceivablesBus(OpenPurchase openPurchase);
+	/**
+	 * 登陆
+	 */
+	Object regMer(AccountLogIn accountLogIn);
+	/**
+	 * 结算银行列表
+	 */
+	Object regBank(SettBank settBank);
+	/**
+	 * 交易列表
+	 */
+	Object regEnquiry(Enquiry enquiry);
+	
+	//修改终端状态
+	Object updateStatus(TerminalEnable terminalId);
+	
+	//更新终端密码
+	Object updatePwd(SelectPassWord selectPassWord);
+	/**
+	 * 终端验证
+	 */
+	Object terminalValidate(TerminalValidate terminalValidate);
+
+	/**
+	 * 账户申请
+	 * @param accountRegist
+	 * @return
+	 */
+	Object checkRegist(AccountRegist accountRegist) throws Exception;
+	/**
+	 * 账户申请第一步
+	 * @param accountRegist
+	 * @return
+	 */
+	Object userRegist(AccountRegist accountRegist) throws Exception;
+
+	/**
+	 * 账户信息查询
+	 * @param accountEnquiry
+	 * @return
+	 */
+	Object accountEnquiry(AccountEnquiry accountEnquiry);
+	/**
+	 * 终端注销
+	 * @param terminal
+	 * @return
+	 */
+	String terminalCancel(SubMerTerminal terminal);
+	/**
+	 * 上账
+	 * @param accountManages
+	 * @return
+	 */
+	String upAccount(AccountManage accountManages) throws Exception ;
+	/**
+	 * 实名认证
+	 * @param subMerAuthInfo
+	 * @return
+	 * @throws Exception
+	 */
+	String authentication(AccountRegist accountRegist) throws Exception;
+	/**
+	 * 商户提现申请记录
+	 * @param drawMoneyRecord
+	 * @return
+	 * @throws Exception
+	 */
+	Object drawMoneyRecord(DrawMoneyRecord drawMoneyRecord) throws Exception;
+	/**
+	 * 查询余额
+	 * @param queryBalance
+	 * @return
+	 */
+	Object queryBalance(QueryBalance queryBalance);
+	/**
+	 * 短信下发
+	 * @param phoneNumber
+	 * @return
+	 */
+	Object phoneNumber(PhoneNumber phoneNumber);
+}

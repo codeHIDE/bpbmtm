@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SysModelDao">
+
+
+	<resultMap id="sysModel" type="com.bypay.domain.SysModel">
+		<result property="id" column="ID" />
+		<result property="modelName" column="MODEL_NAME" />
+		<result property="modelNo" column="MODEL_NO" />
+		<result property="path" column="PATH" />
+		<result property="desc" column="DESC" />
+		<result property="superNo" column="SUPER_NO" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+
+
+	<!-- 查询权限表 -->
+	<select id="selectSysModel" resultMap="sysModel">
+		select * from SYS_MODEL
+	</select>
+	
+	<!-- 查询权限表 -->
+	<select id="selectModelDetail" resultMap="sysModel" parameterType="com.bypay.domain.SysModel">
+		select * from SYS_MODEL 
+		<where>
+			<if test="path!=null and path!=''">
+      			and PATH=#{path} 
+      		</if>
+      		<if test="desc!=null and desc!=''">
+      			and `DESC`=#{desc} 
+      		</if>
+      	</where>
+	
+	</select>
+	
+	<!-- 查询系统模块数据总数 -->
+	<select id="getSysModelCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.SysModel">
+		select count(ID) from SYS_MODEL
+	</select>
+	<!-- 查询系统模块数据总数 -->
+	<select id="getSysModelList"  resultMap="sysModel" parameterType="java.util.Map">
+		select * from SYS_MODEL order by MODEL_NO asc limit #{page},#{pageSize}
+	</select>
+	<!-- 添加系统模块 -->
+	<insert id="addSysModel" parameterType="com.bypay.domain.SysModel">
+		insert into SYS_MODEL(MODEL_NAME, MODEL_NO, PATH, SYS_MODEL.DESC, REMARK, SUPER_NO) 
+		values (#{modelName}, #{modelNo}, #{path}, #{desc}, #{remark}, #{superNo})
+	</insert>
+	<!-- 删除系统模块 -->
+	<insert id="delSysModel" parameterType="com.bypay.domain.SysModel">
+		delete from SYS_MODEL where ID = #{id}
+	</insert>
+	<!-- 修改系统模块 -->
+	<insert id="editSysModel" parameterType="com.bypay.domain.SysModel">
+		update SYS_MODEL set MODEL_NAME = #{modelName}, MODEL_NO = #{modelNo}, PATH = #{path}, 
+		SYS_MODEL.DESC = #{desc}, REMARK = #{remark}, SUPER_NO = #{superNo} where ID = #{id}
+	</insert>
+	<!-- 根据ID获取系统模块 -->
+	<select id="getSysModelById"  resultMap="sysModel" parameterType="com.bypay.domain.SysModel">
+		select * from SYS_MODEL where ID = #{id}
+	</select>
+</mapper>

@@ -1,0 +1,525 @@
+package com.bypay.domain;
+
+/**
+ * 子商户实体类
+ * 
+ * @author Wang
+ * 
+ */
+public class SubMerInfo {
+
+	private String subMerId; // 商户号(自增长) SUB_MER_ID
+	private String subMerName; // 商户工商注册名称 SUB_MER_NAME
+	private String shortName; // 商户简称 SHORT_NAME
+	private String regNo; // 工商注册号 REG_NO
+	private String taxNo; // 税务登记号 TAX_NO
+	private String organizationCode; // 组织机构代码 ORGANIZATION_CODE
+	private String regAddr; // 工商注册地址 REG_ADDR
+	private String legalPerson; // 法人姓名 LEGAL_PERSON
+	private String legalIdcard; // 法人证件号 LEGAL_IDCARD
+	private String merKind; // 商户性质 MER_KIND
+	private String contactor; // 联系人 CONTACTOR
+	private String contactorPhone; // 联系电话 CONTACTOR_PHONE
+	private String contactorAddr; // 联系地址 CONTACTOR_ADDR
+	private String contactorEmail; // 联系邮箱 CONTACTOR_EMAIL
+	private String settAccountName; // 结算账户名 SETT_ACCOUNT_NAME
+	private String settAccountNo; // 结算账户号 SETT_ACCOUNT_NO
+	private String settAccType; // 结算账户类型 SETT_ACCOUNT_TYPE
+	// 1对公 2对私
+	private String settAgency; // 结算机构 SETT_AGENCY
+	private String merSysId; // 机构商号(外键) MER_SYS_ID
+	private String agentIdL1; // 代理商号(外键) AGENT_ID_L1
+	private String agentIdL2; // 代理商号(外键) AGENT_ID_L2
+	private String agentIdL3; // 代理商号(外键) AGENT_ID_L1
+	private String agentIdL4; // 代理商号(外键) AGENT_ID_L2
+	private String mcc; // 行业类别码 MCC
+	private String region; // 地区码 REGION
+	private String billCycle; // 清分周期 BILL_CYCLE
+	// 1|D 1|M
+	private String billStatus;// 清算状态 0停止清算 1 正常清算
+	private String status; // 状态 STATUS
+	// 1：未审核 2：已上线3：暂停4：黑名单
+	private String createTime; // 创建时间 CREATE_TIME
+	private String remark; // 备注 REMARK
+	private String reserved; // 扩展 RESERVED
+	private String color; // 色调,用于管理平台显示 COLOR
+	private String logo; // Logo图,用于管理平台显示LOGO
+	private String gAccStatus; // 金账户开通
+	private String frozenSum;// FROZEN_SUM BIGINT 15 是 已冻结金额
+	private String frozenSumMax;// FROZEN_SUM_MAX BIGINT 15 是 冻结限额
+	private String agreementStatus;//电子协议 0：未阅读 1：已阅读
+	private int checkPayStatus;		//代付验证 字段 1通过
+	
+	// 辅助字段
+	private String tsn; // 终端号
+	private String subMerTerminalType; // 终端类型
+	private SubMerRate subMerRate; // 子商户交易费率表
+	private String authStatus; // 子商户实人认证状态 AUTH_STATUS
+	private String maxTime;
+
+	private String merName;
+	private String city; // 存储市级地区代码
+	private String t0Status;
+	private Long subMerIds;
+
+	private SubMerTrans subMerTrans;
+	
+	private String lineNum; //联行号
+	
+	private String openBank; //开户行
+	
+	private String grade;  //等级
+	
+	private String gradeStatus;  //等级状态
+	
+	private String oldSubMerId;		//注册第一步的商户号
+	
+	private String phoneProvince;		//手机所在地
+	private String phoneCity;				//手机城市
+	
+	
+	public String getPhoneProvince() {
+		return phoneProvince;
+	}
+
+	public void setPhoneProvince(String phoneProvince) {
+		this.phoneProvince = phoneProvince;
+	}
+
+	public String getPhoneCity() {
+		return phoneCity;
+	}
+
+	public void setPhoneCity(String phoneCity) {
+		this.phoneCity = phoneCity;
+	}
+
+	public String getOldSubMerId() {
+		return oldSubMerId;
+	}
+
+	public void setOldSubMerId(String oldSubMerId) {
+		this.oldSubMerId = oldSubMerId;
+	}
+
+	public int getCheckPayStatus() {
+		return checkPayStatus;
+	}
+
+	public void setCheckPayStatus(int checkPayStatus) {
+		this.checkPayStatus = checkPayStatus;
+	}
+
+	public String getAgreementStatus() {
+		return agreementStatus;
+	}
+
+	public void setAgreementStatus(String agreementStatus) {
+		this.agreementStatus = agreementStatus;
+	}
+
+	public String getSubMerTerminalType() {
+		return subMerTerminalType;
+	}
+
+	public SubMerTrans getSubMerTrans() {
+		return subMerTrans;
+	}
+
+	public void setSubMerTrans(SubMerTrans subMerTrans) {
+		this.subMerTrans = subMerTrans;
+	}
+
+	public String getT0Status() {
+		return t0Status;
+	}
+
+	public String getFrozenSum() {
+		return frozenSum;
+	}
+	
+	public String getAgentIdL3() {
+		return agentIdL3;
+	}
+
+	public void setAgentIdL3(String agentIdL3) {
+		this.agentIdL3 = agentIdL3;
+	}
+
+	public String getAgentIdL4() {
+		return agentIdL4;
+	}
+
+	public void setAgentIdL4(String agentIdL4) {
+		this.agentIdL4 = agentIdL4;
+	}
+
+	public void setFrozenSum(String frozenSum) {
+		this.frozenSum = frozenSum;
+	}
+
+	public String getFrozenSumMax() {
+		return frozenSumMax;
+	}
+
+	public void setFrozenSumMax(String frozenSumMax) {
+		this.frozenSumMax = frozenSumMax;
+	}
+
+	public void setT0Status(String t0Status) {
+		this.t0Status = t0Status;
+	}
+
+	public void setgAccStatus(String gAccStatus) {
+		this.gAccStatus = gAccStatus;
+	}
+
+	public String getCity() {
+		return city;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public Long getSubMerIds() {
+		return subMerIds;
+	}
+
+	public void setSubMerIds(Long subMerIds) {
+		this.subMerIds = subMerIds;
+	}
+
+	public String getMerName() {
+		return merName;
+	}
+
+	public void setMerName(String merName) {
+		this.merName = merName;
+	}
+
+	public String getMaxTime() {
+		return maxTime;
+	}
+
+	public void setMaxTime(String maxTime) {
+		this.maxTime = maxTime;
+	}
+
+	public String getAuthStatus() {
+		return authStatus;
+	}
+
+	public void setAuthStatus(String authStatus) {
+		this.authStatus = authStatus;
+	}
+
+	public String getSettAccType() {
+		return settAccType;
+	}
+
+	public void setSettAccType(String settAccountType) {
+		this.settAccType = settAccountType;
+	}
+
+	public SubMerRate getSubMerRate() {
+		return subMerRate;
+	}
+
+	public void setSubMerRate(SubMerRate subMerRate) {
+		this.subMerRate = subMerRate;
+	}
+
+	public void setSubMerTerminalType(String subMerTerminalType) {
+		this.subMerTerminalType = subMerTerminalType;
+	}
+
+	public String getTsn() {
+		return tsn;
+	}
+
+	public void setTsn(String tsn) {
+		this.tsn = tsn;
+	}
+
+	public String getSubMerId() {
+		return subMerId;
+	}
+
+	public void setSubMerId(String subMerId) {
+		this.subMerId = subMerId;
+	}
+
+	public String getSubMerName() {
+		return subMerName;
+	}
+
+	public void setSubMerName(String subMerName) {
+		this.subMerName = subMerName;
+	}
+
+	public String getShortName() {
+		return shortName;
+	}
+
+	public void setShortName(String shortName) {
+		this.shortName = shortName;
+	}
+
+	public String getRegNo() {
+		return regNo;
+	}
+
+	public void setRegNo(String regNo) {
+		this.regNo = regNo;
+	}
+
+	public String getTaxNo() {
+		return taxNo;
+	}
+
+	public void setTaxNo(String taxNo) {
+		this.taxNo = taxNo;
+	}
+
+	public String getOrganizationCode() {
+		return organizationCode;
+	}
+
+	public void setOrganizationCode(String organizationCode) {
+		this.organizationCode = organizationCode;
+	}
+
+	public String getRegAddr() {
+		return regAddr;
+	}
+
+	public void setRegAddr(String regAddr) {
+		this.regAddr = regAddr;
+	}
+
+	public String getLegalPerson() {
+		return legalPerson;
+	}
+
+	public void setLegalPerson(String kegakPerson) {
+		this.legalPerson = kegakPerson;
+	}
+
+	public String getLegalIdcard() {
+		return legalIdcard;
+	}
+
+	public void setLegalIdcard(String legalIdcard) {
+		this.legalIdcard = legalIdcard;
+	}
+
+	public String getMerKind() {
+		return merKind;
+	}
+
+	public void setMerKind(String merKind) {
+		this.merKind = merKind;
+	}
+
+	public String getContactor() {
+		return contactor;
+	}
+
+	public void setContactor(String contactor) {
+		this.contactor = contactor;
+	}
+
+	public String getContactorPhone() {
+		return contactorPhone;
+	}
+
+	public void setContactorPhone(String contactorPhone) {
+		this.contactorPhone = contactorPhone;
+	}
+
+	public String getContactorAddr() {
+		return contactorAddr;
+	}
+
+	public void setContactorAddr(String contactorAddr) {
+		this.contactorAddr = contactorAddr;
+	}
+
+	public String getContactorEmail() {
+		return contactorEmail;
+	}
+
+	public void setContactorEmail(String contactorEmail) {
+		this.contactorEmail = contactorEmail;
+	}
+
+	public String getSettAccountName() {
+		return settAccountName;
+	}
+
+	public void setSettAccountName(String settAccountName) {
+		this.settAccountName = settAccountName;
+	}
+
+	public String getSettAccountNo() {
+		return settAccountNo;
+	}
+
+	public void setSettAccountNo(String settAccountNo) {
+		this.settAccountNo = settAccountNo;
+	}
+
+	public String getSettAgency() {
+		return settAgency;
+	}
+
+	public void setSettAgency(String settAgency) {
+		this.settAgency = settAgency;
+	}
+
+	public String getMerSysId() {
+		return merSysId;
+	}
+
+	public void setMerSysId(String merSysId) {
+		this.merSysId = merSysId;
+	}
+
+	public String getAgentIdL1() {
+		return agentIdL1;
+	}
+
+	public void setAgentIdL1(String agentIdL1) {
+		this.agentIdL1 = agentIdL1;
+	}
+
+	public String getAgentIdL2() {
+		return agentIdL2;
+	}
+
+	public void setAgentIdL2(String agentIdL2) {
+		this.agentIdL2 = agentIdL2;
+	}
+
+	public String getMcc() {
+		return mcc;
+	}
+
+	public void setMcc(String mcc) {
+		this.mcc = mcc;
+	}
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	public String getBillCycle() {
+		return billCycle;
+	}
+
+	public void setBillCycle(String billCycle) {
+		this.billCycle = billCycle;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getReserved() {
+		return reserved;
+	}
+
+	public void setReserved(String reserved) {
+		this.reserved = reserved;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	public String getBillStatus() {
+		return billStatus;
+	}
+
+	public void setBillStatus(String billStatus) {
+		this.billStatus = billStatus;
+	}
+
+	public String getgAccStatus() {
+		return gAccStatus;
+	}
+
+	public String getLineNum() {
+		return lineNum;
+	}
+
+	public void setLineNum(String lineNum) {
+		this.lineNum = lineNum;
+	}
+
+	public String getOpenBank() {
+		return openBank;
+	}
+
+	public void setOpenBank(String openBank) {
+		this.openBank = openBank;
+	}
+
+	public String getGrade() {
+		return grade;
+	}
+
+	public void setGrade(String grade) {
+		this.grade = grade;
+	}
+
+	public String getGradeStatus() {
+		return gradeStatus;
+	}
+
+	public void setGradeStatus(String gradeStatus) {
+		this.gradeStatus = gradeStatus;
+	}
+
+
+	
+	
+	
+}

@@ -1,0 +1,259 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/taglibs.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>密码验证</title>
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Gray/css/all.css'/>" rel="stylesheet" type="text/css" />
+		<script src="<s:url value='/js/jqui/jquery/jquery-1.5.2.min.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/core/base.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerToolBar.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDialog.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerGrid.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDrag.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerResizable.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerGrid.showFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/CustomersData.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDateEditor.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/common.js'/>"></script>
+		<script src="<s:url value='/js/CheckLength.js'/>"></script>
+		<script type="text/javascript">
+			function cols(){
+				window.parent.$.ligerDialog.close();
+	            window.parent.$(".l-dialog,.l-window-mask").remove();
+			}
+			var a= new Array();
+			$(function(){
+			$("#save").click(function(){
+				for ( var i = a.length-1; i >= 0; i--) {
+					for ( var j = i-1; j >= 0; j--) {
+						if(a[i]!='' && a[i]!=null){
+							if(a[i]==a[j]){
+								alert("图片名字重复");
+								return false;
+							}
+						}
+					}
+				}
+				if(confirm("是否要上传信息？")){
+					$("#upload").submit();
+				}
+			});
+			
+			//上传证件图片
+			$("#save").mouseover(function(){
+				var headImg=$("#headImg").val();
+				var hallImg=$("#hallImg").val();
+				var otherImg1=$("#otherImg1").val();
+				var otherImg2=$("#otherImg2").val();
+				var regNoImg=$("#regNoImg").val();
+				var taxNoImg=$("#taxNoImg").val();
+				var occNoImg=$("#occNoImg").val();
+				var idCardImg=$("#idCardImg").val();
+				var personImg=$("#personImg").val();
+				var bankPermitImg=$("#bankPermitImg").val();
+				var cardImg=$("#cardImg").val();
+				a[0]=headImg;
+				a[1]=hallImg;
+				a[2]=otherImg1;
+				a[3]=otherImg2;
+				a[4]=regNoImg;
+				a[5]=taxNoImg;
+				a[6]=occNoImg;
+				a[7]=idCardImg;
+				a[8]=personImg;
+				a[9]=bankPermitImg;
+				a[10]=cardImg;
+				if(headImg!=null && headImg!=''){
+					$("#headImgFile").val(headImg);
+				}
+				if(hallImg!=null && hallImg!=''){
+					$("#hallImgFile").val(hallImg);
+				}
+				if(otherImg1!=null && otherImg1!=''){
+					$("#otherImgFile1").val(otherImg1);
+				}
+				if(otherImg2!=null && otherImg2!=''){
+					$("#otherImgFile2").val(otherImg2);
+				}
+				if(regNoImg!=null && regNoImg!=''){
+					$("#regNoImgFile").val(regNoImg);
+				}
+				if(taxNoImg!=null && taxNoImg!=''){
+					$("#taxNoImgFile").val(taxNoImg);
+				}
+				if(occNoImg!=null && occNoImg!=''){
+					$("#occNoImgFile").val(occNoImg);
+				}
+				if(idCardImg!=null && idCardImg!=''){
+					$("#idCardImgFile").val(idCardImg);
+				}
+				if(personImg!=null && personImg!=''){
+					$("#personImgFile").val(personImg);
+				}
+				if(bankPermitImg!=null && bankPermitImg!=''){
+					$("#bankPermitImgFile").val(bankPermitImg);
+				}
+				if(cardImg!=null && cardImg!=''){
+					$("#cardImgFile").val(cardImg);
+				}
+				
+			});
+		});
+		</script>
+		<style type="text/css">
+			tr {
+				height: 30px;
+			}
+			
+			td{
+					width: 1000px;
+			}
+		</style>
+	</head>
+	<body style="padding: 4px; overflow: hidden;">
+		<div id="content">
+			<s:if test="id=='1' || id eq 1">
+				<script type="text/javascript">
+					alert("图片上传失败！");
+				</script>
+			</s:if>
+			<s:if test="id==2 || id eq 2">
+				<script type="text/javascript">
+					alert("图片上传成功！");
+					cols();
+				</script>
+			</s:if>
+			<s:if test="id==3 || id eq 3">
+				<script type="text/javascript">
+					alert("图片太大！上传失败！");
+				</script>
+			</s:if>
+			<div class="box_system" style="text-align: center;">
+				<form id="upload" action="<s:url value="/subMerInfo!uploadImgs.ac" />" method="post" enctype="multipart/form-data">
+					<table width="100%" border="0" cellspacing="0" cellpadding="0">
+						<tr>
+							<td style="text-align: right">
+								营业执照：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="regNoImg" />
+								<input type="hidden" name="regNoImgFile" id="regNoImgFile" />
+								<input type="hidden" name="id" value="${param.id }"/>
+							</td>
+							<td style="text-align: right">
+								税务登记证：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="taxNoImg" />
+								<input type="hidden" name="taxNoImgFile" id="taxNoImgFile" />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right">
+								组织机构代码证：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="occNoImg" />
+								<input type="hidden" name="occNoImgFile" id="occNoImgFile" />
+							</td>
+							<td style="text-align: right">
+								法人身份证：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="idCardImg" />
+								<input type="hidden" name="idCardImgFile" id="idCardImgFile" />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right">
+								法人照片：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="personImg" />
+								<input type="hidden" name="personImgFile" id="personImgFile" />
+							</td>
+							<td style="text-align: right">
+								银行开户许可证：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="bankPermitImg" />
+								<input type="hidden" name="bankPermitImgFile"
+									id="bankPermitImgFile" />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right">
+								门头照：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="headImg" />
+								<input type="hidden" name="headImgFile" id="headImgFile" />
+							</td>
+							<td style="text-align: right">
+								大厅照：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="hallImg" />
+								<input type="hidden" name="hallImgFile"
+									id="hallImgFile" />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right">
+								其他1：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="otherImg1" />
+								<input type="hidden" name="otherImgFile1" id="otherImgFile1" />
+							</td>
+							<td style="text-align: right">
+								其他2：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="otherImg2" />
+								<input type="hidden" name="otherImgFile2"
+									id="otherImgFile2" />
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right">
+								银行卡：
+							</td>
+							<td style="text-align: left">
+								<input type="file" name="file" class="inputext_style"
+									id="cardImg" />
+								<input type="hidden" name="cardImgFile" id="cardImgFile" />
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="text-align: center;">
+								<input type="button" style="width: 50px" 
+									id="save" value="上传"/>
+							</td>
+							<td colspan="2" style="text-align: center;">
+								<input type="reset" style="width: 50px"
+									value="关闭" onclick="cols()"/>
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+
+	</body>
+</html>

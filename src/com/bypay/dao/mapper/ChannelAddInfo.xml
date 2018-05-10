@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.ChannelAddInfoDao">
+	<resultMap id="channelAddInfo" type="com.bypay.domain.ChannelAddInfo">
+		<result property="chAddId" column="chAddId" />
+		<result property="chName" column="chName" />
+		<result property="chShortName" column="chShortName" />
+		<result property="chHost" column="chHost" />
+		<result property="chPort" column="chPort" />
+		<result property="chTPDU" column="chTPDU" />
+		<result property="chHeader" column="chHeader" />
+		<result property="chOrgNo" column="chOrgNo" />
+		<result property="chOrgKey" column="chOrgKey" />
+		<result property="chStat" column="chStat" />
+		<result property="openDate" column="openDate" />
+		<result property="lastUpdTs" column="lastUpdTs" />
+	</resultMap>
+
+	<select id="selectChannelAddInfo"  resultMap="channelAddInfo" parameterType="java.util.Map">
+		SELECT *
+		FROM channel_add_info
+		WHERE 1=1
+		<if test="channelAddInfo.chTPDU != null and channelAddInfo.chTPDU  != '' ">
+		AND chTPDU = #{channelAddInfo.chTPDU}
+		</if>
+		<if test="channelAddInfo.chOrgNo!= null and channelAddInfo.chOrgNo  != '' ">
+		AND chOrgNo = #{channelAddInfo.chOrgNo}
+		</if>
+		ORDER BY chAddId desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectChannelAddInfoCount" resultType="int" parameterType="java.util.Map">
+		SELECT  COUNT(*)
+		FROM channel_add_info
+		WHERE 1=1
+		<if test="channelAddInfo.chTPDU != null and channelAddInfo.chTPDU  != '' ">
+		AND chTPDU = #{channelAddInfo.chTPDU}
+		</if>
+		<if test="channelAddInfo.chOrgNo!= null and channelAddInfo.chOrgNo  != '' ">
+		AND chOrgNo = #{channelAddInfo.chOrgNo}
+		</if>
+	</select>
+	
+	<insert id="insertChannelAddInfo"  parameterType="com.bypay.domain.RuleInfo">
+	 	INSERT INTO channel_add_info (chName,chHost,chPort,chTPDU,chHeader,chOrgNo,chOrgKey,chStat,openDate,chShortName)
+	 	values(#{chName},#{chHost},#{chPort},#{chTPDU},#{chHeader},#{chOrgNo},#{chOrgKey},#{chStat},#{openDate},#{chShortName})
+	</insert>
+	
+	<select id="selectAllChannelAddInfo"  resultMap="channelAddInfo" >
+		SELECT *
+		FROM channel_add_info
+	</select>
+</mapper>

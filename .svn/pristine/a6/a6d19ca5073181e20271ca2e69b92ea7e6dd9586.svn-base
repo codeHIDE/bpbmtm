@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerTerminalInfoDao">
+	<resultMap id="subMerTerminalInfo" type="com.bypay.domain.SubMerTerminalInfo">
+		<result property="id" column="ID" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="tsn" column="TSN" />
+		<result property="terminalType" column="TERMINAL_TYPE" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+		<result property="factoryId" column="FACTORY_ID" />
+	</resultMap>
+	<!--  -->
+	<delete id="deleteTerminalInfo" parameterType="com.bypay.domain.SubMerTerminalInfo">
+		delete from SUB_MER_TERMINAL_INFO where SUB_MER_ID = #{subMerId}
+	</delete>
+	<!-- 删除子商户终端明细信息 -->
+	<delete id="deleteSubMerTInfo" parameterType="com.bypay.domain.SubMerTerminalInfo">
+		delete from SUB_MER_TERMINAL_INFO where TSN = #{tsn} AND SUB_MER_ID = #{subMerId}
+	</delete>
+	<!-- 添加子商户终端信息 -->
+	<insert id="insertSubMerTerminalInfo" parameterType="com.bypay.domain.SubMerTerminalInfo">
+		insert into SUB_MER_TERMINAL_INFO(
+			TERMINAL_ID, SUB_MER_ID, TSN, TERMINAL_TYPE
+		) values(#{terminalId},#{subMerId},#{tsn}, #{terminalType})
+	</insert>
+	<!-- 查询子商户设备明细 -->
+	<select id="selectSubMerTerminalInfo" resultMap="subMerTerminalInfo" parameterType="com.bypay.domain.SubMerTerminalInfo">
+		select * from SUB_MER_TERMINAL_INFO where TSN = #{tsn} 
+	</select>
+	
+	<update id="updateTerminalInfoTsn" parameterType="com.bypay.domain.SubMerTerminalInfo">
+		update SUB_MER_TERMINAL_INFO set TSN = #{tsn} where SUB_MER_ID = #{subMerId}
+	</update>
+</mapper>

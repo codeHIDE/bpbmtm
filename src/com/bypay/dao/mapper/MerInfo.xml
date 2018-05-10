@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerInfoDao">
+	<resultMap id="merInfo" type="com.bypay.domain.MerInfo">
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="merName" column="MER_NAME" />
+		<result property="merRegNo" column="MER_REG_NO" />
+		<result property="merTaxNo" column="MER_TAX_NO" />
+		<result property="organizationCode" column="ORGANIZATION_CODE" />
+		<result property="merRegAddr" column="MER_REG_ADDR" />
+		<result property="merLegalPerson" column="MER_LEGAL_PERSON" />
+		<result property="merLegalIdcard" column="MER_LEGAL_IDCARD" />
+		<result property="regCapital" column="REG_CAPITAL" />
+		<result property="merKind" column="MER_KIND" />
+		<result property="contactor" column="CONTACTOR" />
+		<result property="contactorPhone" column="CONTACTOR_PHONE" />
+		<result property="contactorAddr" column="CONTACTOR_ADDR" />
+		<result property="contactorEmail" column="CONTACTOR_EMAIL" />
+		<result property="settAccountName" column="SETT_ACCOUNT_NAME" />
+		<result property="settAccountNo" column="SETT_ACCOUNT_NO" />
+		<result property="settAgency" column="SETT_AGENCY" />
+		<result property="settAccType" column="SETT_ACC_TYPE" />
+		<result property="signDate" column="SIGN_DATE" />
+		<result property="signPerson" column="SIGN_PERSON" />
+		<result property="dispName" column="DISP_NAME" />
+		<result property="platMerId" column="PLAT_MER_ID" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="status" column="STATUS" />
+		<result property="authStatus" column="AUTH_STATUS" />
+		<result property="logo" column="LOGO" />
+		<result property="color" column="COLOR" />
+		<result property="billCycle" column="BILL_CYCLE" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<result property="tractId" column="TRACT_ID" />
+		<result property="isIntoPieces" column="IS_INTO_PIECES" />
+		<result property="region" column="REGION" />
+		<result property="lineNum" column="LINE_NUM"/>
+		<result property="openBank" column="OPEN_BANK"/>
+		<association property="platMerInfo"  column="PLAT_MER_ID" select="com.bypay.dao.impl.PlatMerInfoDaoImpl.selectPlatMerInfoById"></association>
+	</resultMap>
+	<select id="selectMerInfoAllByPlatMerId" parameterType="java.util.HashMap" resultMap="merInfo">
+		SELECT * FROM MER_INFO  WHERE PLAT_MER_ID = #{platMerInfo.platMerId}
+		ORDER BY CREATE_TIME DESC
+	   	limit #{page}  , #{pageSize}
+	</select>
+	<select id="selectMerInfoAllByPlatMerIdCount" parameterType="java.util.HashMap" resultType="int">
+		SELECT COUNT(1) FROM MER_INFO  WHERE PLAT_MER_ID = #{platMerInfo.platMerId}
+	</select>
+	<insert id="insertMerInfo" parameterType="com.bypay.domain.MerInfo">
+	INSERT INTO MER_INFO(MER_NAME, MER_REG_NO, MER_TAX_NO, ORGANIZATION_CODE, MER_REG_ADDR, 
+	MER_LEGAL_PERSON, MER_LEGAL_IDCARD, REG_CAPITAL, MER_KIND, CONTACTOR, CONTACTOR_PHONE, 
+	CONTACTOR_ADDR, CONTACTOR_EMAIL, SETT_ACCOUNT_NAME, SETT_ACCOUNT_NO, SETT_AGENCY, SIGN_DATE, 
+	SIGN_PERSON, DISP_NAME, PLAT_MER_ID, CREATE_TIME, STATUS, AUTH_STATUS 
+	<if test="color != -1">
+	 ,COLOR
+	 </if>, BILL_CYCLE, 
+	REMARK, RESERVED, SETT_ACC_TYPE, ACCESS_TYPE) 
+    VALUES(#{merName}, #{merRegNo}, #{merTaxNo}, #{organizationCode}, #{merRegAddr}, #{merLegalPerson},
+     #{merLegalIdcard}, #{regCapital}, #{merKind}, #{contactor}, #{contactorPhone}, #{contactorAddr}, 
+     #{contactorEmail}, #{settAccountName}, #{settAccountNo}, #{settAgency}, #{signDate}, 
+     #{signPerson}, #{dispName}, '-1', #{createTime}, #{status}, #{authStatus} 
+     <if test="color != -1">
+	 ,#{color}
+	 </if>
+     , #{billCycle}, #{remark}, #{reserved}, #{settAccType}, #{accessType})
+    </insert>
+    
+    <select id="selectMerInfoCount" parameterType="com.bypay.domain.MerInfo" resultType="int">
+    	SELECT count(1) FROM MER_INFO mi 
+    	left join PLAT_MER_INFO pmi on mi.PLAT_MER_ID=pmi.PLAT_MER_ID 
+    	<if test="tractId != null and tractId != ''">
+    	left join MER_TRACT mt on mt.MER_SYS_ID = mi.MER_SYS_ID 
+   		</if>
+    	where 1=1
+    	<if test="tractId != null and tractId != ''">
+    		AND mt.TRACT_ID=#{tractId}
+    	</if>
+    	<if test="merSysId != null and merSysId != ''">
+    		AND mi.MER_SYS_ID=#{merSysId}
+    	</if>
+    	<if test="merName != null and merName != ''">
+    		AND mi.MER_NAME=#{merName}
+    	</if>
+    	<if test="signPerson != null and signPerson != ''">
+    		AND mi.SIGN_PERSON=#{signPerson}
+    	</if>
+    	<if test="signDate != null and signDate != ''">
+    		AND mi.SIGN_DATE=#{signDate}
+    	</if>
+    	<if test="createTime != null and createTime != ''">
+    		AND date(mi.CREATE_TIME)=#{createTime}
+    	</if>
+    	<if test="status != -1 and status != null and status != ''">
+    		AND mi.STATUS=#{status}
+    	</if>
+    	<if test="platMerId != null and platMerId != ''">
+    		AND mi.PLAT_MER_ID=#{platMerId}
+    	</if>
+    	<if test="merSysIds!=null and merSysIds!=''">
+			AND mi.MER_SYS_ID in (${merSysIds})
+		</if>	
+    </select>
+    <select id="selectMerInfoAll" parameterType="java.util.HashMap" resultMap="merInfo">
+    	SELECT mi.* FROM MER_INFO mi 
+    	left join PLAT_MER_INFO pmi on mi.PLAT_MER_ID=pmi.PLAT_MER_ID 
+   		<if test="merchantInfo.tractId != null and merchantInfo.tractId != ''">
+    	left join MER_TRACT mt on mt.MER_SYS_ID = mi.MER_SYS_ID 
+    	</if>
+    	where 1=1
+    	<if test="merchantInfo.tractId != null and merchantInfo.tractId != ''">
+    		AND mt.TRACT_ID=#{merchantInfo.tractId}
+    	</if>
+    	<if test="merchantInfo.merSysId != null and merchantInfo.merSysId != ''">
+    		AND mi.MER_SYS_ID=#{merchantInfo.merSysId}
+    	</if>
+    	<if test="merchantInfo.merName != null and merchantInfo.merName != ''">
+    		AND mi.MER_NAME=#{merchantInfo.merName}
+    	</if>
+    	<if test="merchantInfo.signPerson != null and merchantInfo.signPerson != ''">
+    		AND mi.SIGN_PERSON=#{merchantInfo.signPerson}
+    	</if>
+    	<if test="merchantInfo.signDate != null and merchantInfo.signDate != ''">
+    		AND mi.SIGN_DATE=#{merchantInfo.signDate}
+    	</if>
+    	<if test="merchantInfo.createTime != null and merchantInfo.createTime != ''">
+    		AND date(mi.CREATE_TIME)=#{merchantInfo.createTime}
+    	</if>
+    	<if test="merchantInfo.status != -1 and merchantInfo.status != null and merchantInfo.status != ''">
+    		AND mi.STATUS=#{merchantInfo.status}
+    	</if>
+    	<if test="merchantInfo.platMerId  != null and merchantInfo.platMerId != ''">
+    		AND mi.PLAT_MER_ID=#{merchantInfo.platMerId}
+    	</if>
+		<if test="merchantInfo.merSysIds!=null and merchantInfo.merSysIds!=''">
+			AND mi.MER_SYS_ID in (${merSysIds})
+		</if>	
+    	order By mi.CREATE_TIME desc
+    	 limit #{page}  , #{pageSize}
+    </select>
+    <select id="selectMerInfoById" resultMap="merInfo" parameterType="com.bypay.domain.MerInfo">
+    	SELECT * FROM MER_INFO WHERE MER_SYS_ID=#{merSysId}
+    </select>
+    <update id="approvalMerchantInfo" parameterType="com.bypay.domain.MerInfo">
+    	UPDATE MER_INFO SET STATUS=#{status} WHERE MER_SYS_ID=#{merSysId}
+    </update>
+    <update id="updateMerchantInfo" parameterType="com.bypay.domain.MerInfo" >
+    	UPDATE MER_INFO SET
+    	MER_NAME=#{merName}, 
+    	MER_REG_NO=#{merRegNo}, 
+    	MER_TAX_NO=#{merTaxNo}, 
+    	ORGANIZATION_CODE=#{organizationCode}, 
+    	MER_REG_ADDR=#{merRegAddr}, 
+    	MER_LEGAL_PERSON=#{merLegalPerson}, 
+    	MER_LEGAL_IDCARD=#{merLegalIdcard}, 
+    	REG_CAPITAL=#{regCapital}, 
+    	CONTACTOR=#{contactor}, 
+    	CONTACTOR_PHONE=#{contactorPhone}, 
+    	CONTACTOR_ADDR=#{contactorAddr}, 
+    	CONTACTOR_EMAIL=#{contactorEmail}, 
+    	DISP_NAME=#{dispName} 
+		,COLOR=#{color} 
+		<if test="remark != null and remark != ''">
+		,REMARK=#{remark}
+		</if>
+		WHERE MER_SYS_ID=#{merSysId}
+    </update>
+    <update id="updateSettleMerchantInfo" parameterType="com.bypay.domain.MerInfo">
+    	UPDATE MER_INFO SET
+    	SETT_ACCOUNT_NAME = #{settAccountName},
+    	SETT_ACCOUNT_NO = #{settAccountNo},
+    	SETT_AGENCY = #{settAgency},
+    	SETT_ACC_TYPE = #{settAccType},
+    	BILL_CYCLE = #{billCycle}
+    	<if test="region!=null and region!=''">
+   		,REGION=#{region}
+   		</if>
+    	<if test="lineNum !=null and lineNum != ''">
+   		,LINE_NUM=#{lineNum}
+   		</if>
+   		<if test="openBank !=null and openBank != ''">
+   		,OPEN_BANK=#{openBank}
+   		</if>
+    	WHERE MER_SYS_ID=#{merSysId}
+    </update>
+    <!-- 传图片成功后修改数据库机构LOGO字段地址 -->
+    <update id="updateMerLogo" parameterType="com.bypay.domain.MerInfo">
+    	UPDATE MER_INFO SET LOGO = #{logo} WHERE MER_SYS_ID = #{merSysId}
+    </update>
+    
+     <select id="selectMerInfoByAllSysId" resultMap="merInfo"  parameterType="java.util.Map">
+    	SELECT MER_SYS_ID,MER_NAME  FROM MER_INFO 
+    </select>
+    <select id="selectMerInfoByMerSysId" resultMap="merInfo" parameterType="com.bypay.domain.MerInfo">
+    	SELECT * FROM MER_INFO WHERE MER_SYS_ID = #{merSysId}
+    </select>
+    
+    <update id="updateIsIntoPieces" parameterType="com.bypay.domain.MerInfo">
+		UPDATE MER_INFO SET IS_INTO_PIECES=#{isIntoPieces} WHERE MER_SYS_ID=#{merSysId}
+	</update>
+</mapper>

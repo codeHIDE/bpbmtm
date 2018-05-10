@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerTerminalInfoDao">
+	<resultMap id="merTerminalInfo" type="com.bypay.domain.MerTerminalInfo">
+		<result property="id" column="ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="category" column="CATEGORY" />
+		<result property="terminalCode" column="TERMINAL_CODE" />
+		<result property="terminalSysterm" column="TERMINAL_SYSTERM" />
+		<result property="fileName" column="FILE_NAME" />
+		<result property="version" column="VERSION" />
+		<result property="versionDesc" column="VERSION_DESC" />
+		<result property="updateType" column="UPDATE_TYPE" />
+		<result property="updatePath" column="UPDATE_PATH" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="status" column="STATUS" />
+		<result property="reserved" column="RESERVED" />
+	</resultMap>
+
+	<!-- 获取机构终端版本管理表id最大并且为启用的版本号 -->
+	<select id="selectMaxIdMerTerminalInfo" resultMap="merTerminalInfo" parameterType="com.bypay.domain.MerTerminalInfo">
+		SELECT * FROM MER_TERMINAL_INFO where ID in 
+		(select max(ID) FROM MER_TERMINAL_INFO WHERE 
+			<!-- MER_SYS_ID= #{merSysId} AND --> 
+			TERMINAL_SYSTERM = #{terminalSysterm} AND STATUS = '1');
+	</select>
+	<sql id="baseColumn">
+		ID,MER_SYS_ID,CATEGORY,TERMINAL_CODE,TERMINAL_SYSTERM,FILE_NAME,
+		VERSION,VERSION_DESC,UPDATE_TYPE,UPDATE_PATH,CREATE_TIME,
+		STATUS,RESERVED
+	</sql>
+	<!-- 获取机构终端信息 -->
+	<select id="selectMerTerminalInfo" resultMap="merTerminalInfo" parameterType="com.bypay.domain.MerTerminalInfo">
+		select * from MER_TERMINAL_INFO where 
+		 MER_SYS_ID = #{merSysId} and  
+		TERMINAL_SYSTERM = #{terminalSysterm} 
+		<if test="version!=null and version!=''">
+			and VERSION = #{version}
+		</if>
+		<if test="status!=null and status!=''">
+			and STATUS = #{status}
+		</if>
+	</select>
+		<!-- 添加终端信息YJH2014-06-09 -->
+	<insert id="insertMerTerminalInfo"  parameterType="com.bypay.domain.MerTerminalInfo" >
+		INSERT INTO MER_TERMINAL_INFO(
+		MER_SYS_ID,CATEGORY,TERMINAL_CODE,TERMINAL_SYSTERM,FILE_NAME,
+		VERSION,VERSION_DESC,UPDATE_TYPE,UPDATE_PATH,RESERVED,CREATE_TIME
+		,STATUS) 
+    	VALUES(#{merSysId}, #{category}, #{terminalCode}, #{terminalSysterm}, #{fileName}, 
+    	#{version}, #{versionDesc}, #{updateType}, #{updatePath}, #{reserved},#{createTime},
+    	#{status})
+	</insert>
+	
+	<!-- 机构终端查询 -->
+	<select id="selectMerTerminalInfoList"  resultMap="merTerminalInfo" parameterType="java.util.Map">
+		select t.ID,t.MER_SYS_ID,t.CATEGORY,t.TERMINAL_CODE,t.TERMINAL_SYSTERM,t.FILE_NAME,
+				   t.VERSION,t.VERSION_DESC,t.UPDATE_TYPE,t.UPDATE_PATH,t.CREATE_TIME,
+				   t.STATUS
+				from MER_TERMINAL_INFO t
+				<where>
+			<if test="merTerminalInfo.merSysId!=null and merTerminalInfo.merSysId!=''">
+				AND t.MER_SYS_ID=#{merTerminalInfo.merSysId}
+			</if>
+			<if test="merTerminalInfo.category!=null and merTerminalInfo.category!='-1' and merTerminalInfo.category!=''">
+				AND t.CATEGORY=#{merTerminalInfo.category}
+			</if>
+			</where>
+			limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询机构终端的条数分页用 -->
+	<select id="selectMerTerminalInfoCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.MerTerminalInfo">
+		SELECT COUNT(*) from MER_TERMINAL_INFO 
+		<where>
+		<if test="merSysId!=null and merSysId!=''">
+			AND MER_SYS_ID=#{merSysId}
+		</if>
+		<if test="category!=null and category!='-1' and category!=''">
+			AND CATEGORY=#{category}
+		</if>
+		</where>
+	</select>
+	<!-- 查询指定机构终端详情 -->
+	<select id="selectMerTerminalInfoOne" resultMap="merTerminalInfo" parameterType="com.bypay.domain.MerTerminalInfo">
+		SELECT * FROM MER_TERMINAL_INFO WHERE ID=#{id}
+	</select>
+	
+	<!-- 修改指定机构终端 -->
+	<update id="updateMerTerminalInfo" parameterType="com.bypay.domain.MerTerminalInfo">
+		UPDATE MER_TERMINAL_INFO SET ID=#{id}
+		<if test="status != null">
+			,STATUS=#{status} 
+		</if><if test="category != null">
+			,CATEGORY=#{category} 
+		</if><if test="terminalCode != null">
+			,TERMINAL_CODE=#{terminalCode} 
+		</if><if test="terminalSysterm != null">
+			,TERMINAL_SYSTERM=#{terminalSysterm} 
+		</if><if test="version != null">
+			,VERSION=#{version} 
+		</if><if test="versionDesc != null">
+			,VERSION_DESC=#{versionDesc} 
+		</if><if test="updateType != null">
+			,UPDATE_TYPE=#{updateType} 
+		</if><if test="updatePath != null">
+			,UPDATE_PATH=#{updatePath} 
+		</if>
+		WHERE ID=#{id}
+	</update>
+</mapper>

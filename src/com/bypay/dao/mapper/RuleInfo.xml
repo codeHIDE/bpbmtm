@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.RuleInfoDao">
+	<resultMap id="ruleInfo" type="com.bypay.domain.RuleInfo">
+		<result property="userId" column="userId" />
+		<result property="childId" column="childId" />
+		<result property="parentId" column="parentId" />
+	</resultMap>
+
+	<insert id="insertRuleInfo"  parameterType="com.bypay.domain.RuleInfo">
+	 	INSERT INTO RULE_INFO (userId,childId
+	 	<if test="parentId != null and parentId != ''">
+	 	,parentId
+	 	</if>
+	 	)
+	 	values(#{userId},#{childId}
+	 	<if test="parentId != null and parentId != ''">
+	 	,#{parentId}
+	 	</if>
+	 	)
+	</insert>
+	
+	<select id="getChildren" parameterType="com.bypay.domain.RuleInfo" resultMap="ruleInfo">
+		SELECT * FROM RULE_INFO WHERE userId=#{userId}
+	</select>
+</mapper>

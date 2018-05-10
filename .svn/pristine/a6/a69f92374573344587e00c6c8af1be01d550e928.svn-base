@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerAuthInfoDao">
+
+	<resultMap id="subMerAuthInfo" type="com.bypay.domain.SubMerAuthInfo">
+		<result property="authOrderId" column="AUTH_ORDER_ID" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="remitType" column="REMIT_TYPE" />
+		<result property="realName" column="REAL_NAME" /> 
+		<result property="idNum" column="ID_NUM" />
+		<result property="facePicPath" column="FACE_PIC_PATH" />
+		<result property="authStatus" column="AUTH_STATUS" />
+		<result property="serialNo" column="SERIAL_NO" />
+		<result property="terminalId" column="TERMINAL_ID" />
+	</resultMap>
+
+	<!-- 添加实人认证信息 -->
+	<insert id="addSubMerAuthInfo"  parameterType="com.bypay.domain.SubMerAuthInfo"> 
+		INSERT INTO SUB_MER_AUTH_INFO(CREATE_TIME, SUB_MER_ID, REMIT_TYPE,  
+		REAL_NAME, ID_NUM, FACE_PIC_PATH, AUTH_STATUS, SERIAL_NO, TERMINAL_ID) 
+    	VALUES(#{createTime}, #{subMerId}, #{remitType}, 
+    	#{realName}, #{idNum}, #{facePicPath}, #{authStatus}, #{serialNo}, #{terminalId})
+    	 <selectKey resultType="java.lang.String" keyProperty="authOrderId">
+       		 SELECT LAST_INSERT_ID() as authOrderId
+   		 </selectKey>
+	</insert> 
+	
+	<!-- 修改实人认证信息 -->
+	<update id="updateSubMerAuthInfo" parameterType="com.bypay.domain.SubMerAuthInfo">
+		UPDATE SUB_MER_AUTH_INFO SET AUTH_STATUS=#{authStatus}, SERIAL_NO = #{serialNo}
+	    WHERE AUTH_ORDER_ID = #{authOrderId}
+	</update>
+
+	<!-- 修改实人认证AUTH_STATUS字段 -->
+	<update id="updateSubMerAuthInfoByStatus" parameterType="com.bypay.domain.SubMerAuthInfo">
+		UPDATE SUB_MER_AUTH_INFO SET AUTH_STATUS=#{authStatus}
+	    WHERE SUB_MER_ID = #{subMerId}
+	</update>
+</mapper>

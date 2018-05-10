@@ -1,0 +1,148 @@
+@charset "utf-8";
+/* CSS Document */
+body, div, a, p, table, td {
+	padding: 0px;
+	margin: 0px;
+	font-size: 12px;
+}
+.bg{
+	padding: 0px;
+	margin: 0px;
+}
+image {
+	border: 0px;
+}
+a {
+	font-size: 12px;
+	text-decoration: none;
+}
+.clear {
+	clear: both;
+}
+.sh_top {
+	background: #FFF;
+}
+.sht_logo {
+	width: 990px;
+	margin: 0 auto;
+}
+.sh_main {
+	background: #102f19;
+}
+.sh_image {
+	/* background: url(../image/login_bg.png) no-repeat left top; */
+	width: 1200px;
+	height: 467px;
+	margin: 0 auto;
+}
+.shm {
+	width: 990px;
+	margin: 0 auto;
+}
+.sh_cont {
+	padding-top: 15px;
+	float: right;
+	width: 570px;
+}
+.shc_top {
+	background: url(../image/login_01.png) no-repeat left bottom;
+	width: 570px;
+	height: 58px;
+}
+.shc_center {
+	background: url(../image/login_002.png) repeat-y left top;
+	width: 570px;
+	padding: 15px 0 5px 0;
+	position: relative;
+}
+.shc_bottom {
+	background: url(../image/login_28.png) no-repeat left top;
+	width: 570px;
+	height: 26px;
+}
+.shcc_left {
+	float: left;
+	width: 200px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 10px;
+}
+.shcc_img {
+	position: absolute;
+	left: 210px;
+	top: 100px;
+}
+.shcc_right {
+	float: left;
+	width: 330px;
+	border-left: 1px solid #cccccc;
+	padding-left: 20px;
+	padding-bottom: 15px !important;
+	padding-bottom: 0px;
+	margin-left: -2px;
+}
+.wrong{color:#ff6600; padding-bottom:8px; }
+.shcc_right table td {
+	padding: 5px 2px;
+}
+.inputstyle {
+	background: url(../image/login_05.jpg) no-repeat left top;
+	width: 264px;
+	height: 39px;
+	line-height: 39px;
+	border: none;
+	color: #b2b2b2;
+	font-size: 14px;
+	padding-left: 10px;
+}
+.inputstyle2 {
+	background: url(../image/login_11.jpg) no-repeat left top;
+	width: 264px;
+	height: 39px;
+	line-height: 39px;
+	border: none;
+	color: #b2b2b2;
+	font-size: 14px;
+	padding-left: 10px;
+}
+.inputstyle3 {
+	background: url(../image/login_16.jpg) no-repeat left top;
+	width: 264px;
+	height: 39px;
+	line-height: 39px;
+	border: none;
+	color: #b2b2b2;
+	font-size: 14px;
+	padding-left: 10px;
+}
+.inputstyle4 {
+	background: url(../image/login_18.jpg) no-repeat left top;
+	width: 75px;
+	height: 39px;
+	line-height: 39px;
+	border: none;
+	color: #b2b2b2;
+	font-size: 14px;
+	padding-left: 10px;
+}
+.shcc_right table td a {
+	color: #0552aa;
+}
+.shc_text {
+	padding: 10px 0px 0px 0px;
+	text-align: center;
+	color: #FFF;
+}
+.sh_footer {
+	width: 990px;
+	margin: 0 auto;
+	padding: 12px 0 10px 0;
+	color: #666;
+}
+.sh_footer a {
+	color: #666;
+	padding: 0 10px;
+}
+.sh_footer a:hover {
+	color: #333;
+}

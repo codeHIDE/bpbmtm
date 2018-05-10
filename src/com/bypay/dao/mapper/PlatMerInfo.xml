@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.PlatMerInfoDao">
+	<resultMap id="platMerInfo" type="com.bypay.domain.PlatMerInfo">
+		<result property="platMerId" column="PLAT_MER_ID" />
+		<result property="platMerName" column="PLAT_MER_NAME" />
+		<result property="merRegNo" column="MER_REG_NO" />
+		<result property="merTaxNo" column="MER_TAX_NO" />
+		<result property="legalPerson" column="LEGAL_PERSON" />
+		<result property="legalIdcard" column="LEGAL_IDCARD" />
+		<result property="contactor" column="CONTACTOR" />
+		<result property="contactPhone" column="CONTACT_PHONE" />
+		<result property="contactEmail" column="CONTACT_EMAIL" />
+		<result property="contactAddr" column="CONTACT_ADDR" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="status" column="STATUS" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<result property="color" column="COLOR" />
+		<result property="logo" column="LOGO" />
+	</resultMap>
+	
+	<select id="selectPlatMerInfoList" resultMap="platMerInfo">
+	SELECT * FROM PLAT_MER_INFO
+	</select>
+	<insert id="insertPlatMerInfo" parameterType="com.bypay.domain.PlatMerInfo">
+	INSERT INTO PLAT_MER_INFO(PLAT_MER_NAME, MER_REG_NO, MER_TAX_NO, LEGAL_PERSON, LEGAL_IDCARD,
+	 CONTACTOR, CONTACT_PHONE, CONTACT_EMAIL, CONTACT_ADDR, CREATE_TIME, STATUS, REMARK, RESERVED
+	 <if test="color != -1">
+	 ,COLOR
+	 </if>) 
+    VALUES(#{platMerName},#{merRegNo}, #{merTaxNo},#{legalPerson}, #{legalIdcard}, #{contactor}, 
+    #{contactPhone}, #{contactEmail}, #{contactAddr}, #{createTime}, #{status}, #{remark}, #{reserved}
+    <if test="color != -1">
+	 ,#{color}
+	 </if> )
+	 <selectKey resultType="java.lang.String" keyProperty="platMerId">
+       		 SELECT LAST_INSERT_ID() as platMerId
+  		 </selectKey>
+	</insert>
+	
+	<select id="selectPlatMerInfoCount"  parameterType="com.bypay.domain.PlatMerInfo" resultType="int">
+	SELECT count(1) FROM PLAT_MER_INFO  WHERE 1=1
+	<if test="platMerId != null and platMerId !=''">
+	AND PLAT_MER_ID = #{platMerId}
+	</if>
+	<if test="platMerName != null and platMerName !=''">
+	AND PLAT_MER_NAME = #{platMerName}
+	</if>
+	<if test="createTime != null and createTime !=''">
+	AND CREATE_TIME = #{createTime}
+	</if>
+	<if test="status != null and status !='' and status != -1">
+	AND STATUS = #{status}
+	</if>
+	</select>
+	<select id="selectPlatMerInfoAll"  parameterType="java.util.HashMap" resultMap="platMerInfo">
+	SELECT * FROM PLAT_MER_INFO  WHERE 1=1
+	<if test="platMerInfo.platMerId != null and platMerInfo.platMerId !=''">
+	AND PLAT_MER_ID = #{platMerInfo.platMerId}
+	</if>
+	<if test="platMerInfo.platMerName != null and platMerInfo.platMerName !=''">
+	AND PLAT_MER_NAME = #{platMerInfo.platMerName}
+	</if>
+	<if test="platMerInfo.createTime != null and platMerInfo.createTime !=''">
+	AND CREATE_TIME = #{platMerInfo.createTime}
+	</if>
+	<if test="platMerInfo.status != null and platMerInfo.status !='' and platMerInfo.status != -1">
+	AND STATUS = #{platMerInfo.status}
+	</if>
+		order By create_time desc
+	   limit #{page}  , #{pageSize}
+	</select>
+	
+	<update id="approvalPlatMerInfo" parameterType="com.bypay.domain.PlatMerInfo">
+		UPDATE PLAT_MER_INFO SET STATUS=#{status} WHERE PLAT_MER_ID=#{platMerId}
+	</update>
+	
+	<select id="selectPlatMerInfoById" resultMap="platMerInfo" parameterType="com.bypay.domain.PlatMerInfo">
+    	SELECT * FROM PLAT_MER_INFO WHERE PLAT_MER_ID=#{platMerId}
+    </select>
+    
+     <update id="updatePlatMerInfo" parameterType="com.bypay.domain.PlatMerInfo" >
+    	UPDATE PLAT_MER_INFO SET 
+    	PLAT_MER_NAME=#{platMerName}, 
+    	MER_REG_NO=#{merRegNo}, 
+    	MER_TAX_NO=#{merTaxNo},
+    	LEGAL_PERSON=#{legalPerson}, 
+    	LEGAL_IDCARD=#{legalIdcard}, 
+    	CONTACTOR=#{contactor}, 
+    	CONTACT_PHONE=#{contactPhone}, 
+    	CONTACT_EMAIL=#{contactEmail}, 
+    	CONTACT_ADDR=#{contactAddr}, 
+    	REMARK=#{remark}
+    	<if test="color != -1">
+		 ,COLOR=#{color}
+		 </if>
+   		WHERE PLAT_MER_ID=#{platMerId}
+    </update>
+</mapper>

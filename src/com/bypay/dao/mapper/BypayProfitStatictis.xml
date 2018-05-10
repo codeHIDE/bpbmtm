@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.BypayProfitStatictisDao">
+	<resultMap id="bypayProfitStatictis" type="com.bypay.domain.BypayProfitStatictis">
+		<result property="id" column="ID" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="sumAmt" column="SUM_AMT" />
+		<result property="sumFeeAmt" column="SUM_FEE_AMT" />
+		<result property="sumCount" column="SUM_COUNT" />
+		<result property="sumCamt" column="SUM_CAMT" />
+		<result property="sumFeeCamt" column="SUM_FEE_CAMT" />
+		<result property="sumCCount" column="SUM_CCOUNT" />
+		<result property="sumRamt" column="SUM_RAMT" />
+		<result property="sumFeeRamt" column="SUM_FEE_RAMT" />
+		<result property="sumRCount" column="SUM_RCOUNT" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="sumTractFee" column="SUM_TRACT_FEE" />
+		<result property="bypayProfit" column="BYPAY_PROFIT" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	<resultMap type="java.util.HashMap" id="sumInfo">
+		<result property="countSum" column="COUNT_SUM" />
+		<result property="sumAmtSum" column="SUM_AMT_SUM" />
+		<result property="sumFeeAmtSum" column="SUM_FEE_AMT_SUM" />
+		<result property="sumCamtSum" column="SUM_CAMT_SUM" />
+		<result property="sumFeeCamtSum" column="SUM_FEE_CAMT_SUM" />
+		<result property="sumRamtSum" column="SUM_RAMT_SUM" />
+		<result property="sumFeeRamtSum" column="SUM_FEE_RAMT_SUM" />
+		<result property="sumTractFeeSum" column="SUM_TRACT_FEE_SUM" />
+		<result property="bypayProfitSum" column="BYPAY_PROFIT_SUM" />
+	</resultMap>
+	<!-- 获取系统日分润统计数据总条数 -->
+	<select id="getBypayProfitStatictisCount" resultMap="sumInfo" parameterType="java.util.Map">
+		SELECT COUNT(ID) AS COUNT_SUM,  
+		COALESCE(SUM(SUM_AMT),0) AS SUM_AMT_SUM, COALESCE(SUM(SUM_FEE_AMT),0) AS SUM_FEE_AMT_SUM,
+	    COALESCE(SUM(SUM_CAMT),0) AS SUM_CAMT_SUM, COALESCE(SUM(SUM_FEE_CAMT),0) AS SUM_FEE_CAMT_SUM,
+	    COALESCE(SUM(SUM_RAMT),0) AS SUM_RAMT_SUM, COALESCE(SUM(SUM_FEE_RAMT),0) AS SUM_FEE_RAMT_SUM,
+	    COALESCE(SUM(SUM_TRACT_FEE),0) AS SUM_TRACT_FEE_SUM, COALESCE(SUM(BYPAY_PROFIT),0) AS BYPAY_PROFIT_SUM
+		FROM BYPAY_PROFIT_STATICTIS 
+		WHERE SETTLE_DATE BETWEEN #{startTime} AND #{endTime}
+	</select>
+	<!-- 获取系统日分润统计LIST -->
+	<select id="getBypayProfitStatictisList" resultMap="bypayProfitStatictis" parameterType="java.util.Map">
+		SELECT * from BYPAY_PROFIT_STATICTIS 
+		WHERE SETTLE_DATE BETWEEN #{startTime} AND #{endTime} 
+		ORDER BY ID DESC
+		limit #{page},#{pageSize}
+	</select>
+</mapper>

@@ -1,0 +1,62 @@
+package com.bypay.dao.impl;
+
+import java.util.*;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.AgenctInfoDao;
+import com.bypay.domain.AgenctInfo;
+@Repository("AgenctInfoDao")
+public class AgenctInfoDaoImpl implements AgenctInfoDao {
+	@Inject
+	private SqlSessionTemplate sqlSessionTemplate;
+
+	public SqlSessionTemplate getSqlSessionTemplate() {
+		return sqlSessionTemplate;
+	}
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
+	}
+	@SuppressWarnings("unchecked")
+	@Override//查询所有代理商户信息
+	public List<AgenctInfo> selectAgenctInfoAll(Map map) {
+		return sqlSessionTemplate.selectList("selectAgenctInfoAll", map);
+	}
+	@Override
+	public Integer selectAgenctInfoAllCount(Map map) {
+		return (Integer) sqlSessionTemplate.selectOne("selectAgenctInfoAllCount", map);
+	}
+	@Override
+	public AgenctInfo selectAgenctInfoById(AgenctInfo ai) {
+		return (AgenctInfo) sqlSessionTemplate.selectOne("selectAgenctInfoById", ai);
+	}
+	@Override
+	public boolean updateStatus(AgenctInfo ai) {
+		if(sqlSessionTemplate.update("updateAgenctInfoStatus", ai)>0)
+			return true;
+		else
+			return false;
+	}
+	/**
+	 * 获取代理商信息
+	 */
+	@Override
+	public AgenctInfo getAgentInfo(String agentId) {
+		return (AgenctInfo) sqlSessionTemplate.selectOne("getAgentInfo", agentId);
+	}
+	@Override
+	/***
+	 * 代理商户LOGO上传成功后修改代理数据库中LOGO字段地址
+	 */
+	public int updateAgeLogo(AgenctInfo info) {
+		return sqlSessionTemplate.update("updateAgeLogo", info);
+	}
+	
+	public AgenctInfo getAgentInfoByRateInfo(Map<String,Object> map){
+	  return (AgenctInfo) sqlSessionTemplate.selectOne("getAgentInfoByRateInfo", map);
+	}
+	
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.DriverInfoDao">
+	<resultMap id="mobileUser" type="com.bypay.domain.DriverInfo">
+		<result property="id" column="id" />
+		<result property="subMerId" column="subMerId" />
+		<result property="userId" column="userId" />
+		<result property="lsprefix" column="lsprefix" />
+		<result property="lsnum" column="lsnum" />
+		<result property="carorg" column="carorg" />
+		<result property="lstype" column="lstype" />
+		<result property="engineno" column="engineno" />
+		<result property="frameno" column="frameno" />
+		<result property="createTime" column="createTime" />
+		
+	</resultMap>
+
+	<insert id="insertMobileUser"  parameterType="com.bypay.domain.MobileUser">
+	 	INSERT INTO DRIVER_INFO (subMerId,userId,lsprefix,lsnum,carorg,lstype,engineno,frameno,createTime)
+	 	VALUES(#{subMerId},#{userId},#{lsprefix},#{lsnum},#{carorg},#{lstype},#{engineno},#{frameno},NOW())
+	</insert>
+	
+	
+</mapper>

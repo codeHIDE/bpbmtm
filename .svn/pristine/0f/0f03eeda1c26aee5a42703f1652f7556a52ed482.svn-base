@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.DyPayInfoDao">
+	<resultMap id="dyPayInfo" type="com.bypay.domain.DyPayInfo">
+		<result property="id" column="id" />
+		<result property="orderId" column="orderId" />
+		<result property="transTime" column="transTime" />
+		<result property="transAmt" column="transAmt" />
+		<result property="cardNo" column="cardNo" />
+		<result property="accountName" column="accountName" />
+		<result property="respCode" column="respCode" />
+		<result property="respMsg" column="respMsg" />
+		<result property="settleDt" column="settleDt" />
+		<result property="payType" column="payType" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+	
+	<insert id="insertInfo"  parameterType="com.bypay.domain.DyPayInfo" >
+		INSERT INTO DY_PAY_INFO(orderId,transAmt,cardNo,accountName,payType,createTime)
+		VALUES(#{orderId},#{transAmt},#{cardNo},#{accountName},#{payType},NOW())
+	</insert>
+	
+	<update id="updateInfo"  parameterType="com.bypay.domain.DyPayInfo" >
+		UPDATE DY_PAY_INFO SET respCode=#{respCode},respMsg=#{respMsg},settleDt=#{settleDt},transTime=#{transTime} WHERE  orderId=#{orderId}
+	</update>
+	
+	<select id="selectDyPayInfoInfo" parameterType="com.bypay.domain.DyPayInfo" resultMap="dyPayInfo">
+		SELECT *
+		FROM DY_PAY_INFO
+		WHERE 1=1
+		<if test="dyPayInfo.cardNo != null and dyPayInfo.cardNo!= '' ">
+		AND cardNo = #{dyPayInfo.cardNo}
+		</if>
+		<if test="dyPayInfo.orderId != null and dyPayInfo.orderId!= '' ">
+		AND orderId = #{dyPayInfo.orderId}
+		</if>
+		<if test="dyPayInfo.settleDt != null and dyPayInfo.settleDt  != '' ">
+		AND settleDt = #{dyPayInfo.settleDt}
+		</if>
+		<if test="dyPayInfo.payType != null and dyPayInfo.payType  !='-1' ">
+		AND payType = #{dyPayInfo.payType}
+		</if>
+		ORDER BY id desc limit #{page}  , #{pageSize}
+	</select>
+	<select id="selectDyPayInfoInfoCount" parameterType="com.bypay.domain.DyPayInfo" resultType="int">
+		SELECT count(*)
+		FROM DY_PAY_INFO
+		WHERE 1=1
+			<if test="dyPayInfo.cardNo != null and dyPayInfo.cardNo!= '' ">
+		AND cardNo = #{dyPayInfo.cardNo}
+		</if>
+		<if test="dyPayInfo.orderId != null and dyPayInfo.orderId!= '' ">
+		AND orderId = #{dyPayInfo.orderId}
+		</if>
+		<if test="dyPayInfo.settleDt != null and dyPayInfo.settleDt  != '' ">
+		AND settleDt = #{dyPayInfo.settleDt}
+		</if>
+		<if test="dyPayInfo.payType != null and dyPayInfo.payType  !='-1' ">
+		AND payType = #{dyPayInfo.payType}
+		</if>
+	</select>
+	
+	<select id="selectInfoById"  parameterType="com.bypay.domain.DyPayInfo"  resultMap="dyPayInfo">
+		SELECT * FROM DY_PAY_INFO WHERE id = #{id}
+	</select>
+</mapper>

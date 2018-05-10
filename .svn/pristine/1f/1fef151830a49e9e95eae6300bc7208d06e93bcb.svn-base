@@ -1,0 +1,344 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/taglibs.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>交易详情</title>
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Gray/css/all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/css/qzd.css'/>" rel="stylesheet" type="text/css" />
+		<script src="<s:url value='/js/jqui/jquery/jquery-1.5.2.min.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/core/base.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerToolBar.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDialog.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerGrid.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDrag.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerResizable.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerGrid.showFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDateEditor.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/common.js'/>"></script>
+		<script type="text/javascript">
+			function cls(){
+	            window.parent.$.ligerDialog.close();
+	            window.parent.$(".l-dialog,.l-window-mask").remove(); 
+			}
+			function errorSign(orderId,status){
+				window.parent.$.ligerDialog.confirm('是否确认更改签名状态?', function (yes) {
+	        	if(yes){
+	        		var url='<s:url value='/orderInfo!errorSign.ac'/>';
+	        		var formData={
+						orderId:orderId,
+						status:status
+					}
+					$.post(url,formData,function(data){
+						alert(data);
+					});
+	        	}
+	        });
+			}
+			
+			   function goto(terminalSerialNumber){
+	       		 window.parent.$.ligerDialog.confirm('是否要重置密码?', function (yes) {
+	        	if(yes){
+	        		$.post('<s:url value='/subMerInfo!updateSwipePass.ac'/>',
+					  {
+					    terminalSerialNumber:terminalSerialNumber
+					  },
+					  function(data){
+					    if(data=="succ"){
+					    	window.parent.$.ligerDialog.success('密码重置成功    新密码为：123456');
+					    }else{
+					    	window.parent.$.ligerDialog.error('密码重置失败！');
+					    }
+					  });
+	        	}
+	        });
+	        }
+	        
+	        function frozen(orderId,status){
+		        if(confirm("确定要操作吗？")){
+		        	var url="<s:url value="/orderInfo!forzenSum.ac" />";
+		   			 $.post(url,{orderId:orderId,status:status},
+		   			 function(data){
+		    			alert(data.msg);
+		    			location.reload();
+			        },'json');
+		        }
+        }
+	        
+			  function refund(merOrderId){
+	       		window.parent.$.ligerDialog.confirm('是否要退款?', function (yes) {
+		        	if(yes){
+		        		$.post('<s:url value='/orderInfo!returnGoods.ac'/>',
+						  {
+						    merOrderId:merOrderId
+						  },
+						  function(data){
+						    if(data=="succ"){
+						    	window.parent.$.ligerDialog.success('退款成功');
+						    }else if(data=="fail"){
+						    	window.parent.$.ligerDialog.error('退款失败！');
+						    }else{
+						    	alert("退款失败,"+data);
+						    }
+						  });
+		        	}
+	          });
+	        }
+		</script>
+		<style type="text/css">
+			tr{
+				height:30px;
+				
+			}
+			.div{
+				position: relative;
+				float: left;
+				margin-left: 25px;
+			}
+		</style>
+	</head>
+<body >
+<div class="div" >
+	<table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td colspan="2"><span>&nbsp;订单号：</span><s:property value="orderDetailInfo.orderId"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>订单状态：</span>
+          	<s:if test="orderDetailInfo.orderStatus==0">未处理</s:if>
+        	<s:if test="orderDetailInfo.orderStatus==1">支付成功</s:if>
+			<s:if test="orderDetailInfo.orderStatus==2">支付失败</s:if>	
+			<s:if test="orderDetailInfo.orderStatus==3">处理中</s:if>
+			<s:if test="orderDetailInfo.orderStatus==4">已撤销</s:if>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>子商户号：</span><s:property value="orderDetailInfo.subMerId"/></td>
+        </tr>
+        <s:if test="orderDetailInfo.agentIdL1 != null">
+        <tr>
+          <td colspan="2"><span>1级代理商号：</span>
+          <s:property value="orderDetailInfo.agentIdL1"/></td>
+        </tr>
+        </s:if>
+        <s:if test="orderDetailInfo.agentIdL2 != null">
+        <tr>
+          <td colspan="2"><span>2级代理商号：</span>
+          <s:property value="orderDetailInfo.agentIdL2"/></td>
+        </tr>
+        </s:if>
+        <tr>
+          <td colspan="2"><span >交易币种： </span>
+          		<s:else>
+					<s:if test="orderDetailInfo.settleCur eq '156'">
+					人民币
+					</s:if>
+			</s:else>
+         </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>银行卡类型：</span>
+			<s:if test="orderDetailInfo.cardType==1">借记卡</s:if>
+        	<s:if test="orderDetailInfo.cardType==2">贷记卡</s:if>
+			<s:if test="orderDetailInfo.cardType==3">准贷记卡</s:if>	
+			<s:if test="orderDetailInfo.cardType==4">储值卡</s:if>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>交易本金：</span>
+           <s:set var="clearAmt" value="orderDetailInfo.clearAmt" />
+					<fmt:formatNumber value="${clearAmt/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>交易手续费：</span>
+           <s:set var="transFee" value="orderDetailInfo.transFee" />
+					<fmt:formatNumber value="${transFee/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>机构分润：</span>
+          	  <s:set var="merAmt" value="orderDetailInfo.merAmt" />
+        	  <s:set var="merProfit" value="orderDetailInfo.orderProfit.merProfit" />
+					<fmt:formatNumber value="${merProfit/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+          </td>
+        </tr>
+        <s:if test="orderDetailInfo.agentIdL1 != null">
+        <tr>
+          <td colspan="2"><span>1级代理商分润：</span>
+           <s:set var="agent1Profit" value="orderDetailInfo.orderProfit.agent1Profit" />
+					<fmt:formatNumber value="${agent1Profit/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+          
+          </td>
+        </tr>
+        </s:if>
+        <s:if test="orderDetailInfo.agentIdL2 != null">
+         <tr>
+          <td colspan="2"><span>2级代理商分润：</span>
+           <s:set var="agent2Profit" value="orderDetailInfo.orderProfit.agent2Profit" />
+					<fmt:formatNumber value="${agent2Profit/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+          
+          </td>
+        </tr>
+        </s:if>
+        <tr>
+			<td colspan="2">
+				<span>通道成本：</span>
+					<s:set var="transCost" value="orderDetailInfo.orderProfit.transCost" />
+					<fmt:formatNumber value="${transCost/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+			</td>        
+		</tr>
+        
+        <tr>
+          <td colspan="2"><span>平台分润：</span>
+          <s:set var="bypayFee" value="orderDetailInfo.orderProfit.bypayProfit" />
+					<fmt:formatNumber value="${bypayFee/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+          
+          </td>
+        </tr>
+        
+        <tr>
+          <td colspan="2"><span>返回码：</span>
+          <s:property value="orderDetailInfo.respCode"/>
+          </td>
+        </tr>
+        <c:if test="${purview['20110'] == '20110'}">
+	        <s:if test="orderDetailInfo.orderStatus == 1 and orderDetailInfo.transType == '01'">
+				<s:if test="orderFrozen == null or orderFrozen.frozenStatus == 1">
+			        <tr>
+			          <td colspan="2"><input type="button" class="l-button" value="冻结" onclick="frozen(<s:property value="orderDetailInfo.orderId"/>,2)"/></td>
+			        </tr>
+			    </s:if>
+			    <s:else>
+				    <s:if test="orderFrozen.frozenStatus == 2">
+				        <tr>
+					          <td colspan="2"><input type="button" value="返还" class="l-button" onclick="frozen(<s:property value="orderDetailInfo.orderId"/>,1)"/></td>
+					          <td colspan="2"><input type="button" value="扣除" class="l-button" onclick="frozen(<s:property value="orderDetailInfo.orderId"/>,3)"/></td>
+				        </tr>
+			        </s:if>
+		       </s:else>
+	        </s:if>
+        </c:if>
+      </table>
+ </div>
+<div class="qzd" style="margin-left:300px;" class="div">
+  <div class="qzd_tit"><span>商户存根</span>POS签账单</div>
+  <div class="qzd_top">
+    <div class="qzdt_top"></div>
+    <div class="qzdt_center">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td colspan="2"><span>商户名称：</span><s:property value="orderDetailInfo.subMerInfo.subMerName"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>商户编号：</span><s:property value="orderDetailInfo.subMerId"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>终端编号：</span><s:property value="orderDetailInfo.terminalId"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>卡号：</span></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span class="special"><s:property value="orderDetailInfo.cardNo"/></span><br /></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>发卡行：</span><s:property value="orderDetailInfo.issueBankName"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>交易类型：</span>
+        	<s:if test="orderDetailInfo.transType=='01'">消费</s:if>
+        	<s:if test="orderDetailInfo.transType=='04'">消费撤销</s:if>
+			<s:if test="orderDetailInfo.transType=='05'">消费退款</s:if>
+			<s:if test="orderDetailInfo.transType=='06'">转账</s:if>	
+			<s:if test="orderDetailInfo.transType=='07'">还款</s:if>
+			<s:if test="orderDetailInfo.transType=='08'">余额查询</s:if>
+			<s:if test="orderDetailInfo.transType=='09'">手机充值</s:if>
+			</td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>批次号：</span><s:property value="orderDetailInfo.batchNo"/></td>
+        </tr>
+         <tr>
+          <td colspan="2"><span>凭证号：</span><s:property value="orderDetailInfo.voucherNo"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>授权码：</span><s:property value="orderDetailInfo.authNo"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>参考号：</span><s:property value="orderDetailInfo.refferNo"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>日期/时间：</span>
+          	<s:property value="orderDetailInfo.transTime"/>
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>金额：</span></td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <span class="special">RMB:	
+            	<s:set var="fee" value="orderDetailInfo.merAmt" />
+				<fmt:formatNumber value="${fee/100}" type="currency" pattern="0.00"></fmt:formatNumber> 元
+		    </span>
+		  </td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>原凭证号：</span><s:property value="orderDetailInfo.orgOrderId"/></td>
+        </tr>
+        <tr>
+          <td colspan="2"><span>备注：</span></td>
+        </tr>
+      </table>
+     </div>
+    <div class="qzdt_bottom"></div>
+  </div>
+  
+  <div class="qzd_bottom">
+    <div class="qzdt_top"></div>
+    <div class="qzdt_center">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td valign="top"><span>持卡人签名：</span></td>
+          <td>
+	          <div class="tabimg">
+		          <s:if test="orderSign=='' || orderSign==null">
+					<span style="color: red">此交易无图片信息展示</span>
+				  </s:if>
+				  <s:else>
+					 <image src="<s:url value="/orderInfo!getImage.ac" />?orderSign=<s:property value="orderSign" />" width="150px" height="200px" />
+				  </s:else>
+				  
+			</div>
+		</td>
+        </tr>
+      </table>
+    </div>
+    <div class="qzdt_bottom"></div>
+  </div>
+ </div>
+    <div class="qzdt_center" style="width:100% " >
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr align="center">
+			<td colspan="4" align="center">
+				<input type="button" value="关 闭"  id="btn2" class="l-button" onclick="cls()" />
+			</td>
+			<td colspan="4" align="center">
+				<input type="button" value="错误签名"  id="btn3" class="l-button" onclick="errorSign(<s:property value="orderDetailInfo.orderId"/>,1)" />
+				<input type="button" value="正确签名"  id="btn4" class="l-button" onclick="errorSign(<s:property value="orderDetailInfo.orderId"/>,2)" />
+			</td>
+		</tr>
+      </table>
+    </div>
+</body>
+</html>
+						
+						
+							
+					

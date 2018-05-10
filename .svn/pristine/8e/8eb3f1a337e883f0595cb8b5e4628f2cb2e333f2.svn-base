@@ -1,0 +1,457 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerInfoDao">
+	<!-- 配置实体类与数据库的关联 -->
+	<resultMap id="subMerInfo" type="com.bypay.domain.SubMerInfo">
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="subMerName" column="SUB_MER_NAME" />
+		<result property="shortName" column="SHORT_NAME" />
+		<result property="regNo" column="REG_NO" />
+		<result property="taxNo" column="TAX_NO" />
+		<result property="organizationCode" column="ORGANIZATION_CODE" />
+		<result property="regAddr" column="REG_ADDR" />
+		<result property="legalPerson" column="LEGAL_PERSON" />
+		<result property="legalIdcard" column="LEGAL_IDCARD" />
+		<result property="merKind" column="MER_KIND" />
+		<result property="contactor" column="CONTACTOR" />
+		<result property="contactorPhone" column="CONTACTOR_PHONE" />
+		<result property="contactorAddr" column="CONTACTOR_ADDR" />
+		<result property="contactorEmail" column="CONTACTOR_EMAIL" />
+		<result property="settAccountName" column="SETT_ACCOUNT_NAME" />											
+		<result property="settAccountNo" column="SETT_ACCOUNT_NO" />
+		<result property="settAgency" column="SETT_AGENCY" />
+		<result property="settAccType" column="SETT_ACC_TYPE" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="agentIdL1" column="AGENT_ID_L1" />
+		<result property="agentIdL2" column="AGENT_ID_L2" />
+		<result property="agentIdL3" column="AGENT_ID_L3" />
+		<result property="agentIdL4" column="AGENT_ID_L4" />
+		<result property="mcc" column="MCC" />
+		<result property="region" column="REGION" />
+		<result property="billCycle" column="BILL_CYCLE" />
+		<result property="billStatus" column="BILL_STATUS" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<result property="logo" column="LOGO" />
+		<result property="color" column="COLOR" />
+		<result property="merName" column="MER_NAME"/>
+		<result property="gAccStatus" column="G_ACC_STATUS"/>
+		<result property="authStatus" column="AUTH_STATUS"/>
+		<result property="t0Status" column="T0_STATUS"/>
+		<result property="frozenSum" column="FROZEN_SUM"/>
+		<result property="frozenSumMax" column="FROZEN_SUM_MAX"/>
+		<result property="lineNum" column="LINE_NUM"/>
+		<result property="openBank" column="OPEN_BANK"/>
+		<result property="grade" column="GRADE"/>
+		<result property="gradeStatus" column="GRADE_STATUS"/>
+		<result property="checkPayStatus" column="CHECKPAY_STATUS"/>
+		<result property="phoneProvince" column="PHONEPROVINCE"/>
+		<result property="phoneCity" column="PHONECITY"/>
+	</resultMap>
+	<!-- 根据子商户号查找冻结金额 -->
+	<select id="selectFrozenSumMaxBySubMerId" resultType="com.bypay.domain.SubMerInfo" parameterType="java.lang.String">
+		SELECT FROZEN_SUM_MAX FROM SUB_MER_INFO WHERE SUB_MER_ID = #{subMerId}
+	</select>
+	<!-- 根据手机号查询信息 -->
+	<select id="selectSubInfoByPhone" parameterType="java.lang.String" resultMap="subMerInfo">
+		SELECT SUB_MER_ID, CONTACTOR_PHONE FROM SUB_MER_INFO WHERE CONTACTOR_PHONE = #{phone} 
+	</select>
+	<!-- 根据法人证件号查询信息 -->
+	<select id="selectSubInfoByIdCard" parameterType="java.lang.String" resultMap="subMerInfo">
+		SELECT LEGAL_IDCARD FROM SUB_MER_INFO WHERE LEGAL_IDCARD = #{legalIdcard} and STATUS !=4 and STATUS !=5
+	</select>
+	<!-- 模糊获取相关最大子商户号 -->
+	<select id="setMaxSubMerId" parameterType="com.bypay.domain.SubMerInfo" resultType="java.lang.String">
+		SELECT MAX(SUB_MER_ID) AS SUB_MER_ID FROM SUB_MER_INFO WHERE SUB_MER_ID LIKE '${subMerId}%';
+	</select>
+	
+	<!-- 接口使用:账户信息查询 -->
+	<select id="accountEnquiry" parameterType="com.bypay.domain.SubMerTerminal" resultMap="subMerInfo">
+		select SMI.SUB_MER_ID, SUB_MER_NAME, LEGAL_PERSON, 
+		LEGAL_IDCARD, CONTACTOR_PHONE, SETT_ACCOUNT_NAME, SETT_ACCOUNT_NO, SETT_AGENCY,
+		SMI.STATUS, SETT_ACC_TYPE, SMI.MER_SYS_ID, SMTS.AUTH_STATUS,
+		SMI.GRADE, SMI.GRADE_STATUS
+		from SUB_MER_TERMINAL SMT
+		left join SUB_MER_INFO SMI 
+		on SMI.SUB_MER_ID = SMT.SUB_MER_ID
+		left join SUB_MER_TRANS SMTS
+		on SMTS.SUB_MER_ID = SMT.SUB_MER_ID
+		where SMT.SUB_MER_ID = #{subMerId} and SMT.TSN = #{tsn} 
+	</select>
+	<sql id="baseColumn">
+		SUB_MER_ID,          
+		SUB_MER_NAME,          
+		MER_REGNO,             
+		MER_REGADDR,           
+		MER_TAXNO,             
+		MER_LEGAL_PERSON,      
+		MER_LEGAL_IDCARD,      
+		MER_KIND,              
+		MER_SYS_ID,            
+		AGENCY_ID_L1,        
+		AGENCY_ID_L2,           
+		PRODUCT_ID,            
+		BUS_LIST,              
+		MCC_CODE ,             
+		SUB_MER_FEE,           
+		AGENCY_FEE,            
+		AGENCY_PROFIT_RATE,    
+		BILL_CYCLE,            
+		SETT_ACC_TYPE,         
+		SETT_ACCOUNT_NAME,     
+		SETT_ACCOUNT_NO,       
+		SETT_AGENCY_NAME,      
+		STATUS,                
+		CREATE_TIME,           
+		OPEN_TIME,
+		MER_SHORT_NAME,
+		TERMINAL_SERIAL_NUMBER,
+		DISP_NAME,
+		CATEGORY
+	</sql>
+	<!-- 查询子商户信息 详情页面用  -->
+	<select id="selectSubMerInfoDetail" resultMap="subMerInfo" parameterType="com.bypay.domain.SubMerInfo"> 
+		select smi.SETT_ACC_TYPE,smi.SUB_MER_ID,smi.SUB_MER_NAME, smi.REG_NO, smi.PHONEPROVINCE,smi.PHONECITY,
+		smi.TAX_NO, smi.ORGANIZATION_CODE, smi.REG_ADDR, smi.LEGAL_PERSON, 
+		smi.LEGAL_IDCARD, smi.MER_KIND, smi.CONTACTOR,smi.CONTACTOR_PHONE, 
+		smi.CONTACTOR_ADDR, smi.CONTACTOR_EMAIL, smi.SETT_ACCOUNT_NAME, smi.BILL_STATUS,
+		smi.SETT_ACCOUNT_NO, smi.SETT_AGENCY, smi.MER_SYS_ID,smi.MCC, smi.REGION,
+		smi.BILL_CYCLE, smi.STATUS, smi.CREATE_TIME, smi.REMARK,smi.RESERVED,
+		smi.FROZEN_SUM,smi.FROZEN_SUM_MAX, smi.LINE_NUM, smi.OPEN_BANK
+		from SUB_MER_INFO smi 
+		left join SUB_MER_TRANS smt on smi.SUB_MER_ID=smt.SUB_MER_ID
+		where smi.SUB_MER_ID=#{subMerId}
+	</select>
+	<!-- 查询所有子商户信息   -->
+	<select id="selectSubMerchantInfo"  resultMap="subMerInfo" parameterType="java.util.Map">
+		select distinct sub.SUB_MER_ID,sub.SUB_MER_NAME,sub.ORGANIZATION_CODE, sub.MER_KIND,sub.CHECKPAY_STATUS,   
+		sub.SETT_ACCOUNT_NAME, sub.SETT_ACCOUNT_NO,sub.SETT_AGENCY,sub.MER_SYS_ID,sub.MCC, 
+		sub.STATUS,sub.CREATE_TIME,sub.REMARK,mer.MER_NAME,sub.G_ACC_STATUS,smt.T0_STATUS  
+		from SUB_MER_INFO sub 
+		left join MER_INFO mer  on mer.MER_SYS_ID=sub.MER_SYS_ID 
+		left join SUB_MER_TRANS smt on sub.SUB_MER_ID=smt.SUB_MER_ID  where sub.MER_SYS_ID !='-1'   
+								<!-- ID -->
+		<if test="subMerInfo.subMerId!=null and subMerInfo.subMerId!=''">
+			AND sub.SUB_MER_ID=#{subMerInfo.subMerId}   
+		</if>					<!-- 子商户名称 -->
+		<if test="subMerInfo.subMerName!=null and subMerInfo.subMerName!=''">
+			AND sub.SUB_MER_NAME like '%${subMerInfo.subMerName}%' 
+		</if>					<!-- 结算账户号 -->
+		<if test="subMerInfo.settAccountNo!=null and subMerInfo.settAccountNo!=''">    
+			AND sub.SETT_ACCOUNT_NO=#{subMerInfo.settAccountNo}
+		</if>					<!-- 入网时间 -->
+		<if test="subMerInfo.createTime!=null and subMerInfo.createTime!=''">    
+			AND sub.CREATE_TIME>=#{subMerInfo.createTime}   
+			AND sub.CREATE_TIME&lt;=#{subMerInfo.maxTime}    
+		</if>					<!-- 机构商户号 -->
+		<if test="subMerInfo.merSysId!=null and subMerInfo.merSysId!=''">    
+			AND sub.MER_SYS_ID=#{subMerInfo.merSysId}    
+		</if>					<!-- 子商户状态 -->
+		<if test="subMerInfo.status!=-1 and subMerInfo.status!=null">    
+			AND sub.STATUS=#{subMerInfo.status}    
+		</if>					<!-- 手机号 -->
+		<if test="subMerInfo.contactorPhone!=null and subMerInfo.contactorPhone!=''">
+			AND sub.CONTACTOR_PHONE=#{subMerInfo.contactorPhone}
+		</if>                   <!-- 身份证号 -->
+		<if test="subMerInfo.legalIdcard!=null and subMerInfo.legalIdcard!=''">
+			AND sub.LEGAL_IDCARD=#{subMerInfo.legalIdcard}
+		</if>					<!-- 终端号 -->
+		<if test="subMerInfo.tsn!=null and subMerInfo.tsn!=''">
+			AND sub.SUB_MER_ID in (select smt.SUB_MER_ID from SUB_MER_TERMINAL smt 
+			where smt.TSN=#{subMerInfo.tsn} )    
+		</if>					<!-- 终端类型 -->
+		<if test="subMerInfo.subMerTerminalType!=null and subMerInfo.subMerTerminalType!='-1'">
+			AND sub.SUB_MER_ID in (select smt.SUB_MER_ID from SUB_MER_TERMINAL smt 
+			where smt.CATEGORY=#{subMerInfo.subMerTerminalType})      group by sub.SUB_MER_ID
+		</if>
+		  order by CREATE_TIME desc  limit #{page}  , #{pageSize}
+	</select>
+								<!-- 查询信息数量 -->
+	<select id="selectSubMerchantInfoCount" resultType="int" parameterType="java.util.Map">
+		select count(1)
+		from SUB_MER_INFO sub left join MER_INFO mer on mer.MER_SYS_ID=sub.MER_SYS_ID  
+		where sub.MER_SYS_ID !='-1'   
+								<!-- ID -->
+		<if test="subMerInfo.subMerId!=null and subMerInfo.subMerId!=''">
+			AND sub.SUB_MER_ID=#{subMerInfo.subMerId}   
+		</if>					<!-- 子商户名称 -->
+		<if test="subMerInfo.subMerName!=null and subMerInfo.subMerName!=''">
+			AND sub.SUB_MER_NAME like '%${subMerInfo.subMerName}%' 
+		</if>					<!-- 结算账户号 -->
+		<if test="subMerInfo.settAccountNo!=null and subMerInfo.settAccountNo!=''">    
+			AND sub.SETT_ACCOUNT_NO=#{subMerInfo.settAccountNo}
+		</if>					<!-- 入网时间 -->
+		<if test="subMerInfo.createTime!=null and subMerInfo.createTime!=''">    
+			AND sub.CREATE_TIME>=#{subMerInfo.createTime}   
+			AND sub.CREATE_TIME&lt;=#{subMerInfo.maxTime}    
+		</if>					<!-- 机构商户号 -->
+		<if test="subMerInfo.merSysId!=null and subMerInfo.merSysId!=''">    
+			AND sub.MER_SYS_ID=#{subMerInfo.merSysId}    
+		</if>					<!-- 子商户状态 -->
+		<if test="subMerInfo.status!=-1 and subMerInfo.status!=null">    
+			AND sub.STATUS=#{subMerInfo.status}    
+		</if>					<!-- 手机号 -->
+		<if test="subMerInfo.contactorPhone!=null and subMerInfo.contactorPhone!=''">
+			AND sub.CONTACTOR_PHONE=#{subMerInfo.contactorPhone}
+		</if>                   <!-- 身份证号 -->
+		<if test="subMerInfo.legalIdcard!=null and subMerInfo.legalIdcard!=''">
+			AND sub.LEGAL_IDCARD=#{subMerInfo.legalIdcard}
+		</if>					<!-- 终端号 -->
+		<if test="subMerInfo.tsn!=null and subMerInfo.tsn!=''">
+			AND sub.SUB_MER_ID in (select smt.SUB_MER_ID from SUB_MER_TERMINAL smt 
+			where smt.TSN=#{subMerInfo.tsn} )    
+		</if>					<!-- 终端类型 -->
+		<if test="subMerInfo.subMerTerminalType!=null and subMerInfo.subMerTerminalType!='-1'">
+			AND sub.SUB_MER_ID in (select smt.SUB_MER_ID from SUB_MER_TERMINAL smt 
+			where smt.CATEGORY=#{subMerInfo.subMerTerminalType})      group by sub.SUB_MER_ID
+		</if>
+	</select>
+	<!-- 修改子商户信息 -->
+	<update id="updateSubMerInfo" parameterType="com.bypay.domain.SubMerInfo">
+   		UPDATE SUB_MER_INFO SET  SUB_MER_ID=#{subMerId}
+   		<if test="subMerName!=null and subMerName!=''">
+   		,SUB_MER_NAME=#{subMerName}
+   		</if><if test="regNo!=null and regNo!=''">
+   		, REG_NO=#{regNo}
+   		</if><if test="taxNo!=null and taxNo!=''">
+   		, TAX_NO=#{taxNo}
+   		</if><if test="regAddr!=null and regAddr!=''">
+   		, REG_ADDR=#{regAddr}
+   		</if><if test="legalPerson!=null and legalPerson!=''">
+   		, LEGAL_PERSON=#{legalPerson}
+   		</if><if test="legalIdcard!=null and legalIdcard!=''">
+   		, LEGAL_IDCARD=#{legalIdcard}
+   		</if><if test="contactorPhone!=null and contactorPhone!=''">
+   		,CONTACTOR_PHONE=#{contactorPhone}
+   		</if><if test="contactor!=null and contactor!=''">
+   		,CONTACTOR=#{contactor}
+   		</if><if test="settAccountName!=null and settAccountName!=''">
+   		,SETT_ACCOUNT_NAME=#{settAccountName}
+   		</if><if test="settAccountNo!=null and settAccountNo!=''">
+   		,SETT_ACCOUNT_NO=#{settAccountNo}
+   		</if><if test="settAccType!=null and settAccType!=''">
+   		,SETT_ACC_TYPE=#{settAccType}
+   		</if><if test="settAgency!=null and settAgency!=''">
+   		,SETT_AGENCY=#{settAgency}
+   		</if><if test="billCycle!=null and billCycle!=''">
+   		,BILL_CYCLE=#{billCycle}
+   		</if><if test="billStatus!=null and billStatus!=''">
+   		,BILL_STATUS=#{billStatus}
+   		</if><if test="mcc!=null and mcc!=''">
+   		,MCC=#{mcc}
+   		</if><if test="region!=null and region!=''">
+   		,REGION=#{region}
+   		</if><if test="merSysId!=null and merSysId != ''">
+   		,MER_SYS_ID=#{merSysId}
+   		</if>
+   		<if test="frozenSum !=null and frozenSum != ''">
+   		,FROZEN_SUM = FROZEN_SUM + #{frozenSum}
+   		</if>
+   		<if test="frozenSumMax !=null and frozenSumMax != ''">
+   		,FROZEN_SUM_MAX = FROZEN_SUM_MAX + #{frozenSumMax}
+   		</if>
+   		<if test="agentIdL1 !=null and agentIdL1 != ''">
+   		,AGENT_ID_L1=#{agentIdL1}
+   		</if>
+   		<if test="agentIdL2 !=null and agentIdL2 != ''">
+   		,AGENT_ID_L2=#{agentIdL2}
+   		</if>
+   		<if test="agentIdL3 !=null and agentIdL3 != ''">
+   		,AGENT_ID_L3=#{agentIdL3}
+   		</if>
+   		<if test="agentIdL4 !=null and agentIdL4 != ''">
+   		,AGENT_ID_L4=#{agentIdL4}
+   		</if>
+   		<if test="lineNum !=null and lineNum != ''">
+   		,LINE_NUM=#{lineNum}
+   		</if>
+   		<if test="openBank !=null and openBank != ''">
+   		,OPEN_BANK=#{openBank}
+   		</if>
+   		<if test="gAccStatus !=null and gAccStatus != ''">
+   		,G_ACC_STATUS=#{gAccStatus}
+   		</if>
+   		
+	    WHERE SUB_MER_ID=#{subMerId}
+	</update>
+	
+	<!-- 修改子商户信息 -->
+	<update id="updateSubMerInfoReg" parameterType="com.bypay.domain.SubMerInfo">
+   		UPDATE SUB_MER_INFO SET  SUB_MER_ID=#{subMerId}
+   		<if test="subMerName!=null and subMerName!=''">
+   		,SUB_MER_NAME=#{subMerName}
+   		</if><if test="regNo!=null and regNo!=''">
+   		, REG_NO=#{regNo}
+   		</if><if test="taxNo!=null and taxNo!=''">
+   		, TAX_NO=#{taxNo}
+   		</if><if test="regAddr!=null and regAddr!=''">
+   		, REG_ADDR=#{regAddr}
+   		</if><if test="legalPerson!=null and legalPerson!=''">
+   		, LEGAL_PERSON=#{legalPerson}
+   		</if><if test="legalIdcard!=null and legalIdcard!=''">
+   		, LEGAL_IDCARD=#{legalIdcard}
+   		</if><if test="contactorPhone!=null and contactorPhone!=''">
+   		,CONTACTOR_PHONE=#{contactorPhone}
+   		</if><if test="contactor!=null and contactor!=''">
+   		,CONTACTOR=#{contactor}
+   		</if><if test="settAccountName!=null and settAccountName!=''">
+   		,SETT_ACCOUNT_NAME=#{settAccountName}
+   		</if><if test="settAccountNo!=null and settAccountNo!=''">
+   		,SETT_ACCOUNT_NO=#{settAccountNo}
+   		</if><if test="settAccType!=null and settAccType!=''">
+   		,SETT_ACC_TYPE=#{settAccType}
+   		</if><if test="settAgency!=null and settAgency!=''">
+   		,SETT_AGENCY=#{settAgency}
+   		</if><if test="billCycle!=null and billCycle!=''">
+   		,BILL_CYCLE=#{billCycle}
+   		</if><if test="billStatus!=null and billStatus!=''">
+   		,BILL_STATUS=#{billStatus}
+   		</if><if test="mcc!=null and mcc!=''">
+   		,MCC=#{mcc}
+   		</if><if test="region!=null and region!=''">
+   		,REGION=#{region}
+   		</if><if test="merSysId!=null and merSysId != ''">
+   		,MER_SYS_ID=#{merSysId}
+   		</if>
+   		<if test="frozenSum !=null and frozenSum != ''">
+   		,FROZEN_SUM = FROZEN_SUM + #{frozenSum}
+   		</if>
+   		<if test="frozenSumMax !=null and frozenSumMax != ''">
+   		,FROZEN_SUM_MAX = FROZEN_SUM_MAX + #{frozenSumMax}
+   		</if>
+   		<if test="agentIdL1 !=null and agentIdL1 != ''">
+   		,AGENT_ID_L1=#{agentIdL1}
+   		</if>
+   		<if test="agentIdL2 !=null and agentIdL2 != ''">
+   		,AGENT_ID_L2=#{agentIdL2}
+   		</if>
+   		<if test="agentIdL3 !=null and agentIdL3 != ''">
+   		,AGENT_ID_L3=#{agentIdL3}
+   		</if>
+   		<if test="agentIdL4 !=null and agentIdL4 != ''">
+   		,AGENT_ID_L4=#{agentIdL4}
+   		</if>
+   		<if test="lineNum !=null and lineNum != ''">
+   		,LINE_NUM=#{lineNum}
+   		</if>
+   		<if test="openBank !=null and openBank != ''">
+   		,OPEN_BANK=#{openBank}
+   		</if>
+   		<if test="status !=null and status != ''">
+   		,STATUS=#{status}
+   		</if>
+	    WHERE SUB_MER_ID=#{oldSubMerId}
+	</update>
+	
+	
+	<!-- 修改子商户状态信息 -->
+	<update id="updateStatus" parameterType="com.bypay.domain.SubMerInfo">
+		UPDATE SUB_MER_INFO  SET STATUS=#{status},REMARK=#{remark}
+	    WHERE SUB_MER_ID=#{subMerId}
+	</update>
+	<!-- 修改指定子商户的交易费率信息 -->
+	<update id="updateSubMerInfoSubMerRate" parameterType="com.bypay.domain.AgenctInfo">
+		UPDATE SUB_MER_RATE SET TRANS_HIGHEST_FEE=#{transHighestFee},TRANS_RATE=#{teransRate}
+	    WHERE SUB_MER_ID=#{subMerId}
+	</update>
+	<!-- 实人认证 -->
+	
+	<!-- 查询所有未上线的子商户信息   -->
+	<select id="selectSubMerchantNoOnline"  resultMap="subMerInfo" parameterType="java.util.Map">
+		select smi.SUB_MER_ID,smi.SUB_MER_NAME,smi.STATUS,smi.CREATE_TIME,smi.SETT_ACCOUNT_NAME,
+		smi.SETT_ACCOUNT_NO,mi.MER_NAME,mi.MER_SYS_ID,SMT.AUTH_STATUS,SMT.T0_STATUS
+		from SUB_MER_INFO  smi
+		left join MER_INFO mi 
+		on smi.MER_SYS_ID=mi.MER_SYS_ID
+		left join SUB_MER_TRANS SMT
+		ON smi.SUB_MER_ID = SMT.SUB_MER_ID
+		where smi.STATUS=#{subMerInfo.status}
+		order by smi.CREATE_TIME DESC
+		limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectSubMerchantNoOnlineCount"  resultType="int" parameterType="java.util.Map">
+		select COUNT(1)
+		from SUB_MER_INFO  smi
+		left join MER_INFO mi 
+		on smi.MER_SYS_ID=mi.MER_SYS_ID
+		left join SUB_MER_TRANS SMT
+		ON smi.SUB_MER_ID = SMT.SUB_MER_ID
+		where smi.STATUS=#{subMerInfo.status}
+		order by smi.CREATE_TIME DESC
+	</select>
+	<!-- 修改同一个代理商的子商户状态 -->
+	<update id="updateSubMerInfoSTATUS" parameterType="com.bypay.domain.SubMerInfo">
+   		UPDATE SUB_MER_INFO  SET STATUS=#{status} WHERE AGENT_ID_L1=#{agentIdL1} or AGENT_ID_L2=#{agentIdL2}
+	</update>
+	
+	<!-- 添加子商户信息 -->
+	<insert id="insertSubMerInfo"  parameterType="com.bypay.domain.SubMerInfo"> 
+		INSERT INTO SUB_MER_INFO(SUB_MER_ID, SUB_MER_NAME, SHORT_NAME, LEGAL_PERSON, LEGAL_IDCARD,  
+		REG_NO, TAX_NO, ORGANIZATION_CODE, SETT_ACC_TYPE, SETT_ACCOUNT_NAME, SETT_ACCOUNT_NO, 
+		SETT_AGENCY, STATUS, MER_SYS_ID, MCC, REGION, CREATE_TIME, AGENT_ID_L1, AGENT_ID_L2,AGENT_ID_L3,AGENT_ID_L4,
+		BILL_CYCLE, BILL_STATUS, MER_KIND, CONTACTOR, CONTACTOR_PHONE, LINE_NUM, OPEN_BANK, GRADE, 
+		GRADE_STATUS,REG_ADDR) 
+    	VALUES(#{subMerId}, #{subMerName}, #{shortName}, #{legalPerson}, #{legalIdcard}, 
+    	#{regNo}, #{taxNo}, #{organizationCode}, #{settAccType}, #{settAccountName}, #{settAccountNo}, 
+    	#{settAgency}, #{status}, #{merSysId}, #{mcc}, #{region}, #{createTime}, #{agentIdL1}, 
+    	#{agentIdL2},#{agentIdL3},#{agentIdL4}, #{billCycle}, #{billStatus}, #{merKind}, #{contactor}, #{contactorPhone}, 
+    	#{lineNum}, #{openBank},#{grade}, #{gradeStatus},#{regAddr})
+    	 <selectKey resultType="java.lang.Long" keyProperty="subMerIds">
+       		 SELECT LAST_INSERT_ID() as subMerIds
+   		 </selectKey>
+	</insert> 
+	
+	<!-- 收款功能开通 -->
+	<update id="updateSubMerInfoByOpenCur" parameterType="com.bypay.domain.SubMerInfo">
+   		UPDATE SUB_MER_INFO SET SETT_ACCOUNT_NAME = #{settAccountName},SETT_ACCOUNT_NO = #{settAccountNo}, SETT_AGENCY = #{settAgency}
+   		,SUB_MER_NAME=#{subMerName} 
+		WHERE SUB_MER_ID = #{subMerId} 
+	</update>
+	
+	
+	<!-- 查询子商户信息 -->
+	<select id="getSubMerInfoById" parameterType="java.lang.String" resultMap="subMerInfo">
+		SELECT SMI.*, SMT.AUTH_STATUS FROM SUB_MER_INFO SMI
+		left join SUB_MER_TRANS SMT on SMI.SUB_MER_ID = SMT.SUB_MER_ID
+		WHERE SMI.SUB_MER_ID = #{subMerId}
+	</select>
+	
+	<!-- 根据终端号查询子商户 -->
+	<select id="getSubMerInfoByTerminalId" parameterType="com.bypay.domain.SubMerTerminal" resultMap="subMerInfo">
+		SELECT SMI.SUB_MER_ID,SMI.SUB_MER_NAME
+		FROM SUB_MER_INFO SMI 
+		LEFT JOIN SUB_MER_TERMINAL SMT ON SMI.SUB_MER_ID = SMT.SUB_MER_ID
+		WHERE SMT.TSN = #{tsn} 
+	</select>
+	<!-- 修改指定子商户的联系人和身份证 -->
+	<update id="updateSubMerInfoWithRest" parameterType="com.bypay.domain.SubMerInfo">
+		UPDATE SUB_MER_INFO SET LEGAL_IDCARD=#{legalIdcard},CONTACTOR_PHONE=#{contactorPhone} WHERE SUB_MER_ID=#{subMerId}
+	</update>
+	<!-- 清空商户的法人信息 -->
+	<update id="updateLegalInfo" parameterType="com.bypay.domain.SubMerInfo">
+		update SUB_MER_INFO set LEGAL_PERSON = '',LEGAL_IDCARD = '', STATUS=5, REMARK=#{remark}
+		where SUB_MER_ID = #{subMerId}
+	</update>
+	<select id="selectLineNum" parameterType="java.util.Map" resultMap="subMerInfo">
+		SELECT lineNum as LINE_NUM, openBank as OPEN_BANK FROM line_num WHERE BANKNAME = #{bankName}
+		AND PROVINCE LIKE #{province}
+		AND CITY LIKE #{city}
+	</select>
+	
+	<update id="updateCheckSub" parameterType="java.lang.String">
+		update SUB_MER_INFO set CHECKPAY_STATUS = 1 where SUB_MER_ID = #{subMerId}
+	</update>
+	
+	<select id="findByPhone" resultMap="subMerInfo" parameterType="com.bypay.domain.SubMerInfo">
+		SELECT * FROM SUB_MER_INFO WHERE CONTACTOR_PHONE = #{contactorPhone}  and STATUS='2'
+	</select>
+	
+	<update id="updateMobileFrom" parameterType="com.bypay.domain.SubMerInfo">
+		UPDATE SUB_MER_INFO SET PHONEPROVINCE=#{phoneProvince},PHONECITY=#{phoneCity} WHERE CONTACTOR_PHONE = #{contactorPhone}
+	</update>
+	
+</mapper>

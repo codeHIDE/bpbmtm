@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.OrderProfit">
+	<resultMap id="orderProfit" type="com.bypay.domain.OrderProfit">
+		<result property="id" column="ID" />
+		<result property="orderId" column="ORDER_ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="merProfit" column="MER_PROFIT" />
+		<result property="merRate" column="MER_RATE" />
+		<result property="agentL1Id" column="AGENT_L1_ID" />
+		<result property="agent1Profit" column="AGENT1_PROFIT" />
+		<result property="agentL2Id" column="AGENT_L2_ID" />
+		<result property="agent2Profit" column="AGENT2_PROFIT" />
+		<result property="platId" column="PLAT_ID" />
+		<result property="platProfit" column="PLAT_PROFIT" />
+		<result property="bypayProfit" column="BYPAY_PROFIT" />
+		<result property="tractFee" column="TRACT_FEE" />
+		<result property="tractBypayProfit" column="TRACT_BYPAY_PROFIT" />
+		<result property="tractAcqbankProfit" column="TRACT_ACQBANK_PROFIT" />
+		<result property="tractCost" column="TRACT_COST" />
+		<result property="reserved" column="RESERVED" />
+	</resultMap>
+
+	<!-- 根据订单号查询订单信息 -->
+	<select id="selectOrderProfitByOrderId" parameterType="java.lang.String" resultMap="orderProfit">
+		select * from ORDER_PROFIT where ORDER_ID = #{orderId}
+	</select>
+</mapper>
+

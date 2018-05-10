@@ -1,0 +1,349 @@
+package com.bypay.domain;
+
+public class AgenctInfo {
+	private String agentId; // AGENT_ID BIGINT 11 否 自增长
+	private String agentName; // AGENT_NAME VARCHAR 60 否 代理商名
+	private String regNo; // REG_NO VARCHAR 20 否 工商注册号
+	private String taxNo; // TAX_NO VARCHAR 20 否 税务登记号
+	private String regAddr; // REG_ADDR VARCHAR 100 是 工商注册地址
+	private String region; // REGION VARCHAR 5 否 地区码
+	private String settAccountName; // SETT_ACCOUNT_NAME VARCHAR 60 否 结算账户名
+	private String settAccountNo; // SETT_ACCOUNT_NO VARCHAR 30 否 结算账户号
+	private String settAccType; // SETT_ACCOUNT_TYPE 结算账户类型
+	private String settAgency; // SETT_AGENCY VARCHAR 30 否 结算机构
+	private String merSysId; // MER_SYS_ID BIGINT 11 否 机构商号(外键)
+	private String level; // LEVEL VARCHAR 2 否 代理商级别
+	private String superAgentId; // SUPER_AGENT_ID BIGINT 11 是 上级代理商号
+	private String agentLv2;//二级代理商号
+	private String agentLv3;//三级代理商号
+	private String agentLv4;//三级代理商号
+	private String agentLv5;//三级代理商号
+	private String agentLv6;//三级代理商号
+	private String agentLv7;//三级代理商号
+	private String agentLv8;//三级代理商号
+	private String agentLv9;//三级代理商号
+	private String billCycle; // BILL_CYCLE 清分周期 // 1|D 1|M
+	private String TerminalType; // TERMINAL_TYPE VARCHAR 30 否 终端产品类型表 //
+									// 多项集合以’|’分隔
+	private String busType; // BUS_TYPE VARCHAR 30 否 交易类型表 // 多项集合以’|’分隔
+	private String status; // STATUS VARCHAR 1 否 状态 // 0 未使用 1 正在使用 2 暂停
+	private String createTime; // CREATE_TIME 创建时间
+	private String logo; // Logo图,用于管理平台显示
+	private String color; // 色调,用于管理平台显示
+	private String remark; // REMARK 备注
+	private String reserved; // RESERVED 扩展
+	private String isIntoPieces;// 是否暂停进件 0.否 1是
+
+	private String agentRate1;// 代理商费率 扣率
+	private String agentRate2;// 代理商费率 封顶
+	private String agentHighestFee;// 代理商封顶值
+	private String agentProfitRate;// 代理商分润比
+	private String agentD1Rate;
+	private String agentT0Rate;
+	private String agentRateNoTop;
+
+	public String getAgentLv4() {
+        return agentLv4;
+    }
+
+    public void setAgentLv4(String agentLv4) {
+        this.agentLv4 = agentLv4;
+    }
+
+    public String getAgentLv5() {
+        return agentLv5;
+    }
+
+    public void setAgentLv5(String agentLv5) {
+        this.agentLv5 = agentLv5;
+    }
+
+    public String getAgentLv6() {
+        return agentLv6;
+    }
+
+    public void setAgentLv6(String agentLv6) {
+        this.agentLv6 = agentLv6;
+    }
+
+    public String getAgentLv7() {
+        return agentLv7;
+    }
+
+    public void setAgentLv7(String agentLv7) {
+        this.agentLv7 = agentLv7;
+    }
+
+    public String getAgentLv8() {
+        return agentLv8;
+    }
+
+    public void setAgentLv8(String agentLv8) {
+        this.agentLv8 = agentLv8;
+    }
+
+    public String getAgentLv9() {
+        return agentLv9;
+    }
+
+    public void setAgentLv9(String agentLv9) {
+        this.agentLv9 = agentLv9;
+    }
+
+    public String getIsIntoPieces() {
+		return isIntoPieces;
+	}
+
+	public void setIsIntoPieces(String isIntoPieces) {
+		this.isIntoPieces = isIntoPieces;
+	}
+
+	public String getAgentRate1() {
+		return agentRate1;
+	}
+
+	public void setAgentRate1(String agentRate1) {
+		this.agentRate1 = agentRate1;
+	}
+
+	public String getAgentRate2() {
+		return agentRate2;
+	}
+
+	public void setAgentRate2(String agentRate2) {
+		this.agentRate2 = agentRate2;
+	}
+
+	public String getAgentHighestFee() {
+		return agentHighestFee;
+	}
+
+	public void setAgentHighestFee(String agentHighestFee) {
+		this.agentHighestFee = agentHighestFee;
+	}
+
+	public String getAgentProfitRate() {
+		return agentProfitRate;
+	}
+
+	public void setAgentProfitRate(String agentProfitRate) {
+		this.agentProfitRate = agentProfitRate;
+	}
+
+	public String getLogo() {
+		return logo;
+	}
+
+	public void setLogo(String logo) {
+		this.logo = logo;
+	}
+
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
+
+	public String getAgentId() {
+		return agentId;
+	}
+
+	public void setAgentId(String agentId) {
+		this.agentId = agentId;
+	}
+
+	public String getAgentName() {
+		return agentName;
+	}
+
+	public void setAgentName(String agentName) {
+		this.agentName = agentName;
+	}
+
+	public String getRegNo() {
+		return regNo;
+	}
+
+	public void setRegNo(String regNo) {
+		this.regNo = regNo;
+	}
+
+	public String getTaxNo() {
+		return taxNo;
+	}
+
+	public void setTaxNo(String taxNo) {
+		this.taxNo = taxNo;
+	}
+
+	public String getRegAddr() {
+		return regAddr;
+	}
+
+	public void setRegAddr(String regAddr) {
+		this.regAddr = regAddr;
+	}
+
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	public String getSettAccountName() {
+		return settAccountName;
+	}
+
+	public void setSettAccountName(String settAccountName) {
+		this.settAccountName = settAccountName;
+	}
+
+	public String getSettAccountNo() {
+		return settAccountNo;
+	}
+
+	public void setSettAccountNo(String settAccountNo) {
+		this.settAccountNo = settAccountNo;
+	}
+
+	public String getSettAgency() {
+		return settAgency;
+	}
+
+	public void setSettAgency(String settAgency) {
+		this.settAgency = settAgency;
+	}
+
+	public String getMerSysId() {
+		return merSysId;
+	}
+
+	public void setMerSysId(String merSysId) {
+		this.merSysId = merSysId;
+	}
+
+	public String getLevel() {
+		return level;
+	}
+
+	public void setLevel(String level) {
+		this.level = level;
+	}
+
+	public String getSuperAgentId() {
+		return superAgentId;
+	}
+
+	public void setSuperAgentId(String superAgentId) {
+		this.superAgentId = superAgentId;
+	}
+
+	public String getBillCycle() {
+		return billCycle;
+	}
+
+	public void setBillCycle(String billCycle) {
+		this.billCycle = billCycle;
+	}
+
+	public String getTerminalType() {
+		return TerminalType;
+	}
+
+	public void setTerminalType(String terminalType) {
+		TerminalType = terminalType;
+	}
+
+	public String getBusType() {
+		return busType;
+	}
+
+	public void setBusType(String busType) {
+		this.busType = busType;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public String getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(String createTime) {
+		this.createTime = createTime;
+	}
+
+	public String getRemark() {
+		return remark;
+	}
+
+	public void setRemark(String remark) {
+		this.remark = remark;
+	}
+
+	public String getReserved() {
+		return reserved;
+	}
+
+	public void setReserved(String reserved) {
+		this.reserved = reserved;
+	}
+
+	public String getSettAccType() {
+		return settAccType;
+	}
+
+	public void setSettAccType(String settAccType) {
+		this.settAccType = settAccType;
+	}
+
+	public String getAgentD1Rate() {
+		return agentD1Rate;
+	}
+
+	public void setAgentD1Rate(String agentD1Rate) {
+		this.agentD1Rate = agentD1Rate;
+	}
+
+	public String getAgentT0Rate() {
+		return agentT0Rate;
+	}
+
+	public void setAgentT0Rate(String agentT0Rate) {
+		this.agentT0Rate = agentT0Rate;
+	}
+
+	public String getAgentRateNoTop() {
+		return agentRateNoTop;
+	}
+
+	public void setAgentRateNoTop(String agentRateNoTop) {
+		this.agentRateNoTop = agentRateNoTop;
+	}
+
+	public String getAgentLv2() {
+		return agentLv2;
+	}
+
+	public void setAgentLv2(String agentLv2) {
+		this.agentLv2 = agentLv2;
+	}
+
+	public String getAgentLv3() {
+		return agentLv3;
+	}
+
+	public void setAgentLv3(String agentLv3) {
+		this.agentLv3 = agentLv3;
+	}
+	
+}

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd" updateCheck="false">
+    <!--
+     | Please see http://ehcache.sourceforge.net/documentation/configuration.html for
+     | detailed information on how to configurigure caches in this file
+     +-->
+    <!-- Location of persistent caches on disk -->
+    <diskStore path="java.io.tmpdir/myApp" />
+	<defaultCache
+            maxElementsInMemory="10000"
+            eternal="true"
+            timeToIdleSeconds="120"
+            timeToLiveSeconds="120"
+            overflowToDisk="true"
+            diskSpoolBufferSizeMB="5"
+            maxElementsOnDisk="10000000"
+            diskPersistent="true"
+            diskExpiryThreadIntervalSeconds="120"
+            memoryStoreEvictionPolicy="LRU"
+            />
+
+    <cache name="selectAccountByAccountNameCache"
+            maxElementsInMemory="10000"
+            eternal="true"
+            timeToIdleSeconds="1200"
+            timeToLiveSeconds="1200"
+            overflowToDisk="true"
+            diskSpoolBufferSizeMB="1"
+            maxElementsOnDisk="10000000"
+            diskPersistent="true"
+            diskExpiryThreadIntervalSeconds="120"
+            memoryStoreEvictionPolicy="LRU"
+            />
+</ehcache>

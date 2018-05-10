@@ -1,0 +1,269 @@
+package com.bypay.service.impl;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import javax.inject.Inject;
+import javax.xml.bind.JAXBException;
+
+import org.springframework.stereotype.Service;
+
+import sun.misc.BASE64Decoder;
+
+import com.bypay.dao.OrderInfoDao;
+import com.bypay.dao.OrderRiskDao;
+import com.bypay.domain.OrderInfo;
+import com.bypay.domain.OrderRisk;
+import com.bypay.domain.clientTool.Refund;
+import com.bypay.service.OrderInfoService;
+import com.bypay.util.DateUtil;
+import com.bypay.util.RefundUtil;
+import com.bypay.util.RemoteAccessor;
+import com.bypay.util.XmlUtilnew;
+import com.richerpay.core.model.CoreTransInfo;
+
+@Service("orderInfoService")
+public class OrderInfoServiceImpl implements OrderInfoService {
+	@Inject
+	private OrderInfoDao orderInfoDao;
+	@Inject
+	private OrderRiskDao orderRiskDao;
+	@Inject
+	private XmlUtilnew xmlUtilnew;
+
+	ResourceBundle rb = ResourceBundle.getBundle("com/bypay/config/bmtmUtil",
+			Locale.getDefault());
+
+	// 查询所有 OrderInfo 历史交易查询
+	@Override
+	public List<OrderInfo> selecrOrderHistoryList(Map map) {
+		return orderInfoDao.selecrOrderHistoryList(map);
+	}
+
+	// 查询历史交易的条数分页用
+	@Override
+	public Map selectOrderHistoryCount(Map map) {
+		return orderInfoDao.selectOrderHistoryCount(map);
+	}
+
+	// 查询当天交易信息
+	@Override
+	public List<OrderInfo> selectOrderTheDate(Map map) {
+		return orderInfoDao.selectOrderTheDate(map);
+	}
+
+	// 查询当日交易的条数分页用
+	@Override
+	public Map selectOrderTheDateCount(Map map) {
+		return orderInfoDao.selectOrderTheDateCount(map);
+	}
+	@Override
+	public List<OrderInfo> selectOrderTheDateRate(Map map) {
+		return orderInfoDao.selectOrderTheDateRate(map);
+	}
+	
+	// 查询当日交易的条数分页用
+	@Override
+	public Map selectOrderTheDateCountRate(Map map) {
+		return orderInfoDao.selectOrderTheDateCountRate(map);
+	}
+
+	// 转账信息查询
+	@Override
+	public List<OrderInfo> selectTransfer(Map map) {
+		return orderInfoDao.selectTransfer(map);
+	}
+
+	// 查询转账信息的条数
+	@Override
+	public Map selectTransferCount(Map map) {
+		return orderInfoDao.selectTransferCount(map);
+	}
+
+	/**
+	 * 应用交易查询的条数
+	 */
+	@Override
+	public Map selectApplyCount(Map map) {
+		return orderInfoDao.selectApplyCount(map);
+	}
+
+	/**
+	 * 应用交易查询
+	 */
+	@Override
+	public List<OrderInfo> selectApplyList(Map map) {
+		return orderInfoDao.selectApplyList(map);
+	}
+
+	/**
+	 * 应用详情
+	 */
+	@Override
+	public OrderInfo selectOrderDetail(Map map) {
+		return orderInfoDao.selectOrderDetail(map);
+	}
+
+	// private String testEncode(String xml) throws Exception{
+	// String
+	// publicKey="MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC11dhz/urKmlEU7hlzd+Fa+yYpLpJ7Fq9byk5/SjaVvlkfbU+f3tBCklP1M2r2avAAG5fh680xwdVpGuuaJBp7JNj1kIAJOPZ8EQLR+wzLqzaEDx0MCnHGfyqtOKN6eJWm6H5wUxBrAzPXqjqjJVVT4vZIAYwFlOaHRKfFucNP0QIDAQAB";
+	// BASE64Encoder encoder = new BASE64Encoder();
+	// BASE64Decoder decoder = new BASE64Decoder();
+	// String first = encoder.encodeBuffer("1000000001".getBytes());
+	// String second =
+	// encoder.encodeBuffer(RSACoder.encryptByPublicKey(MD5.getHashString("123456").getBytes(),
+	// decoder.decodeBuffer(publicKey)));
+	// String third =
+	// encoder.encodeBuffer(DesUtil.encrypt(xml.getBytes("utf-8"),
+	// MD5.getHashString("123456").getBytes()));
+	// String reqXml = first + "|" + second + "|" + third;
+	// System.out.println("reqXml="+reqXml);
+	// return reqXml;
+	// }
+	// private String decodeForTerminal(String resp) throws Exception {
+	// BASE64Decoder decoder =new BASE64Decoder();
+	// BASE64Encoder encoder = new BASE64Encoder();
+	// String desKey=MD5.getHashString("123456");//平台公钥
+	// //拆分密文体
+	// //String[] list = StringHandler.split(trans.getBody(),"\\|");
+	// String[] list = resp.split("\\|");
+	// System.out.println(list.length);
+	// if (list.length!=3) {
+	//			
+	// }
+	// String respFlag=list[0];
+	// String returnXml="";
+	// if("1".equals(respFlag)){
+	// returnXml = new String(DesUtil.decrypt(decoder.decodeBuffer(list[1]) ,
+	// desKey.getBytes()),"UTF-8");
+	//			
+	// System.out.println("platform return xml : " + returnXml);
+	// //sendPlatformResult.setRespCode(getRespCodeOfReturnXml(returnXml));
+	// //sendPlatformResult.setBean( XmlUtil.XmlToObj(returnXml,
+	// object.getClass()));
+	//			
+	// }else if("0".equals(respFlag)){
+	// String errorCode=new String(decoder.decodeBuffer(list[1]),"UTF-8");
+	// String errorDesc=new String(decoder.decodeBuffer(list[2]),"UTF-8");
+	// System.out.println("错误代码:"+errorCode+",错误描述 : " + errorDesc);
+	// }
+	//		 
+	// return null;
+	// }
+	// public static void main(String[] args) throws Exception {
+	// String str =
+	// "1|QzHOE0tRePMeHr3jcpSH5dzW5Vz6b8UZgkVDXWIVoJaTJawDx7kIt7589rBDb6VHIGHLbjGwnQdQVFvaoF9A+IS5Qtz21mKOjBig+3Fluu3Dxio3Dy0HqF5rU9esH1dWlWuV0OdhW9Z3KJuHgW8wQx6Hxs8XXJ0yRb5u21DUKen0cK3NnR1onzcNkc3b2E6lPS/lkiTl4EgrvXwp0NGmg5FLP4YeGzWb0vsljcCm3qX2Uu5ZAGv16guqdyEC+aqkjBjtW5FxI0nPgzi8/TiipD8PzQW9hTB6z2LjPrJDxpnCsOMBYtFqWd5B9ASiaPCQgJLG6v6xL2Ct/SLQya9y0rvVBsIYTas6gYT+gAMjyXbxUx2dw0KmOBReEQ/dmAeGbx6B5is8JNkrUZTP2MQYMI+Fkev9gjoA2J7LEzUfGKr3q77h8NrEs9ieyxM1HxiqlIcEU+XVeGkB06O7BrYmafNAio6Sbz9L1UVxMWDxLCF43w9FTIUZrDUqMom0WXFbhpjYoKBoFS3T1aRRyepgyR8PIjf0dw110UeILB8bzav6qwGOgyyAuvNwHvkE1oFM|NgAuv4VNvKaYzwllh/sO5g==";
+	// new OrderInfoServiceImpl().decodeForTerminal(str);
+	// }
+	/**
+	 * 历史订单退款
+	 */
+	@Override
+	public String orderRefund(OrderInfo orderInfo) {
+		String returns = "";
+		if (orderInfo != null) {
+			Refund refund = new Refund();
+			refund.setApplication("Refund.Req");
+			refund.setVersion("1.0.0");
+			refund.setSendTime(new SimpleDateFormat("yyyyMMddmmhhss")
+					.format(new Date()));
+			refund.setMerchantId(orderInfo.getSubMerId());
+			refund.setTerminalId(orderInfo.getTerminalId());
+			refund.setPlatformId("");
+			refund.setTransType("200001");
+			refund.setTransAmt(orderInfo.getMerAmt());
+			refund.setMerchantOrderId(orderInfo.getMerOrderId());
+			refund.setOrgTransId(orderInfo.getQid());
+			refund.setOrgTransTime(orderInfo.getTransTime());
+			refund.setOrgMerchantOrderId(orderInfo.getOrgOrderId());
+			refund.setTransId("");
+			refund.setTransTime("");
+			refund.setAccountNumber("");
+			refund.setMerchantSign("");
+			refund.setSenderSign("");
+			refund.setServiceInfo("");
+			refund.setTerminalInfo("");
+			String data = "";
+			try {
+				data = xmlUtilnew.ObjToXml(refund);
+				System.out.println(data);
+				RefundUtil refundUtil = new RefundUtil();
+				data = refundUtil.encrypt(data, orderInfo.getTerminalId());
+				System.out.println(">>>>>>>:" + data);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			RemoteAccessor remoteAccessor = new RemoteAccessor();
+			String decryptXml = "";
+			try {
+				String url = rb.getString("posp-url");
+				decryptXml = remoteAccessor.getResponseByStream(url, "utf-8",
+						data);
+				System.out.println(decryptXml);
+				String[] ss = decryptXml.split("\\|");
+				if (ss[0].equals("0")) {
+					returns = "0|";
+					returns += ss[1] + "|";
+					returns += new String(new BASE64Decoder()
+							.decodeBuffer(ss[2]), "utf-8");
+				}
+				if (ss[0].equals("1")) {
+					returns = new RefundUtil().decrypt(ss[1]);
+				}
+			} catch (Exception e) {
+				returns = "0|9900|交易超时";
+				e.printStackTrace();
+			}
+		}
+		return returns;
+	}
+
+	/**
+	 * 根据订单ID获取订单信息
+	 */
+	@Override
+	public OrderInfo getOrderInfo(String orderId) {
+		return orderInfoDao.getOrderInfo(orderId);
+	}
+
+	@Override
+	public Boolean markOrderException(String orderId) {
+		OrderInfo orderInfo = orderInfoDao.getOrderInfo(orderId);
+		int result = 0;
+		if (null != orderInfo) {
+			OrderRisk orderRisk = new OrderRisk();
+			orderRisk.setOrderId(orderId);
+			orderRisk.setSubmerId(orderInfo.getSubMerId());
+			orderRisk.setOrderRiskType("00");
+			orderRisk.setOrderRiskProcType("1");
+			orderRisk.setOrderRiskProcTime(DateUtil
+					.getDateMinuteFormat(new Date()));
+			result = orderRiskDao.insertOrderRisk(orderRisk);
+		}
+		if (result > 0) {
+			// 修改订单信息表的RESERVED字段为-1,表示此订单已标记过为异常
+			orderInfoDao.updateOrderReserved(orderId);
+			return Boolean.TRUE;
+		} else {
+			return Boolean.FALSE;
+		}
+	}
+
+	@Override
+	public Map<String, Object> selectTotalTractCost(Map<String, Object> map) {
+		return orderInfoDao.selectTotalTractCost(map);
+	}
+	
+	@Override
+	public int updateOrderSettle(String orderId) {
+		return orderInfoDao.updateOrderSettle(orderId);
+	}
+	
+	public void updateOrder(OrderInfo OrderInfo) {
+		orderInfoDao.updateOrder(OrderInfo);
+	}
+}

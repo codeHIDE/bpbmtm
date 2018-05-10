@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SendFileDao">
+	<resultMap id="sendFile" type="com.bypay.domain.SendFile">
+		<result property="id" column="ID" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="settleType" column="SETTLE_TYPE" />
+	</resultMap>
+	<select id="selectSendFileList" resultMap="sendFile" parameterType="com.bypay.domain.SendFile">
+		SELECT * FROM SEND_FILE 
+		<where>
+			<if test="settleDate != null and settleDate != ''">
+				SETTLE_DATE = #{settleDate}
+			</if>
+			<if test="settleType != null and settleDate != ''">
+				AND SETTLE_TYPE = #{settleType}
+			</if>
+		</where> 
+	</select>
+</mapper>

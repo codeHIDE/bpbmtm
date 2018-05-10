@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerInfoUpdateLogDao">
+	<resultMap id="merInfoUpdateLog" type="com.bypay.domain.MerInfoUpdateLog">
+		<result property="id" column="ID" />
+		<result property="merId" column="MER_ID" />
+		<result property="merType" column="MER_TYPE" />
+		<result property="orgValue" column="ORG_VALUE" />
+		<result property="newValue" column="NEW_VALUE" />
+		<result property="orgTime" column="ORG_TIME" />
+		<result property="updateTime" column="UPDATE_TIME" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	<!-- 增加一条变更信息 -->
+	<insert id="insertMerInfoUpdateLog" parameterType="com.bypay.domain.MerInfoUpdateLog">
+		INSERT INTO MER_INFO_UPDATE_LOG(MER_ID, MER_TYPE, ORG_VALUE, NEW_VALUE, ORG_TIME, UPDATE_TIME, RESERVED1, RESERVED2, RESERVED3) 
+		VALUES( #{merId}, #{merType}, #{orgValue}, #{newValue}, #{orgTime}, #{updateTime}, #{reserved1}, #{reserved2}, #{reserved3})
+	</insert>
+	<!-- 查询代理商是否变更过 -->
+	<select id="selectOrgTime" resultMap="merInfoUpdateLog" parameterType="com.bypay.domain.MerInfoUpdateLog">
+		SELECT MIUL.UPDATE_TIME 
+		FROM MER_INFO_UPDATE_LOG MIUL 
+		WHERE MIUL.MER_ID=#{merId} AND MIUL.MER_TYPE=#{merType} ORDER BY MIUL.ID DESC
+	</select>
+</mapper>

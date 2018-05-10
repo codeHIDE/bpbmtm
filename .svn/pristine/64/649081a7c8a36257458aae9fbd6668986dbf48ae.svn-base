@@ -1,0 +1,32 @@
+package com.bypay.dao.impl;
+
+import java.util.List;
+
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.SumMerProfitDao;
+import com.bypay.domain.SumMerProfit;
+
+@Repository("sumMerProfitDao")
+public class SumMerProfitDaoImpl implements SumMerProfitDao {
+    @Inject
+    private SqlSessionTemplate sqlSessionTemplate;
+    
+    @Override
+    public void insertMerProfit(SumMerProfit sumMerProfit) {
+        sqlSessionTemplate.insert("insertMerProfit",sumMerProfit);
+
+    }
+
+    @Override
+    public List<Map> getSumList(Map<String, String> map) {
+        return sqlSessionTemplate.selectList("getSumList", map);
+
+    }
+
+}

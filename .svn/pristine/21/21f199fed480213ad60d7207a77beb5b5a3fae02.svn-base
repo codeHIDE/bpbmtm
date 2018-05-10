@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MobileUserDao">
+	<resultMap id="mobileUser" type="com.bypay.domain.MobileUser">
+		<result property="id" column="ID" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPwd" column="LOGIN_PWD" />
+		<result property="lastLoginTime" column="LAST_LOGIN_TIME" />
+		<result property="status" column="STATUS" />
+	</resultMap>
+
+	<insert id="insertMobileUser"  parameterType="com.bypay.domain.MobileUser">
+	 	INSERT INTO MOBILE_USER (SUB_MER_ID,CREATE_TIME,LOGIN_NAME,LOGIN_PWD,STATUS
+	 	<if test="terminalId != null and terminalId != ''">
+	 	,TERMINAL_ID
+	 	</if>
+	 	)
+	 	values(#{subMerId},#{createTime},#{loginName},#{loginPwd},#{status}
+	 	<if test="terminalId != null and terminalId != ''">
+	 	,#{terminalId}
+	 	</if>
+	 	)
+	</insert>
+	
+	<delete id="deleteMobileUser"  parameterType="com.bypay.domain.MobileUser">
+	 	DELETE FROM MOBILE_USER WHERE SUB_MER_ID = #{subMerId}
+	</delete>
+	
+	<!-- 查询登陆信息 -->
+	<select id="selectMobileUser" resultMap="mobileUser" parameterType="com.bypay.domain.MobileUser">
+		SELECT * FROM MOBILE_USER WHERE LOGIN_NAME = #{loginName}
+		<if test="loginPwd != null and loginPwd != ''">
+		AND LOGIN_PWD = #{loginPwd}
+		</if>
+	</select>
+
+<!-- 修改设备最近登录时间 -->
+	<update id="updateUserByLastLoginTime" parameterType="com.bypay.domain.MobileUser">
+		UPDATE MOBILE_USER SET LAST_LOGIN_TIME = #{lastLoginTime}
+		 WHERE ID=#{id}
+	</update>
+	
+	<update id="updateUserEavFail" parameterType="com.bypay.domain.MobileUser">
+		UPDATE MOBILE_USER SET TERMINAL_ID =NULL,STATUS = 1
+		WHERE SUB_MER_ID = #{subMerId}
+	</update>
+	
+	<update id="updateMobileUser" parameterType="com.bypay.domain.MobileUser">
+		UPDATE MOBILE_USER SET 
+		<if test="subMerId != null and subMerId != ''">
+		SUB_MER_ID = #{subMerId},
+		</if>
+		<if test="terminalId != null and terminalId != ''">
+		TERMINAL_ID = #{terminalId},
+		</if>
+		<if test="loginPwd != null and loginPwd != ''">
+		LOGIN_PWD = #{loginPwd},
+		</if>
+		<if test="status != null and status != ''">
+		STATUS = #{status}
+		</if>
+		WHERE LOGIN_NAME=#{loginName}
+	</update>
+	
+	<update id="updateTerminal" parameterType="com.bypay.domain.MobileUser">
+		UPDATE MOBILE_USER SET 
+		<if test="subMerId != null and subMerId != ''">
+		SUB_MER_ID = #{subMerId},
+		</if>
+		<if test="status != null and status != ''">
+		STATUS = #{status},
+		</if>
+		<if test="terminalId != null and terminalId != ''">
+		TERMINAL_ID = #{terminalId}
+		</if>
+		WHERE SUB_MER_ID=#{oldSubMerId}
+	</update>
+	
+</mapper>

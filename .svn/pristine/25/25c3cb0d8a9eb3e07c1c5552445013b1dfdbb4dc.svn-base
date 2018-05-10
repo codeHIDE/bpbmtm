@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.PhoneVerifyCodeDao">
+	<resultMap id="phoneVerifyCode" type="com.bypay.domain.PhoneVerifyCode">
+		<result property="id" column="ID" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="phone" column="PHONE" />
+		<result property="code" column="CODE" />
+		<result property="createTime" column="CREATE_TIME" />
+	</resultMap>
+
+	<!-- 手机验证码验证 -->
+	<select id="selectPhoneVerifyCode" parameterType="com.bypay.domain.PhoneVerifyCode" resultMap="phoneVerifyCode">
+		SELECT ID, TERMINAL_ID, PHONE, CODE, CREATE_TIME 
+	    FROM PHONE_VERIFY_CODE where PHONE=#{phone} AND TERMINAL_ID=#{terminalId} AND CODE=#{code}
+	    order by ID desc limit 1 
+	</select>
+	<!-- 添加短信验证码 -->
+	<insert id="insertPhoneVerifyCode" parameterType="com.bypay.domain.PhoneVerifyCode">
+		INSERT INTO
+		PHONE_VERIFY_CODE(TERMINAL_ID, PHONE, CODE, CREATE_TIME)
+		VALUES(#{terminalId},#{phone},#{code},#{createTime})
+	</insert>
+</mapper>

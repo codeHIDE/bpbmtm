@@ -1,0 +1,236 @@
+<%@ page language="java" pageEncoding="utf-8"%>
+<%@include file="/common/taglibs.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+  <head>
+    <title>设置风控信息</title>
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<script src="<s:url value='/js/jqui/jquery/jquery-1.5.2.min.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/core/base.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDialog.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerGrid.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDrag.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerResizable.js'/>" type="text/javascript"></script>
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Gray/css/all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<script type="text/javascript" src="<s:url value='/js/jquery/jquery-ui-1.7.1.custom.min.js'/>"></script>
+		<script type="text/javascript" src="<s:url value='/js/My97DatePicker_1/WdatePicker.js' />"></script>
+		<script src="<s:url value='/js/CheckLength.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/common.js'/>"></script>
+		<style type="text/css">
+			tr{
+				height:30px;
+			}
+			.tdata td{text-align: center;}
+			.td{text-align: right;}
+		</style>
+		<script type="text/javascript">
+			function setTrans(){
+					if(	length('debitPerCardQuota',10,'NS','借记卡单卡单笔限额') &&
+						length('debitCardQuota',10,'NS','借记卡单卡单日限额') &&
+						length('debitCardCount',10,'N','借记卡单卡单日次数') &&
+						length('creditPerCardQuota',10,'NS','信用卡单卡单笔限额') &&
+						length('creditCardQuota',10,'NS','信用卡单卡单日限额') &&
+						length('creditCardCount',10,'N','信用卡单卡单日次数') &&
+						length('terminalCardQuota',10,'NS','单终端单日限额') &&
+						length('transferPerCardQuota',10,'NS','转账单卡单笔限额') &&
+						length('transferCardQuota',10,'NS','转账单卡单日限额') &&
+						length('transferCardCount',10,'N','转账单卡单日次数') &&
+						length('terminalTransferCardQuota',10,'NS','转账单终端单日限额') &&
+						length('payCreditPerCardQuota',10,'NS','信用卡还款单笔限额') &&
+						length('payCreditCardQuota',10,'NS','信用卡还款单日限额') &&
+						length('queryCreditCardCount',10,'N','信用卡余额查询次数')&&
+						length('queryDebitCardCount',10,'N','借记卡余额查询次数') &&
+						length('payCreditCardCount',10,'N','信用卡还款单日次数')
+						)
+						if(confirm("确认要更新吗？"))
+					$.ajax({
+	                   type: "POST",
+	                   dataType: "text",
+	                   url: "<s:url value='/merchantInfo!setTrans.ac'/>",
+	                   data: $('#form1').serialize(),
+	                   success: function (data) {
+	                      if(data=="succ"){
+	                   	    $.ligerDialog.success('修改成功！');
+	                      }else if(data=="fone"){
+	                   	    $.ligerDialog.success('修改失败！');
+	                      }
+	                   },
+	                   error: function(data) {
+		                  		 $.ligerDialog.success("错误提示:"+data.responseText);
+		                         window.parent.$.ligerDialog.closeWaitting(); 
+		                 }
+					});
+			}
+			function getMerRate(){
+				$("#merRate").html("商户收益："+(100-$("#platRate").val())+" %");
+			}
+		</script>
+		
+  </head>
+  <body style="padding: 15px;">
+  <%@include file="/js/common.jsp" %>
+  <form id="form1">
+  <input type="hidden" id="merSysId" name="merRisk.merSysId" value="<s:property value='merchantInfo.merSysId'/>"/>
+    <div id="content">
+			<div class="box_system">
+				<table width="100%" border="0" cellpadding="0" cellspacing="0">
+					<tr>
+						<td colspan="4">当前机构商户：<s:property value="merchantInfo.merName"/>
+						(<s:property value="merchantInfo.merSysId"/>)</td>
+					</tr>
+					<tr>
+						<td colspan="4" style="text-align: center;">
+						-----------------------交易信息-----------------------
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: right">借记卡单卡单笔限额：</td>
+						<td ><div class="l-text" style="width:110px;float:left;">
+							<input type="text" name="merRisk.debitPerCardQuota" class="l-text-field" style="width:110px;"  
+							<s:if test="merRisk.debitPerCardQuota != -1 && merRisk.debitPerCardQuota != null &&merRisk.debitPerCardQuota != ''">
+							value="<fmt:formatNumber value="${merRisk.debitPerCardQuota/100}" pattern="0.00"/>"</s:if> id="debitPerCardQuota"/>
+							</div>
+							<div style="width:10px;float:left;">元</div>
+						</td>
+						<td style="text-align: right">借记卡单卡单日限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8"  maxlength="10" name="merRisk.debitCardQuota" class="l-text-field" style="width:110px;"
+							<s:if test="merRisk.debitCardQuota != -1 && merRisk.debitCardQuota != null && merRisk.debitCardQuota != ''"> value="<fmt:formatNumber value="${merRisk.debitCardQuota/100}" pattern="0.00"/>"</s:if> id="debitCardQuota"/></div><div style="width:10px;float:left;">元</div>
+						</td>
+					</tr>
+					<tr>
+					<td style="text-align: right">借记卡单卡单日次数：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.debitCardCount" class="l-text-field" style="width:110px;"
+							<s:if test="merRisk.debitCardCount != -1 && merRisk.debitCardCount != null && merRisk.debitCardCount != ''">value="<fmt:formatNumber value="${merRisk.debitCardCount}" pattern="0"/>"</s:if> id="debitCardCount"/> </div><div style="width:10px;float:left;"></div>
+						</td>
+					</tr>
+					<tr>
+					<td style="text-align: right">信用卡单卡单笔限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.creditPerCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.creditPerCardQuota != -1 && merRisk.creditPerCardQuota != null && merRisk.creditPerCardQuota != ''">value="<fmt:formatNumber value="${merRisk.creditPerCardQuota/100}" pattern="0.00"/>"</s:if> id="creditPerCardQuota"/></div><div style="width:10px;float:left;">元</div>
+						</td>
+					<td style="text-align: right">信用卡单卡单日限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.creditCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.creditCardQuota != -1 && merRisk.creditCardQuota != null && merRisk.creditCardQuota != ''">value="<fmt:formatNumber value="${merRisk.creditCardQuota/100}" pattern="0.00"/>"</s:if> id="creditCardQuota" size="4"/> </div><div style="width:10px;float:left;">元</div>
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: right">信用卡单卡单日次数：</td>
+						<td ><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.creditCardCount" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.creditCardCount != -1 && merRisk.creditCardCount != null && merRisk.creditCardCount != ''">value="<fmt:formatNumber value="${merRisk.creditCardCount}" pattern="0"/>"</s:if> id="creditCardCount" size="4"/> </div><div style="width:10px;float:left;"></div>
+						</td>
+						<td style="text-align: right">单终端单日限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.terminalCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.terminalCardQuota != -1 && merRisk.terminalCardQuota != null && merRisk.terminalCardQuota != ''">
+							value="<fmt:formatNumber value="${merRisk.terminalCardQuota/100}" pattern="0.00"/>"</s:if> id="terminalCardQuota"/> </div>
+							<div style="width:10px;float:left;">元</div>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4" style="text-align: center;">
+						-----------------------转账信息-----------------------
+						</td>
+					</tr>
+					<tr>
+						<td style="text-align: right">转账单卡单日次数：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.transferCardCount" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.transferCardCount != -1 && merRisk.transferCardCount != null && merRisk.transferCardCount != ''">value="<fmt:formatNumber value="${merRisk.transferCardCount}" pattern="0"/>"</s:if> id="transferCardCount"/> </div><div style="width:10px;float:left;"></div>
+						</td>
+						<td style="text-align: right">转账单卡单笔限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.transferPerCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.transferPerCardQuota != -1 && merRisk.transferPerCardQuota != null && merRisk.transferPerCardQuota != ''">value="<fmt:formatNumber value="${merRisk.transferPerCardQuota/100}" pattern="0.00"/>"</s:if> id="transferPerCardQuota"/> </div><div style="width:10px;float:left;">元</div>
+						</td>
+					</tr>
+					<tr>
+					<td style="text-align: right">转账单卡单日限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.transferCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.transferCardQuota != -1 && merRisk.transferCardQuota != null && merRisk.transferCardQuota != ''">value="<fmt:formatNumber value="${merRisk.transferCardQuota/100}" pattern="0.00"/>"</s:if> id="transferCardQuota"/> </div><div style="width:10px;float:left;">元</div>
+						</td>
+						<td style="text-align: right">转账单终端单日限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.terminalTransferCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.terminalTransferCardQuota != -1 && merRisk.terminalTransferCardQuota != null && merRisk.terminalTransferCardQuota != ''">value="<fmt:formatNumber value="${merRisk.terminalTransferCardQuota/100}" pattern="0.00"/>"</s:if> id="terminalTransferCardQuota"/> </div><div style="width:10px;float:left;">元</div>
+						</td>
+					</tr>
+					<tr>
+						
+					</tr>
+					<tr>
+						<td colspan="4" style="text-align: center;">
+						--------------------信用卡还款信息--------------------
+						</td>
+					</tr>
+					<tr>
+					<td style="text-align: right">信用卡还款单日限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.payCreditCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.payCreditCardQuota != -1 && merRisk.payCreditCardQuota != null && merRisk.payCreditCardQuota != ''">value="<fmt:formatNumber value="${merRisk.payCreditCardQuota/100}" pattern="0.00"/>"</s:if> id="payCreditCardQuota"/> </div><div style="width:10px;float:left;">元</div>
+						</td>
+					
+						<td style="text-align: right">信用卡还款单笔限额：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.payCreditPerCardQuota" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.payCreditPerCardQuota != -1 && merRisk.payCreditPerCardQuota != null && merRisk.payCreditPerCardQuota != ''">value="<fmt:formatNumber value="${merRisk.payCreditPerCardQuota/100}" pattern="0.00"/>"</s:if> id="payCreditPerCardQuota"/> </div><div style="width:10px;float:left;">元</div>
+						</td>
+					</tr>
+					<tr>	
+						<td style="text-align: right">信用卡还款单日次数：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.payCreditCardCount" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.payCreditCardCount != -1 && merRisk.payCreditCardCount != null && merRisk.payCreditCardCount != ''">value="<fmt:formatNumber value="${merRisk.payCreditCardCount}" pattern="0"/>"</s:if> id="payCreditCardCount"/> </div><div style="width:10px;float:left;"></div>
+						</td>
+					</tr>
+					<tr>	
+					<td style="text-align: right">交易开始时间：</td>
+						<td>
+							<input type="text"  name="merRisk.transTimeBegin" id="transTimeBegin"
+													onfocus="WdatePicker({dateFmt:'HH:mm:ss'})"
+													value="<s:property value="merRisk.transTimeBegin"/>"
+													class="inputext_style" />
+						</td>
+						<td style="text-align: right">交易结束时间：</td>
+						<td>
+							<input type="text" name="merRisk.transTimeEnd" id="transTimeEnd"
+													onfocus="WdatePicker({dateFmt:'HH:mm:ss'})"
+													value="<s:property value="merRisk.transTimeEnd"/>"
+													class="inputext_style" />
+						</td>
+					</tr>
+					<tr>
+						<td colspan="4" style="text-align: center;">
+						-----------------------余额信息-----------------------
+						</td>
+					</tr>
+					<tr>	
+						<td style="text-align: right">信用卡余额查询次数：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.queryCreditCardCount" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.queryCreditCardCount != -1 && merRisk.queryCreditCardCount != null && merRisk.queryCreditCardCount != ''">value="<fmt:formatNumber value="${merRisk.queryCreditCardCount}" pattern="0"/>"</s:if> id="queryCreditCardCount"/> </div><div style="width:10px;float:left;"></div>
+						</td>
+						<td style="text-align: right">借记卡余额查询次数：</td>
+						<td><div class="l-text" style="width:110px;float:left;">
+							<input type="text" size="8" maxlength="10" name="merRisk.queryDebitCardCount" class="l-text-field" style="width:110px;" 
+							<s:if test="merRisk.queryDebitCardCount != -1 && merRisk.queryDebitCardCount != null && merRisk.queryDebitCardCount != ''">value="<fmt:formatNumber value="${merRisk.queryDebitCardCount}" pattern="0"/>"</s:if> id="queryDebitCardCount"/> </div><div style="width:10px;float:left;"></div>
+						</td>
+					</tr>
+					<tr align="center">
+						<td colspan="4">
+							<input type="button" value="更新" id="btn" style="width:80px" onclick="setTrans()"/>
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		</form>
+  </body>
+</html>

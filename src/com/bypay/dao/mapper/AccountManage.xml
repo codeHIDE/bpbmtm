@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.AccountManageDao">
+	<resultMap id="accountManage" type="com.bypay.domain.AccountManage">
+		<result property="id" column="ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="merAmt" column="MER_AMT" />
+		<result property="feeAmt" column="FEE_AMT" />
+		<result property="accountType" column="ACCOUNT_TYPE" />
+		<result property="status" column="STATUS" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="updateTime" column="UPDATE_TIME" />
+		<result property="updateOpenId" column="UPDATE_OPER_ID" />
+		<result property="changeStatus" column="CHANGE_STATUS" />
+		<result property="changeAmt" column="CHANGE_AMT" />
+		<result property="changeOpenId" column="CHANGE_OPER_ID" />
+		<result property="changeReason" column="CHANGE_REASON" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+		<result property="merAmts" column="MER_AMTs" />
+		
+	</resultMap>
+
+	<sql id="baseColumn">
+	</sql>
+
+	<!-- 查询所有 -->
+	<select id="selectAccountManageList"  resultMap="accountManage" parameterType="java.util.Map">
+			select t.MER_SYS_ID,t.MER_AMT,t.FEE_AMT,t.STATUS,t.SETTLE_DATE,
+			t.CREATE_TIME, t.UPDATE_TIME,t.UPDATE_OPER_ID
+			from ACCOUNT_MANAGE t
+			<where>
+			<if test="accountManage.settleDate != null and accountManage.settleDate != ''">
+			AND	t.SETTLE_DATE = #{accountManage.settleDate}
+			</if>
+			<if test="accountManage.merSysId != null and accountManage.merSysId != ''">
+			AND t.MER_SYS_ID = #{accountManage.merSysId}
+			</if>
+			</where>
+			order by  t.CREATE_TIME desc limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询条数 -->
+	<select id="selectAccountManageCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.AccountManage">
+		SELECT COUNT(*) from ACCOUNT_MANAGE 
+		<where>
+		<if test="merSysId!=null and merSysId!=''">
+			AND MER_SYS_ID=#{merSysId}
+		</if>
+		<if test="settleDate!=null and settleDate!=''">
+			AND SETTLE_DATE=#{settleDate}
+		</if>
+		</where>
+	</select>
+	
+		<!-- 查询详情 -->
+	<select id="selectAccountManage" resultMap="accountManage" parameterType="com.bypay.domain.AccountManage">
+		SELECT * from ACCOUNT_MANAGE  where  MER_SYS_ID=#{merSysId} and  SETTLE_DATE=#{settleDate}
+	</select>
+	
+	
+	<!-- 修改金额 -->
+	<update id="updateAccountManage" parameterType="com.bypay.domain.AccountManage">
+		update ACCOUNT_MANAGE 
+		<set>
+		<if test="merAmt!=null and merAmt!=''">
+			MER_AMT=#{merAmt}*100,
+		</if>
+		<if test="changeAmt!=null and changeAmt!=''">
+			CHANGE_AMT=#{merAmts},
+		</if>
+		<if test="changeReason!=null and changeReason!=''">
+			CHANGE_REASON=#{changeReason},
+		</if>
+		<if test="changeStatus!=null and changeStatus!=''">
+			CHANGE_STATUS=#{changeStatus},
+		</if>
+		<if test="changeOpenId!=null and changeOpenId!=''">
+			CHANGE_OPER_ID=#{changeOpenId},
+		</if>
+		</set>
+		where MER_SYS_ID=#{merSysId}  and SETTLE_DATE=#{settleDate}
+	</update>
+	<!-- 修改预存款表的状态 -->
+	<update id="updateAccountManageByStatus" parameterType="com.bypay.domain.AccountManage">
+		update ACCOUNT_MANAGE set STATUS = #{status}
+		where MER_SYS_ID=#{merSysId}  and SETTLE_DATE=#{settleDate} and ID=#{id}
+	</update>
+</mapper>

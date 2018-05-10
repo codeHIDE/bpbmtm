@@ -1,0 +1,21 @@
+package com.bypay.dao;
+
+import com.bypay.domain.MobileUser;
+
+public interface MobileUserDao {
+	
+	public int insertMobileUser(MobileUser mobileUser);
+	
+	public MobileUser getMobileUser(MobileUser mobileUser);
+	
+	/**
+	   * 修改设备最近登录时间
+	   * 
+	   * @param subMerTerminal
+	   */
+	public void updateUserByLastLoginTime(MobileUser mobileUser);
+	
+	public void updateMobileUser(MobileUser mobileUser);
+	
+	public boolean updateTerminal(MobileUser mobileUser);
+}

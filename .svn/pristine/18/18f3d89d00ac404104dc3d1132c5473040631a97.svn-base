@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.RulesAllDao">
+	<resultMap id="rulesAll" type="com.bypay.domain.RulesAll">
+		<result property="id" column="ID" />
+		<result property="startTime" column="START_TIME" />
+		<result property="endTime" column="END_TIME" />
+		<result property="tractHight" column="TRACT_NIGHT" />
+		<result property="tractDay" column="TRACT_DAY" />
+		<result property="status" column="STATUS" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	<select id="selectRulesAllList" resultMap="rulesAll" parameterType="java.util.Map">
+		select ID,START_TIME,END_TIME,TI1.TRACT_NAME AS TRACT_NIGHT,TI2.TRACT_NAME AS TRACT_DAY,RESERVED1,
+		RESERVED2,RESERVED3,RA.STATUS from RULES_ALL RA LEFT JOIN TRACT_INFO TI1 ON TI1.TRACT_ID = RA.TRACT_NIGHT
+		LEFT JOIN TRACT_INFO TI2 ON TI2.TRACT_ID = RA.TRACT_DAY
+		 order by STATUS desc limit #{page},#{pageSize}
+	</select>
+	<select id="selectRulesAllListCount" resultType="int" parameterType="java.util.Map">
+		select COUNT(1) from RULES_ALL RA LEFT JOIN TRACT_INFO TI1 ON TI1.TRACT_ID = RA.TRACT_NIGHT
+		LEFT JOIN TRACT_INFO TI2 ON TI2.TRACT_ID = RA.TRACT_NIGHT
+	</select>
+	<insert id="insertRulesAll" parameterType="com.bypay.domain.RulesAll">
+		insert into RULES_ALL(START_TIME,END_TIME,TRACT_NIGHT,TRACT_DAY,STATUS,RESERVED1,RESERVED2,RESERVED3) 
+		values(#{startTime},#{endTime},#{tractHight},#{tractDay},#{status},#{reserved1},#{reserved2},#{reserved3})
+	</insert>
+	<update id="updateRulesAllStatus" parameterType="com.bypay.domain.RulesAll">
+		UPDATE RULES_ALL
+		SET
+		STATUS = #{status}
+		<if test="id != null and id != ''">
+			WHERE ID = #{id}
+		</if>
+	</update>
+	<delete id="deleteRulesAllById" parameterType="com.bypay.domain.RulesAll">
+		DELETE FROM RULES_ALL WHERE ID = #{id}
+	</delete>
+</mapper>

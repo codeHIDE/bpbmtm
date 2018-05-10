@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.ProcedureDao">
+	<select id="getSequence" statementType="CALLABLE" parameterType="java.util.Map">
+		{call get_sequence(#{o_id,mode=OUT,jdbcType=INTEGER})}
+	</select>
+	
+	<select id="getOrderId" parameterType="java.lang.String" resultType="java.lang.Long">
+		SELECT nextval(#{value})
+	</select>
+</mapper>

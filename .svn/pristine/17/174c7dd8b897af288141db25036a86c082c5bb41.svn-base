@@ -1,0 +1,39 @@
+package com.bypay.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.bypay.domain.MerTerminalInfo;
+
+public interface MerTerminalInfoDao {
+	
+	//添加终端配置信息
+	int insertMerTerminalInfo(MerTerminalInfo merTerminalInfo);
+	
+	//终端查询 查询所有机构商户的终端信息
+	List<MerTerminalInfo> selectMerTerminalInfoList(Map map);
+	
+	//查询机构终端的条数 分页用
+	int selectMerTerminalInfoCount(MerTerminalInfo merTerminalInfo);
+
+	/**
+	 * 获取机构终端信息
+	 * @param merTerminalInfo
+	 * @return
+	 */
+	MerTerminalInfo selectMerTerminalInfo(MerTerminalInfo merTerminalInfo);
+	
+	MerTerminalInfo selectMerTerminalInfoOne(MerTerminalInfo merTerminalInfo);
+	
+	MerTerminalInfo selectMerTerminalVersion(MerTerminalInfo merTerminalInfo);
+	
+	int updateMerTerminalInfo(MerTerminalInfo merTerminalInfo);
+
+	/**
+	 * 获取机构终端版本管理表id最大并且为启用的版本信息
+	 * @param terminalInfo
+	 * @return
+	 */
+	MerTerminalInfo selectMaxIdMerTerminalInfo(MerTerminalInfo terminalInfo);
+
+}

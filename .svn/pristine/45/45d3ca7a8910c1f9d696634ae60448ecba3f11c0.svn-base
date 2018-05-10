@@ -1,0 +1,90 @@
+package com.bypay.service.impl.util;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.bypay.domain.clientTool.AccountEnquiry;
+import com.bypay.domain.clientTool.AccountLogIn;
+import com.bypay.domain.clientTool.AccountRegist;
+import com.bypay.domain.clientTool.DrawMoneyRecord;
+import com.bypay.domain.clientTool.Enquiry;
+import com.bypay.domain.clientTool.OpenPurchase;
+import com.bypay.domain.clientTool.PhoneNumber;
+import com.bypay.domain.clientTool.QueryBalance;
+import com.bypay.domain.clientTool.SelectPassWord;
+import com.bypay.domain.clientTool.SettBank;
+import com.bypay.domain.clientTool.TerminalEnable;
+import com.bypay.domain.clientTool.TerminalValidate;
+import com.bypay.service.InterfaceService;
+
+@Service
+public  class  BusProcessing  {
+
+	@Inject
+	private InterfaceService interfaceService;
+	/**
+	 * 分流业务
+	 * 
+	 * @param object
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Object toBus(Object busObj) {
+		
+		Object busObject = new Object();
+		String application = "";
+		try {
+			Class superClass = busObj.getClass().getSuperclass();
+			application = (String) superClass.getDeclaredMethod("getApplication", null).invoke(busObj, null);
+			if("AccountRegist.Req".equals(application)){//注册
+				AccountRegist accountRegist = (AccountRegist)busObj;
+				busObject = interfaceService.checkRegist(accountRegist);
+			}else if("UserRegist.Req".equals(application)){//注册第一步
+				AccountRegist accountRegist = (AccountRegist)busObj;
+				busObject = interfaceService.checkRegist(accountRegist);
+			}else if("AccountLogIn.Req".equals(application)){//登陆	
+				AccountLogIn accountLogIn = (AccountLogIn)busObj;
+				busObject = interfaceService.regMer(accountLogIn);
+			}else if("OpenPurchase.Req".equals(application)){//收款开通
+				OpenPurchase openPurchase = (OpenPurchase)busObj;
+				busObject = interfaceService.openReceivablesBus(openPurchase);
+			}else if("EnquiryList.Req".equals(application)){//交易列表
+				Enquiry enquiry = (Enquiry)busObj;
+				busObject = interfaceService.regEnquiry(enquiry);
+			}else if("SettBankList.Req".equals(application)){//结算银行列表
+				SettBank settBank = (SettBank)busObj;
+				busObject = interfaceService.regBank(settBank);
+			}else if("TerminalEnable.Req".equals(application)){//终端启用 YJH
+				TerminalEnable settBank = (TerminalEnable)busObj;
+				busObject=interfaceService.updateStatus(settBank);
+			}else if("TerminalValidate.Req".equals(application)){//终端验证
+				TerminalValidate terminalValidate = (TerminalValidate)busObj;
+				busObject = interfaceService.terminalValidate(terminalValidate);
+			} else if("AccountEnquiry.Req".equals(application)){//账户信息查询
+				AccountEnquiry accountEnquiry = (AccountEnquiry) busObj;
+				busObject = interfaceService.accountEnquiry(accountEnquiry);
+			}else if("FindPwd.Req".equals(application)){//找回密码
+				SelectPassWord selectPassWord= (SelectPassWord)busObj;
+				busObject=interfaceService.updatePwd(selectPassWord);
+			} else if("WithDrawRecords.Req".equals(application)){//商户提现申请记录
+				DrawMoneyRecord drawMoneyRecord = (DrawMoneyRecord) busObj;
+				busObject=interfaceService.drawMoneyRecord(drawMoneyRecord);
+			} else if("QueryBalance.Req".equals(application)){//查询余额
+				QueryBalance queryBalance = (QueryBalance) busObj;
+				busObject = interfaceService.queryBalance(queryBalance);
+			} else if("PhoneNumber.Req".equals(application)){//短信下发
+				PhoneNumber phoneNumber = (PhoneNumber) busObj;
+				busObject = interfaceService.phoneNumber(phoneNumber);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} 
+		
+		return busObject;
+	}
+	
+	
+}
+

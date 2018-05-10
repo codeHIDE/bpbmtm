@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans 
+		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+	<bean id="jaxb2Marshaller" class="org.springframework.oxm.jaxb.Jaxb2Marshaller">
+		<property name="classesToBeBound">
+			<list>
+				<value>com.bypay.domain.clientTool.AccountEnquiry</value>
+				<value>com.bypay.domain.clientTool.AccountLogIn</value>
+				<value>com.bypay.domain.clientTool.AccountRegist</value>
+				<value>com.bypay.domain.clientTool.BeanParent</value>
+				<value>com.bypay.domain.clientTool.Enquiry</value>
+				<value>com.bypay.domain.clientTool.EnquiryList</value>
+				<value>com.bypay.domain.clientTool.GenerateTsm</value>
+				<value>com.bypay.domain.clientTool.OpenPurchase</value>
+				<value>com.bypay.domain.clientTool.ProxyPay</value>
+				<value>com.bypay.domain.clientTool.Refund</value>
+				<value>com.bypay.domain.clientTool.SelectPassWord</value>
+				<value>com.bypay.domain.clientTool.SettBank</value>
+				<value>com.bypay.domain.clientTool.SettBankList</value>
+				<value>com.bypay.domain.clientTool.TerminalCancel</value>
+				<value>com.bypay.domain.clientTool.TerminalEnable</value>
+				<value>com.bypay.domain.clientTool.TerminalValidate</value>
+				<value>com.bypay.domain.clientTool.TransInfoReq</value>
+				<value>com.bypay.domain.clientTool.DrawMoneyRecord</value>
+				<value>com.bypay.domain.clientTool.DrawMoneyRecordList</value>
+				<value>com.bypay.domain.clientTool.QueryBalance</value>
+				<value>com.bypay.domain.clientTool.PhoneNumber</value>
+				<value>com.bypay.domain.clientTool.AccountBalance</value>
+				<value>com.bypay.domain.clientTool.GFinvestment</value>
+				<value>com.bypay.domain.clientTool.CreditInfoList</value>
+				<value>com.bypay.domain.clientTool.CheckVersion</value>
+				<value>com.bypay.domain.clientTool.XunlianOrder</value>
+			</list>
+		</property>
+	</bean>
+</beans>

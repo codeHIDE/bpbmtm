@@ -1,0 +1,9 @@
+package com.bypay.dao;
+
+import com.bypay.domain.IdCardInfo;
+
+
+public interface IdCardInfoDao {
+	
+	 Integer insertIdCardInfo(IdCardInfo idCardInfo);
+}

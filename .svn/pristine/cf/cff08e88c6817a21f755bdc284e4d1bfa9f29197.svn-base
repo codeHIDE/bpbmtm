@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerTerminalDao">
+	<!-- 配置实体类与数据库的关联 -->
+	<resultMap id="subMerTerminal" type="com.bypay.domain.SubMerTerminal">
+		<result property="id" column="ID" />
+		<result property="tsn" column="TSN" />
+		<result property="factory" column="FACTORY" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="platMerId" column="PLAT_MER_ID" />
+		<result property="version" column="VERSION" />
+		<result property="category" column="CATEGORY" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="activeTime" column="ACTIVE_TIME" />
+		<result property="lastUpdateTime" column="LAST_UPDATE_TIME" />
+		<result property="terminalInfo" column="TERMINAL_INFO" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPwd" column="LOGIN_PWD" />
+		<result property="lastLoginTime" column="LAST_LOGIN_TIME" />
+		<result property="lastLoginInfo" column="LAST_LOGIN_INFO" />
+		<result property="status" column="STATUS" />
+		<result property="reserved" column="RESERVED" />
+		<result property="agentIdL1" column="AGENT_ID_L1" />
+		<result property="agentIdL2" column="AGENT_ID_L2" />
+		<result property="agentIdL3" column="AGENT_ID_L3" />
+		<result property="agentIdL4" column="AGENT_ID_L4" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="countTsn" column="COUNT_TSN"></result>
+		<result property="countValid" column="COUNT_VALID"></result>
+	</resultMap>
+	<!-- 根据登录名/手机号查询信息 -->
+	<select id="selectSubMerTerminalByPhone" parameterType="java.lang.String" resultMap="subMerTerminal">
+		select  SMT.* from SUB_MER_TERMINAL SMT 
+		left join SUB_MER_INFO SMI on SMI.SUB_MER_ID=SMT.SUB_MER_ID
+		where LOGIN_NAME = #{phone}
+	</select>
+	<!-- 根据子商户查询设备信息 -->
+	<select id="selectTerminalBySubMerId" parameterType="java.lang.String" resultMap="subMerTerminal">
+		select * from SUB_MER_TERMINAL where SUB_MER_ID = #{subMerId}
+	</select>
+	<update id="resetMerSysIdByTsn"  parameterType="com.bypay.domain.SubMerTerminal">
+		update SUB_MER_TERMINAL set TSN = #{tsn}
+		<if test="merSysId != null and merSysId != ''">
+		,MER_SYS_ID = #{merSysId}
+		</if>
+		<if test="agentIdL1 != null and agentIdL1 != ''">
+		,AGENT_ID_L1 = #{agentIdL1}
+		</if>
+		<if test="agentIdL2 != null and agentIdL2 != ''">
+		,AGENT_ID_L2 = #{agentIdL2}
+		</if>
+		<if test="agentIdL3 != null and agentIdL3 != ''">
+		,AGENT_ID_L3 = #{agentIdL3}
+		</if>
+		<if test="agentIdL4 != null and agentIdL4 != ''">
+		,AGENT_ID_L4 = #{agentIdL4}
+		</if>
+		WHERE TSN = #{tsn}
+	</update>
+	<!-- 修改子商户设备的版本信息 -->
+	<update id="updateSubMerTerminalVersion" parameterType="com.bypay.domain.SubMerTerminal">
+		update SUB_MER_TERMINAL set VERSION = #{version} where TSN = #{tsn}
+	</update>
+	<!-- 根据商户号、终端号获取子商户设备信息 -->
+	<select id="getSubMerTerInfo" resultMap="subMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		select * from SUB_MER_TERMINAL where SUB_MER_ID = #{subMerId} and TSN=#{tsn}
+	</select>
+	
+	<select id="getSubMerTerMer" resultMap="subMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		select * from SUB_MER_TERMINAL where MER_SYS_ID = #{merSysId} and TSN=#{tsn}
+	</select>
+								<!-- 一个子商户的所有设备信息-W -->
+<!-- 	<select id="selectSubMerTerminalAll" resultMap="subMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		SELECT ID,TSN,STATUS,CATEGORY FROM SUB_MER_TERMINAL where SUB_MER_ID=#{subMerId} 
+		<if test="tsn!=null and tsn!=''">
+		AND TSN=#{tsn}
+		</if>
+	</select> -->
+	
+	<select id="selectSubMerTerminalAll" resultMap="subMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		SELECT ID,TSN,STATUS,CATEGORY FROM SUB_MER_TERMINAL where SUB_MER_ID=#{subMerId} 
+		<if test="tsn!=null and tsn!=''">
+		AND TSN=#{tsn}
+		</if>
+	</select>
+	
+								<!-- 根据id查询子一条商户设备信息-W -->
+	<select id="selectSubMerTerminalOne" parameterType="com.bypay.domain.SubMerTerminal" resultMap="subMerTerminal">
+		select * from SUB_MER_TERMINAL where ID=#{id}
+	</select>
+								<!-- 重置终端信息密码-W -->
+	<select id="updateTreminalPwd" parameterType="java.util.Map">
+		UPDATE SUB_MER_TERMINAL  SET  LOGIN_PWD=#{pwd} WHERE ID=#{number}
+	</select>
+								<!-- 重置终端信息状态-W -->
+	<select id="updateTreminalStatus" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET  STATUS=#{pwd} WHERE ID=#{number}
+	</select>
+	<select id="selectSubMerTerminalByTerminalId" parameterType="com.bypay.domain.SubMerTerminal" resultMap="subMerTerminal">
+		select * from SUB_MER_TERMINAL where TSN = #{tsn} 
+	</select>
+
+	<!-- 修改商户设备信息 -->
+	<update id="updateSubMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET SUB_MER_ID=#{subMerId}, LOGIN_NAME = #{loginName}, LOGIN_PWD = #{loginPwd} 
+		WHERE TSN = #{tsn}
+	</update>
+	
+	<!-- 查询登陆信息 -->
+	<select id="getSubMerTerminal" resultMap="subMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		SELECT * FROM SUB_MER_TERMINAL WHERE
+		LOGIN_NAME = #{loginName} 
+		<if test="loginPwd != null and loginPwd != '' ">
+			AND LOGIN_PWD = #{loginPwd}
+		</if>
+		<if test="subMerId != null and subMerId != '' ">
+			AND SUB_MER_ID = #{subMerId} 
+		</if>
+		<if test="tsn != null and tsn != '' ">
+			AND TSN = #{tsn} 
+		</if>
+	</select>
+	
+	<!-- 查询终端信息 -->
+	<select id="selectSubMerTerminal" parameterType="com.bypay.domain.SubMerTerminal" resultMap="subMerTerminal">
+		SELECT ts.FACTORY,ts.ID,ts.TSN,ts.SUB_MER_ID,ts.MER_SYS_ID,
+		ts.AGENT_ID_L1,ts.AGENT_ID_L2,ts.PLAT_MER_ID,ts.CATEGORY,ts.LOGIN_NAME,
+		ts.STATUS,info.TERMINAL_ID
+		FROM SUB_MER_TERMINAL ts 
+		left join SUB_MER_TERMINAL_INFO info
+		ON ts.TSN=info.TSN
+		WHERE 1=1
+		<if test="subMerTerminal.merSysId != null and subMerTerminal.merSysId != '' ">
+		AND MER_SYS_ID = #{subMerTerminal.merSysId}
+		</if>
+		<if test="subMerTerminal.terminalId != null and subMerTerminal.terminalId != '' ">
+		AND info.TERMINAL_ID = #{subMerTerminal.terminalId}
+		</if>
+		<if test="subMerTerminal.tsn != null and subMerTerminal.tsn != '' ">
+		AND ts.TSN like '${subMerTerminal.tsn}%'
+		</if>
+		<if test="subMerTerminal.subMerId != null and subMerTerminal.subMerId != '' ">
+		AND ts.SUB_MER_ID = #{subMerTerminal.subMerId}
+		</if>
+		<if test="subMerTerminal.category != null and subMerTerminal.category != '' and subMerTerminal.category != -1">
+		AND ts.CATEGORY = #{subMerTerminal.category}
+		</if>
+		<if test="subMerTerminal.agentIdL1 != null and subMerTerminal.agentIdL1 != '' ">
+			<if test="subMerTerminal.level == 1">
+				AND ts.AGENT_ID_L1 = #{subMerTerminal.agentIdL1}
+			</if>
+			<if test="subMerTerminal.level == 2">
+				AND ts.AGENT_ID_L2 = #{subMerTerminal.agentIdL1}
+			</if>
+		</if>
+		<if test="subMerTerminal.platMerId != null and subMerTerminal.platMerId != '' ">
+		AND ts.PLAT_MER_ID = #{subMerTerminal.platMerId}
+		</if>
+		<if test="subMerTerminal.status != null and subMerTerminal.status != '' and subMerTerminal.status != -1">
+		AND ts.STATUS = #{subMerTerminal.status}
+		</if>
+		<if test="subMerTerminal.loginName != null and subMerTerminal.loginName != ''">
+		AND ts.LOGIN_NAME = #{subMerTerminal.loginName}
+		</if>
+		ORDER BY ID desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<!-- 查询终端信息条数 -->
+	<select id="selectSubMerTerminalCount" parameterType="com.bypay.domain.SubMerTerminal" resultType="int">
+		SELECT COUNT(1) FROM SUB_MER_TERMINAL ts 
+		left join SUB_MER_TERMINAL_INFO info 
+		ON ts.TSN=info.TSN
+		WHERE 1=1
+		<if test="subMerTerminal.merSysId != null and subMerTerminal.merSysId != '' ">
+		AND MER_SYS_ID = #{subMerTerminal.merSysId}
+		</if>	
+		<if test="subMerTerminal.terminalId != null and subMerTerminal.terminalId != '' ">
+		AND info.TERMINAL_ID = #{subMerTerminal.terminalId}
+		</if>
+		<if test="subMerTerminal.tsn != null and subMerTerminal.tsn != '' ">
+		AND ts.TSN like '${subMerTerminal.tsn}%'
+		</if>
+		<if test="subMerTerminal.subMerId != null and subMerTerminal.subMerId != '' ">
+		AND ts.SUB_MER_ID = #{subMerTerminal.subMerId}
+		</if>
+		<if test="subMerTerminal.category != null and subMerTerminal.category != '' and subMerTerminal.category != -1">
+		AND ts.CATEGORY = #{subMerTerminal.category}
+		</if>
+		<if test="subMerTerminal.agentIdL1 != null and subMerTerminal.agentIdL1 != '' ">
+			<if test="subMerTerminal.level == 1">
+				AND ts.AGENT_ID_L1 = #{subMerTerminal.agentIdL1}
+			</if>
+			<if test="subMerTerminal.level == 2">
+				AND ts.AGENT_ID_L2 = #{subMerTerminal.agentIdL1}
+			</if>
+		</if>
+		<if test="subMerTerminal.platMerId != null and subMerTerminal.platMerId != '' ">
+		AND ts.PLAT_MER_ID = #{subMerTerminal.platMerId}
+		</if>
+		<if test="subMerTerminal.status != null and subMerTerminal.status != '' and subMerTerminal.status != -1">
+		AND ts.STATUS = #{subMerTerminal.status}
+		</if>
+		<if test="subMerTerminal.loginName != null and subMerTerminal.loginName != ''">
+		AND ts.LOGIN_NAME = #{subMerTerminal.loginName}
+		</if>
+	</select>
+	<!-- 重置 -->
+	<update id="reset" parameterType="com.bypay.domain.SubMerTerminal">
+		update SUB_MER_TERMINAL
+		<set>
+			<if test="loginName != null and loginName != ''">
+			LOGIN_NAME = #{loginName}
+			</if>
+			<if test="subMerId != null and subMerId != ''">
+			SUB_MER_ID = #{subMerId}
+			</if>
+			<if test="agentIdL1 != null and agentIdL1 != ''">
+			AGENT_ID_L1 = #{agentIdL1}
+			</if>
+			<if test="agentIdL2 != null and agentIdL2 != ''">
+			AGENT_ID_L2 = #{agentIdL2}
+			</if>
+			<if test="status != null and status != ''">
+			STATUS = #{status}
+			</if>
+			<if test="loginPwd != null and loginPwd != ''">
+			LOGIN_PWD = #{loginPwd}
+			</if>
+		</set>
+		WHERE ID = #{id}
+	</update>
+	<update id="updateTerminalStatus" parameterType="com.bypay.domain.clientTool.TerminalEnable">
+		UPDATE SUB_MER_TERMINAL  SET STATUS='1'
+		 WHERE TSN=#{terminalId}
+	</update>
+	
+	<!-- 更新密码前查询终端是否存在 -->
+	<select id="selectSubMerTerminalByUpdatePwd" resultMap="subMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		SELECT * FROM SUB_MER_TERMINAL WHERE TSN = #{tsn}
+		AND SUB_MER_ID = #{subMerId} 
+		AND LOGIN_NAME = #{loginName} 
+	</select>
+	
+	<!-- 更新终端密码 -->
+	<update id="updatePwd" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET LOGIN_PWD = #{loginPwd}
+		 WHERE TSN=#{tsn}
+	</update>
+	
+	<!-- 修改设备最近登录时间 -->
+	<update id="updateSubMerByLastLoginTime" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET LAST_LOGIN_TIME = #{lastLoginTime}
+		 WHERE TSN=#{tsn}
+	</update>
+	<!-- 增加一条终端信息 -->
+	<insert id="insertSubMerTerminal" parameterType="com.bypay.domain.SubMerTerminal">
+		INSERT INTO SUB_MER_TERMINAL(TSN, FACTORY, MER_SYS_ID,CATEGORY, CREATE_TIME,
+		LAST_UPDATE_TIME,STATUS,SUB_MER_ID,AGENT_ID_L1,AGENT_ID_L2) 
+   		VALUES(#{tsn},#{factory},#{merSysId},#{category},#{createTime},#{lastUpdateTime},
+   		#{status},"-1","-1","-1")
+	</insert>
+	
+	<!-- 修改登录名 -->
+	<update id="updateSubMerTerminalLoginName" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET LOGIN_NAME = #{loginName}
+		 WHERE TSN=#{tsn}
+	</update>
+	
+	<!-- 修改终端状态 -->
+	<update id="updateTreminalStatusBySubMerId" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET STATUS = #{status}
+		 WHERE SUB_MER_ID=#{subMerId}
+	</update>
+	
+	<select id="getSubMerTerminalTSN" parameterType="com.bypay.domain.SubMerTerminal" resultMap="subMerTerminal">
+		select * from SUB_MER_TERMINAL where SUB_MER_ID=#{subMerId}
+	</select>
+	
+	<!-- 重置 -->
+	<update id="resetSubMerInfo" parameterType="com.bypay.domain.SubMerTerminal">
+		update SUB_MER_TERMINAL set SUB_MER_ID = #{subMerId}, LOGIN_NAME = #{loginName}, LOGIN_PWD = #{loginPwd} WHERE ID = #{id}
+	</update>
+	<!-- 设备信息，清除商户号，登录账户号、密码 -->
+	<update id="updateLoginInfoAndSubId" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL set SUB_MER_ID='-1', LOGIN_NAME='',LOGIN_PWD='' 
+		where SUB_MER_ID = #{subMerId}
+	</update>
+	
+	<!-- 根据机构商号返回 机构商号、统计下属终端数、终端开通数 syw 2015.08.06 -->
+	<select id="queryCountMerPusineTer" parameterType="java.util.Map" resultMap="subMerTerminal">
+		SELECT 
+			MER_SYS_ID,
+			count(TSN) as COUNT_TSN,
+			COUNT(CASE WHEN LOGIN_NAME is not NULL then LOGIN_NAME END) as COUNT_VALID
+		from 
+			SUB_MER_TERMINAL
+		WHERE 1=1
+		<if test="merSysId != null and merSysId != ''">
+		AND MER_SYS_ID = #{merSysId}
+		</if>
+		GROUP BY MER_SYS_ID
+		limit #{page},#{pageSize}
+	</select>
+	
+	<update id="updateCloneTer" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL SET SUB_MER_ID=#{subMerId},MER_SYS_ID=#{merSysId},LOGIN_NAME=#{loginName},LOGIN_PWD=#{loginPwd},LAST_LOGIN_TIME=#{lastLoginTime},STATUS=#{status} WHERE ID=#{id}
+	</update>
+	
+	<update id="updateCleanLogin" parameterType="com.bypay.domain.SubMerTerminal">
+		UPDATE SUB_MER_TERMINAL set SUB_MER_ID='-1', LOGIN_NAME='',LOGIN_PWD='',STATUS=1 
+		where ID = #{id}
+	</update>
+	
+	<insert id="insertBatchSubMerTerminal" parameterType="java.util.List">
+        insert into SUB_MER_TERMINAL(TSN, MER_SYS_ID, CATEGORY,CREATE_TIME,
+		LAST_UPDATE_TIME,STATUS,SUB_MER_ID,AGENT_ID_L1,AGENT_ID_L2,AGENT_ID_L3,AGENT_ID_L4) values 
+    <foreach collection="list" item= "item" index ="index" separator=",">
+       (#{item.tsn}, #{item.merSysId},#{item.category},#{item.createTime},#{item.lastUpdateTime},
+   		#{item.status},"-1","-1","-1","-1","-1")
+    </foreach >
+    
+	</insert>
+	
+</mapper>

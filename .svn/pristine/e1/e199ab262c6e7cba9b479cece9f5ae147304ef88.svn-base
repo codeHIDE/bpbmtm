@@ -1,0 +1,3119 @@
+package com.bypay.service.impl;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.ResourceBundle;
+
+import javax.inject.Inject;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
+import com.Ostermiller.util.MD5;
+import com.bypay.dao.AccountManageDao;
+import com.bypay.dao.AgenctInfoDao;
+import com.bypay.dao.BankBehalfBranchDao;
+import com.bypay.dao.BlackInfoDao;
+import com.bypay.dao.FactoryRiskDao;
+import com.bypay.dao.MerInfoDao;
+import com.bypay.dao.MerManagerDao;
+import com.bypay.dao.MerSettleStatictisDao;
+import com.bypay.dao.MerTerminalInfoDao;
+import com.bypay.dao.MerTransDao;
+import com.bypay.dao.MobileUserDao;
+import com.bypay.dao.OrderInfoDao;
+import com.bypay.dao.PhoneVerifyCodeDao;
+import com.bypay.dao.ProcedureDao;
+import com.bypay.dao.SubMerAuthInfoDao;
+import com.bypay.dao.SubMerCashoutDao;
+import com.bypay.dao.SubMerInfoDao;
+import com.bypay.dao.SubMerRateDao;
+import com.bypay.dao.SubMerTerminalDao;
+import com.bypay.dao.SubMerTerminalInfoDao;
+import com.bypay.dao.SubMerTransDao;
+import com.bypay.domain.AccountManage;
+import com.bypay.domain.AgenctInfo;
+import com.bypay.domain.BankBehalfBranch;
+import com.bypay.domain.BlackInfo;
+import com.bypay.domain.FactoryRisk;
+import com.bypay.domain.MerInfo;
+import com.bypay.domain.MerManager;
+import com.bypay.domain.MerSettleStatictis;
+import com.bypay.domain.MerTerminalInfo;
+import com.bypay.domain.MerTrans;
+import com.bypay.domain.MobileUser;
+import com.bypay.domain.OrderInfo;
+import com.bypay.domain.PhoneVerifyCode;
+import com.bypay.domain.SubMerAuthInfo;
+import com.bypay.domain.SubMerCashout;
+import com.bypay.domain.SubMerInfo;
+import com.bypay.domain.SubMerRate;
+import com.bypay.domain.SubMerTerminal;
+import com.bypay.domain.SubMerTerminalInfo;
+import com.bypay.domain.SubMerTrans;
+import com.bypay.domain.clientTool.AccountEnquiry;
+import com.bypay.domain.clientTool.AccountLogIn;
+import com.bypay.domain.clientTool.AccountRegist;
+import com.bypay.domain.clientTool.BankUtils;
+import com.bypay.domain.clientTool.DrawMoneyRecord;
+import com.bypay.domain.clientTool.DrawMoneyRecordList;
+import com.bypay.domain.clientTool.Enquiry;
+import com.bypay.domain.clientTool.EnquiryList;
+import com.bypay.domain.clientTool.OpenPurchase;
+import com.bypay.domain.clientTool.PhoneNumber;
+import com.bypay.domain.clientTool.QueryBalance;
+import com.bypay.domain.clientTool.SelectPassWord;
+import com.bypay.domain.clientTool.SettBank;
+import com.bypay.domain.clientTool.SettBankList;
+import com.bypay.domain.clientTool.TerminalCancel;
+import com.bypay.domain.clientTool.TerminalEnable;
+import com.bypay.domain.clientTool.TerminalValidate;
+import com.bypay.domain.clientTool.TransInfoReq;
+import com.bypay.service.InterfaceService;
+import com.bypay.util.AuthenticationUtil;
+import com.bypay.util.DateUtil;
+import com.bypay.util.HFSendData;
+import com.bypay.util.Md5Util;
+import com.bypay.util.PageUtil;
+import com.bypay.util.PropertiesUtils;
+import com.bypay.util.RSACoder;
+import com.bypay.util.RefundUtil;
+import com.bypay.util.RemoteAccessor;
+import com.bypay.util.ValueTool;
+import com.bypay.util.XmlUtil;
+import com.bypay.util.XmlUtilnew;
+
+@Service("interfaceService")
+public class InterfaceServiceImpl implements InterfaceService {
+	@Inject
+	private MerInfoDao merInfoDao;
+	@Inject
+	private FactoryRiskDao factoryRiskDao;
+	@Inject
+	private SubMerCashoutDao subMerCashoutDao;
+	@Inject
+	private MerManagerDao merManagerDao;
+	@Inject
+	private MerSettleStatictisDao merSettleStatictisDao;
+	@Inject
+	private AccountManageDao accountManageDao;
+	@Inject
+	private ProcedureDao procedureDao;
+	@Inject
+	private SubMerTerminalInfoDao subMerTerminalInfoDao;
+	@Inject
+	private MerTerminalInfoDao merTerminalInfoDao;
+	@Inject
+	private SubMerAuthInfoDao subMerAuthInfoDao;
+	@Inject
+	private BankBehalfBranchDao bankBehalfBranchDao;
+	@Inject
+	private SubMerInfoDao subMerInfoDao;
+	@Inject
+	private MobileUserDao mobileUserDao;
+	@Inject
+	private SubMerTransDao subMerTransDao;
+	@Inject
+	private SubMerRateDao subMerRateDao;
+	@Inject
+	private MerTransDao merTransDao;
+	@Inject
+	private AgenctInfoDao agenctInfoDao;
+	@Inject
+	private SubMerTerminalDao subMerTerminalDao;
+	@Inject
+	private XmlUtilnew xmlUtilnew;
+	@Inject
+	private OrderInfoDao orderInfoDao;
+	@Inject
+	private PhoneVerifyCodeDao phoneVerifyCodeDao;
+	@Inject
+	private BlackInfoDao blackInfoDao;
+
+	private String checkCode;
+	static ResourceBundle rb = ResourceBundle.getBundle(
+			"com/bypay/config/bmtmUtil", Locale.getDefault());
+
+	public String getCheckCode() {
+		return checkCode;
+	}
+
+	public void setCheckCode(String checkCode) {
+		this.checkCode = checkCode;
+	}
+
+	/**
+	 * 注册时的数据查询验证、添加商户
+	 * 
+	 * @throws Exception
+	 */
+	public AccountRegist checkRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = "";// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		Integer terminalId = (Integer) map.get("o_id");
+		try {
+			// 手机验证码验证
+//			PhoneVerifyCode phoneVerifyCode = new PhoneVerifyCode();
+//			phoneVerifyCode.setTerminalId(regist.getTerminalId());
+//			phoneVerifyCode.setPhone(regist.getMobileNum());
+//			phoneVerifyCode.setCode(regist.getMsgExt());
+//			PhoneVerifyCode phoneVerifyCodes = phoneVerifyCodeDao.selectPhoneVerifyCode(phoneVerifyCode);
+
+//			if ((null == regist.getMsgExt() || "".equals(regist.getMsgExt()))
+//					|| (null != phoneVerifyCodes)) {
+//				long a = 0;
+//				long b = 0;
+//				if (null != phoneVerifyCodes) {
+//					a = Long.parseLong(DateUtil.getDate("yyyyMMddHHmmss"));
+//					b = Long.parseLong(phoneVerifyCodes.getCreateTime());
+//				}
+//				long c = a - b;
+//				if (c > 1500) {
+//					setCheckCode("3060");
+//				} else {
+					// 查询法人身份验证
+					List<SubMerInfo> subMerInfos = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+					if (null == subMerInfos || subMerInfos.size() <= 0) {
+						// 子商户终端登录名(手机号)
+						List<SubMerTerminal> terminals = subMerTerminalDao.selectSubMerTerminalByPhone(regist.getMobileNum());
+						if (null == terminals || terminals.size() <= 0) {
+							// 获取子商户设备信息
+							SubMerTerminal terminal = new SubMerTerminal();
+							terminal.setTsn(regist.getTerminalId());
+							SubMerTerminal subMerTerminal = subMerTerminalDao.selectSubMerTerminalByTerminalId(terminal);
+							setCheckCode("9001");
+							if (null != subMerTerminal) {
+								setCheckCode("9004");
+								if (subMerTerminal.getSubMerId() == null
+										|| "".equals(subMerTerminal.getSubMerId())
+										|| "-1".equals(subMerTerminal.getSubMerId())) {
+									String status = "0";// 子商户状态
+									// 代理 暂停进件验证 (代理商状态为3）
+									String isIntoPieces1 = "";
+									String isIntoPieces2 = "";
+									if (null != subMerTerminal.getAgentIdL1()
+											&& !"".equals(subMerTerminal.getAgentIdL1())
+											&& !"-1".equals(subMerTerminal.getAgentIdL1())) {
+										
+										status = "-2";
+
+										AgenctInfo agenctInfo = new AgenctInfo();
+										agenctInfo.setAgentId(subMerTerminal.getAgentIdL1());
+										agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+										isIntoPieces1 = agenctInfo.getIsIntoPieces();
+									}
+									if (null != subMerTerminal.getAgentIdL2()
+											&& !"".equals(subMerTerminal.getAgentIdL2())
+											&& !"-1".equals(subMerTerminal.getAgentIdL2())) {
+										status = "-3";
+
+										AgenctInfo agenctInfo = new AgenctInfo();
+										agenctInfo.setAgentId(subMerTerminal.getAgentIdL2());
+										agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+										isIntoPieces2 = agenctInfo.getIsIntoPieces();
+									}
+									MerInfo mi = new MerInfo();
+									mi.setMerSysId(subMerTerminal.getMerSysId());
+									mi = merInfoDao.selectMerInfoById(mi);
+									//机构 暂停进件
+									if(null != mi && !"1".equals(mi.getIsIntoPieces())) {
+										// 代理暂停进件验证
+										if (!"1".equals(isIntoPieces1) && !"1".equals(isIntoPieces2)) {
+											// 获取机构交易配置信息
+											MerTrans merTrans = merTransDao.getMerTransInfo(subMerTerminal.getMerSysId());
+											setCheckCode("3039");
+											if (null != merTrans) {
+												if (null != merTrans.getAutoApprove()
+														&& !"".equals(merTrans.getAutoApprove())
+														&& "1".equals(merTrans.getAutoApprove())) {
+													status = "2";
+												}
+												String authStatus = "";// 实名认证状态
+												String serialNo = "";// 实名认证流水号
+												// 自动审核
+												if ("1".equals(merTrans
+														.getAutoApprove())) {
+													if (null != regist.getSettleAccountType()
+															&& !"".equals(regist.getSettleAccountType())
+															&& "2".equals(regist.getSettleAccountType())) {// 对私注册
+														// 实名认证
+														String authResult = authentication(regist);
+														String authStr[] = authResult
+																.split("\\|");
+														authStatus = authStr[0];
+														serialNo = authStr[1];
+														if ("1".equals(authStatus)) {
+															Long subMerId = null;// 子商户号
+															// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+															// 组装子商户号
+															merchantId = merTrans
+																	.getMerSysId()
+																	.substring(merTrans.getMerSysId().length() - 3)
+																	+ merTrans.getBasicRegion()
+																	+ merTrans.getBasicMcc();// 缺少后4位数的编码
+															boolean res = false;
+															// 一次只能有一个线程进入，将子商户号组装完整
+															synchronized (merchantId) {
+																SubMerInfo merInfo = new SubMerInfo();
+																merInfo.setSubMerId(merchantId);
+																String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+																if (subId != null && !"".equals(subId)) {
+																	subMerId = Long.parseLong(subId) + 1;
+																} else {
+																	subMerId = Long.parseLong(merchantId + "0001");
+																}
+																res = insertSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+															}
+															// 添加子商户信息
+															setCheckCode("9009");
+															if (res == true) { // 判断子商户添加成功是否
+																merchantId = subMerId .toString();
+																// 添加修改商户相关信息
+																optSubMerInfo(merTrans, subMerTerminal, subMerId, regist, terminalId);
+															}
+															// 修改子商户交易配置-认证状态
+															SubMerTrans subMerTrans = new SubMerTrans();
+															subMerTrans.setSubMerId(subMerId.toString());
+															subMerTrans.setAuthStatus(authStatus);
+															subMerTrans.setAuthTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+															if (subMerTransDao.updateSubMerTransInfo(subMerTrans) != 1) {
+																setCheckCode("3047");
+															}
+														} else {
+															setCheckCode("2001");
+														}
+														// 添加实名数据到数据库
+														SubMerAuthInfo auth = new SubMerAuthInfo();
+														auth.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+														if ("".equals(merchantId)) {
+															merchantId = "-1";
+														}
+														auth.setSubMerId(merchantId);
+														auth.setRemitType("1");
+														auth.setRealName(regist.getLegalManName());
+														auth.setIdNum(regist.getLegalManIdcard());
+														if ("-1".equals(authStatus)) {
+															authStatus = "4";
+														}
+														auth.setAuthStatus(authStatus);
+														auth.setSerialNo(serialNo);
+														auth.setTerminalId(regist.getTerminalId());
+														// 添加认证信息到数据库
+														if (subMerAuthInfoDao
+																.addSubMerAuthInfo(auth) != 1) {
+															setCheckCode("3048");
+														}
+													} else {// 对公注册
+														Long subMerId = null;// 子商户号：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+														// 组装子商户号
+														merchantId = merTrans.getMerSysId().substring(merTrans.getMerSysId().length() - 3)
+																+ merTrans.getBasicRegion()
+																+ merTrans.getBasicMcc();// 缺少后4位数的编码
+														boolean res = false;
+														// 一次只能有一个线程进入，将子商户号组装完整
+														synchronized (merchantId) {
+															SubMerInfo merInfo = new SubMerInfo();
+															merInfo.setSubMerId(merchantId);
+															String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+															if (subId != null && !"".equals(subId)) {
+																subMerId = Long.parseLong(subId) + 1;
+															} else {
+																subMerId = Long.parseLong(merchantId + "0001");
+															}
+															res = insertSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+														}
+														// 添加子商户信息
+														setCheckCode("9009");
+														if (res == true) { // 判断子商户添加成功是否
+															merchantId = subMerId.toString();
+															// 添加修改商户相关信息
+															optSubMerInfo(merTrans, subMerTerminal, subMerId, regist, terminalId);
+														}
+													}
+													// 添加子商户超级管理员
+													insertSubMerManager(merchantId, regist);
+												} else {// 手动审核
+													Long subMerId = null;// 子商户号
+													// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+													// 组装子商户号
+													merchantId = merTrans.getMerSysId().substring(
+																	merTrans.getMerSysId().length() - 3)
+															+ merTrans.getBasicRegion()
+															+ merTrans.getBasicMcc();// 缺少后4位数的编码
+													boolean res = false;
+													// 一次只能有一个线程进入，将子商户号组装完整
+													synchronized (merchantId) {
+														SubMerInfo merInfo = new SubMerInfo();
+														merInfo.setSubMerId(merchantId);
+														String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+														if (subId != null && !"".equals(subId)) {
+															subMerId = Long.parseLong(subId) + 1;
+														} else {
+															subMerId = Long.parseLong(merchantId + "0001");
+														}
+														res = insertSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+													}
+													// 添加子商户信息
+													setCheckCode("9009");
+													if (res == true) { // 判断子商户添加成功是否
+														merchantId = subMerId.toString();
+														// 添加修改商户相关信息
+														optSubMerInfo(merTrans, subMerTerminal, subMerId, regist, terminalId);
+													}
+												}
+
+											}
+										} else {
+											setCheckCode("3063");
+										}
+									}else {
+										setCheckCode("3062");
+									}
+								}
+							}
+						} else {
+							setCheckCode("3057");
+						}
+					} else {
+						setCheckCode("3055");
+					}
+//				}
+//			} else {
+//				setCheckCode("3059");
+//			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+
+	/**
+	 * 注册第一步,手机密码验证码
+	 * 
+	 * @throws Exception
+	 */
+	public AccountRegist userRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		int rI = (int)(Math.random()*9);
+		String subMerId = sdf.format(new Date())+rI;// 子商户号
+		try {
+			// 子商户终端登录名(手机号)
+			List<SubMerTerminal> terminals = subMerTerminalDao.selectSubMerTerminalByPhone(regist.getMobileNum());
+			//判断手机号是否在黑名单内
+			BlackInfo blackInfo = new BlackInfo();
+			blackInfo.setPhone(regist.getMobileNum());
+			blackInfo = blackInfoDao.selectBlackInfo(blackInfo);
+			if(blackInfo==null){
+				if (null == terminals || terminals.size() <= 0) {
+					// 查询Mobile 信息
+					MobileUser mobileUser = new MobileUser();
+					mobileUser.setLoginName(regist.getMobileNum());
+	//				mobileUser.setLoginPwd(regist.getAccountPwd());
+					mobileUser = mobileUserDao.getMobileUser(mobileUser);
+					System.out.println("mobileUser="+mobileUser);
+					if(mobileUser==null){
+						String status = "0";// 子商户状态
+						// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+						boolean res = false;
+						// 一次只能有一个线程进入，将手机号号组装完整	
+						synchronized (regist.getMobileNum()) {
+							System.out.println("go to insert");
+							res = insertSubMerInfo(regist, status, subMerId);
+						}
+					}else{
+						setCheckCode("3057");
+					}
+				} else {
+					setCheckCode("3057");
+				}
+			}else{
+				setCheckCode("3057");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("UserRegist.Rsp");
+		regist.setMerchantId(subMerId);
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setAccountPwd("");
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+	
+	/**
+	 * 注册第二步
+	 * 
+	 * @throws Exception
+	 */
+	public AccountRegist subMerRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = "";// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		try {
+			// 查询法人身份验证
+//			List<SubMerInfo> subMerInfosList = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+//			if (null == subMerInfosList || subMerInfosList.size() <= 0) {
+			Boolean idFlag = true;
+			//判定 黑名单
+			//卡号黑名单
+			BlackInfo cardBlackInfo = new BlackInfo();
+			cardBlackInfo.setCardNo(regist.getSettleAccountNo());
+			cardBlackInfo = blackInfoDao.selectBlackInfo(cardBlackInfo);
+			BlackInfo idBlackInfo = new BlackInfo();
+			//身份证黑名单
+			idBlackInfo.setIdNum(regist.getLegalManIdcard());
+			idBlackInfo = blackInfoDao.selectBlackInfo(idBlackInfo);
+			if(cardBlackInfo==null && idBlackInfo==null){
+			SubMerInfo subMerInfos  = subMerInfoDao.getSubMerInfoById(regist.getMerchantId());
+				if(subMerInfos==null){
+					List<SubMerInfo> subMerInfosList = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+					if (null != subMerInfosList && subMerInfosList.size() > 0) {
+						idFlag=false;
+					}
+				}
+					setCheckCode("9004");
+					String status = "0";// 子商户状态
+					if(idFlag) {
+							setCheckCode("3039");
+								String authStatus = "";// 实名认证状态
+								String serialNo = "";// 实名认证流水号
+									Long subMerId = null;// 子商户号
+									// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+									// 组装子商户号
+									MobileUser mobileUser = new MobileUser();
+									mobileUser.setLoginName(regist.getAccountName());
+									mobileUser = mobileUserDao.getMobileUser(mobileUser);
+									merchantId = mobileUser.getSubMerId();
+									boolean res = false;
+									// 一次只能有一个线程进入，将子商户号组装完整
+									synchronized (merchantId) {
+										SubMerInfo merInfo = new SubMerInfo();
+										merInfo.setSubMerId(merchantId);
+										if(subMerInfos==null){
+											res = insertSubMer(regist,status, merchantId);
+											mobileUser.setStatus("1");
+										}else{
+											res = updateSubMer(regist,status, merchantId);
+											mobileUser.setStatus("2");
+										}
+										//更新用户信息
+										mobileUserDao.updateMobileUser(mobileUser);
+									}
+							
+						
+					}else {
+						setCheckCode("3055");
+					}
+			} else {
+				setCheckCode("3055");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("SubMerRegist.Rsp");
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+	
+	public AccountRegist terminalRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = "";// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		Integer terminalId = (Integer) map.get("o_id");
+		MobileUser mobileUser = new MobileUser();
+		mobileUser.setLoginName(regist.getMobileNum());
+		mobileUser = mobileUserDao.getMobileUser(mobileUser);
+		if(StringUtils.isNotEmpty(mobileUser.getTerminalId())){
+			if(mobileUser.getTerminalId().equals(regist.getTerminalId())){
+				setCheckCode("3066");	
+			}else{
+				setCheckCode("3064");
+			}
+			regist.setApplication("TerminalRegist.Rsp");
+			regist.setRespCode(checkCode);
+			regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+			return regist;
+		}
+		try {
+		// 子商户终端登录名(手机号)
+		List<SubMerTerminal> terminals = subMerTerminalDao.selectSubMerTerminalByPhone(regist.getMobileNum());
+		if (null == terminals || terminals.size() <= 0) {
+			// 获取子商户设备信息
+			SubMerTerminal terminal = new SubMerTerminal();
+			terminal.setTsn(regist.getTerminalId());
+			SubMerTerminal subMerTerminal = subMerTerminalDao.selectSubMerTerminalByTerminalId(terminal);
+			setCheckCode("9001");
+			if (null != subMerTerminal) {
+				setCheckCode("9004");
+				if (subMerTerminal.getSubMerId() == null
+						|| "".equals(subMerTerminal.getSubMerId())
+						|| "-1".equals(subMerTerminal.getSubMerId())) {
+					String status = "0";// 子商户状态
+					// 代理 暂停进件验证 (代理商状态为3）
+					String isIntoPieces1 = "";
+					String isIntoPieces2 = "";
+					if (null != subMerTerminal.getAgentIdL1()
+							&& !"".equals(subMerTerminal.getAgentIdL1())
+							&& !"-1".equals(subMerTerminal.getAgentIdL1())) {
+						
+						status = "-2";
+
+						AgenctInfo agenctInfo = new AgenctInfo();
+						agenctInfo.setAgentId(subMerTerminal.getAgentIdL1());
+						agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+						isIntoPieces1 = agenctInfo.getIsIntoPieces();
+					}
+					if (null != subMerTerminal.getAgentIdL2()
+							&& !"".equals(subMerTerminal.getAgentIdL2())
+							&& !"-1".equals(subMerTerminal.getAgentIdL2())) {
+						status = "-3";
+
+						AgenctInfo agenctInfo = new AgenctInfo();
+						agenctInfo.setAgentId(subMerTerminal.getAgentIdL2());
+						agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+						isIntoPieces2 = agenctInfo.getIsIntoPieces();
+					}
+					MerInfo mi = new MerInfo();
+					mi.setMerSysId(subMerTerminal.getMerSysId());
+					mi = merInfoDao.selectMerInfoById(mi);
+					//机构 暂停进件
+					if(null != mi && !"1".equals(mi.getIsIntoPieces())) {
+						// 代理暂停进件验证
+						if (!"1".equals(isIntoPieces1) && !"1".equals(isIntoPieces2)) {
+							// 获取机构交易配置信息
+							MerTrans merTrans = merTransDao.getMerTransInfo(subMerTerminal.getMerSysId());
+							setCheckCode("3039");
+							if (null != merTrans) {
+								if (null != merTrans.getAutoApprove()
+										&& !"".equals(merTrans.getAutoApprove())
+										&& "1".equals(merTrans.getAutoApprove())) {
+									status = "2";
+								}
+								String authStatus = "";// 实名认证状态
+								String serialNo = "";// 实名认证流水号
+								// 自动审核
+								if ("1".equals(merTrans
+										.getAutoApprove())) {
+									if (null != regist.getSettleAccountType()
+											&& !"".equals(regist.getSettleAccountType())
+											&& "2".equals(regist.getSettleAccountType())) {// 对私注册
+										// 实名认证
+										String authResult = authentication(regist);
+										String authStr[] = authResult
+												.split("\\|");
+										authStatus = authStr[0];
+										serialNo = authStr[1];
+										if ("1".equals(authStatus)) {
+											Long subMerId = null;// 子商户号
+											// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+											// 组装子商户号
+											merchantId = merTrans
+													.getMerSysId()
+													.substring(merTrans.getMerSysId().length() - 3)
+													+ merTrans.getBasicRegion()
+													+ merTrans.getBasicMcc();// 缺少后4位数的编码
+											boolean res = false;
+											// 一次只能有一个线程进入，将子商户号组装完整
+											synchronized (merchantId) {
+												SubMerInfo merInfo = new SubMerInfo();
+												merInfo.setSubMerId(merchantId);
+												String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+												if (subId != null && !"".equals(subId)) {
+													if(regist.getMerchantId().trim().length()>15){
+														subMerId = Long.parseLong(subId) + 1;
+													}else{
+														subMerId = Long.parseLong(regist.getMerchantId());
+													}
+												} else {
+													subMerId = Long.parseLong(merchantId + "0001");
+												}
+												res = updateSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+											}
+											// 添加子商户信息
+											setCheckCode("9009");
+											if (res == true) { // 判断子商户添加成功是否
+												merchantId = subMerId .toString();
+												// 添加修改商户相关信息
+												optSubMerInfoAndTerminal(merTrans, subMerTerminal, subMerId, regist, terminalId);
+											}
+											// 修改子商户交易配置-认证状态
+											SubMerTrans subMerTrans = new SubMerTrans();
+											subMerTrans.setSubMerId(subMerId.toString());
+											subMerTrans.setAuthStatus(authStatus);
+											subMerTrans.setAuthTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+											if (subMerTransDao.updateSubMerTransInfo(subMerTrans) != 1) {
+												setCheckCode("3047");
+											}
+										} else {
+											setCheckCode("2001");
+										}
+										// 添加实名数据到数据库
+										SubMerAuthInfo auth = new SubMerAuthInfo();
+										auth.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+										if ("".equals(merchantId)) {
+											merchantId = "-1";
+										}
+										auth.setSubMerId(merchantId);
+										auth.setRemitType("1");
+										auth.setRealName(regist.getLegalManName());
+										auth.setIdNum(regist.getLegalManIdcard());
+										if ("-1".equals(authStatus)) {
+											authStatus = "4";
+										}
+										auth.setAuthStatus(authStatus);
+										auth.setSerialNo(serialNo);
+										auth.setTerminalId(regist.getTerminalId());
+										// 添加认证信息到数据库
+										if (subMerAuthInfoDao
+												.addSubMerAuthInfo(auth) != 1) {
+											setCheckCode("3048");
+										}
+									} else {// 对公注册
+										Long subMerId = null;// 子商户号：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+										// 组装子商户号
+										merchantId = merTrans.getMerSysId().substring(merTrans.getMerSysId().length() - 3)
+												+ merTrans.getBasicRegion()
+												+ merTrans.getBasicMcc();// 缺少后4位数的编码
+										boolean res = false;
+										// 一次只能有一个线程进入，将子商户号组装完整
+										synchronized (merchantId) {
+											SubMerInfo merInfo = new SubMerInfo();
+											merInfo.setSubMerId(merchantId);
+											String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+											if (subId != null && !"".equals(subId)) {
+												if(regist.getMerchantId().trim().length()>15){
+													subMerId = Long.parseLong(subId) + 1;
+												}else{
+													subMerId = Long.parseLong(regist.getMerchantId());
+												}
+											} else {
+												subMerId = Long.parseLong(merchantId + "0001");
+											}
+											res = updateSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+										}
+										// 添加子商户信息
+										setCheckCode("9009");
+										if (res == true) { // 判断子商户添加成功是否
+											merchantId = subMerId.toString();
+											// 添加修改商户相关信息
+											optSubMerInfoAndTerminal(merTrans, subMerTerminal, subMerId, regist, terminalId);
+										}
+									}
+									// 添加子商户超级管理员
+									insertSubMerManager(merchantId, regist);
+								} else {// 手动审核
+									Long subMerId = null;// 子商户号
+									// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+									// 组装子商户号
+									merchantId = merTrans.getMerSysId().substring(
+													merTrans.getMerSysId().length() - 3)
+											+ merTrans.getBasicRegion()
+											+ merTrans.getBasicMcc();// 缺少后4位数的编码
+									boolean res = false;
+									// 一次只能有一个线程进入，将子商户号组装完整
+									synchronized (merchantId) {
+										SubMerInfo merInfo = new SubMerInfo();
+										merInfo.setSubMerId(merchantId);
+										String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+										if (subId != null && !"".equals(subId)) {
+											if(regist.getMerchantId().trim().length()>15){
+												subMerId = Long.parseLong(subId) + 1;
+											}else{
+												subMerId = Long.parseLong(regist.getMerchantId());
+											}
+										} else {
+											subMerId = Long.parseLong(merchantId + "0001");
+										}
+										res = updateSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+									}
+									// 添加子商户信息
+									setCheckCode("9009");
+									if (res == true) { // 判断子商户添加成功是否
+										merchantId = subMerId.toString();
+										// 添加修改商户相关信息
+										optSubMerInfoAndTerminal(merTrans, subMerTerminal, subMerId, regist, terminalId);
+									}
+								}
+
+							}
+						} else {
+							setCheckCode("3063");
+						}
+					}else {
+						setCheckCode("3062");
+					}
+				}
+			}
+		} else {
+			setCheckCode("3057");
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("TerminalRegist.Rsp");
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	
+	}
+	
+	
+	public AccountRegist changeCard(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = regist.getMerchantId();// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		try {
+			// 查询法人身份验证
+			List<SubMerInfo> subMerInfos = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+			setCheckCode("9004");
+				String status = "0";// 子商户状态
+						setCheckCode("3039");
+						boolean res = false;
+						// 一次只能有一个线程进入，将子商户号组装完整
+						synchronized (merchantId) {
+							SubMerInfo merInfo = new SubMerInfo();
+							merInfo.setSubMerId(merchantId);
+							res = changeCard(regist,status, merchantId);
+						}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("ChangeCard.Rsp");
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+	
+	
+	/**
+	 * 添加修改商户相关信息
+	 * 
+	 * @param merTrans
+	 * @param subMerTerminal
+	 * @param subMerId
+	 * @param regist
+	 * @throws Exception
+	 * @throws Exception
+	 */
+	private void optSubMerInfo(MerTrans merTrans,
+			SubMerTerminal subMerTerminal, Long subMerId, AccountRegist regist,
+			Integer terminalId) throws Exception {
+		String subMerIds = subMerId.toString();
+		// 添加子商户交易费率信息
+		insertSubMerRateInfo(merTrans, subMerIds, subMerTerminal);
+		// 添加子商户交易配置信息
+		insertSubMerTransInfo(merTrans, subMerIds, regist);
+		// 修改子商户设备信息
+		updateSubMerTerminal(regist, subMerIds);
+		// 添加子商户终端信息
+		if (insertSubMerTerminalInfo(subMerIds, regist, merTrans, terminalId)) {
+			setCheckCode("0000");
+		}
+	}
+	
+	private void optSubMerInfoAndTerminal(MerTrans merTrans,
+			SubMerTerminal subMerTerminal, Long subMerId, AccountRegist regist,
+			Integer terminalId) throws Exception {
+		String subMerIds = subMerId.toString();
+		// 添加子商户交易费率信息
+		insertSubMerRateInfo(merTrans, subMerIds, subMerTerminal);
+		// 添加子商户交易配置信息
+		insertSubMerTransInfo(merTrans, subMerIds, regist);
+		// 修改子商户设备信息
+		updateSubMerTerminal(regist, subMerIds);
+		// 修改mobileUser信息
+		updateMoblieUser(regist, subMerIds);
+		// 添加子商户终端信息
+		if (insertSubMerTerminalInfo(subMerIds, regist, merTrans, terminalId)) {
+			setCheckCode("0000");
+		}
+	}
+	
+	/**
+	 * 添加子商户管理员
+	 * 
+	 * @param subMerIds
+	 * @return
+	 */
+	private boolean insertSubMerManager(String subMerId, AccountRegist regist)
+			throws Exception {
+		boolean result = false;
+
+		MerManager merManager = new MerManager();
+		merManager.setMid(subMerId);
+		merManager.setMerType("1");
+		merManager.setLoginName("admin");
+		merManager.setLoginPwd(MD5.getHashString("admin"));
+		merManager.setRealName(regist.getLegalManName());
+		merManager.setPhone(regist.getMobileNum());
+		merManager.setEmail("");
+		merManager.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+		merManager.setStatus("1");
+		merManager.setRemark("1");
+
+		if (merManagerDao.insertMerManager(merManager) > 0) {
+			result = true;
+		} else {
+			setCheckCode("3049");
+		}
+		return result;
+	}
+
+	/**
+	 * 添加子商户终端信息
+	 * 
+	 * @param string
+	 * @param regist
+	 * @return
+	 */
+	private boolean insertSubMerTerminalInfo(String subMerId,
+			AccountRegist regist, MerTrans merTrans, Integer terminalId)
+			throws Exception {
+		boolean result = false;
+		SubMerTerminalInfo subMerTerminalInfo = new SubMerTerminalInfo();
+		setCheckCode("3045");
+		subMerTerminalInfo.setTerminalId(terminalId.toString());// subMerId.substring(subMerId.length()-8,
+		// subMerId.length())
+		subMerTerminalInfo.setSubMerId(subMerId);
+		subMerTerminalInfo.setTsn(regist.getTerminalId());
+		// subMerTerminalInfo.setFactoryId(regist.getFactoryId());
+		// 自动审核
+		if (null != merTrans.getAutoApprove()
+				&& "1".equals(merTrans.getAutoApprove())) {
+			subMerTerminalInfo.setTerminalType(merTrans.getRateType());
+		}
+		// 手动审核
+		if (null != merTrans.getAutoApprove()
+				&& "0".equals(merTrans.getAutoApprove())) {
+			subMerTerminalInfo.setTerminalType("01");
+		}
+
+		setCheckCode("3046");
+		int re = subMerTerminalInfoDao
+				.insertSubMerTerminalInfo(subMerTerminalInfo);
+		if (re > 0) {
+			result = true;
+		}
+		return result;
+	}
+
+	/**
+	 * 修改子商户设备信息
+	 * 
+	 * @param results
+	 * @param string
+	 * @return
+	 */
+	private Boolean updateSubMerTerminal(AccountRegist regist, String subMerId)
+			throws Exception {
+		Boolean result = false;
+		SubMerTerminal smt = new SubMerTerminal();
+		smt.setTsn(regist.getTerminalId());
+		// smt.setFactory(regist.getFactoryId());
+		smt.setSubMerId(subMerId);
+		smt.setLoginName(regist.getMobileNum());
+		smt.setLoginPwd(regist.getAccountPwd());
+		// 修改子商户设备信息
+		setCheckCode("3021");
+		if (subMerTerminalDao.updateSubMerTerminal(smt)) {
+			result = true;
+		}
+		return result;
+	}
+
+	private Boolean updateMoblieUser(AccountRegist regist, String subMerId)
+			throws Exception {
+		Boolean result = false;
+		MobileUser smt = new MobileUser();
+		smt.setSubMerId(subMerId.trim());
+		smt.setOldSubMerId(regist.getMerchantId());
+		smt.setTerminalId(regist.getTerminalId());
+		smt.setStatus("2");
+		// 修改子商户设备信息
+		setCheckCode("3021");
+		if (mobileUserDao.updateTerminal(smt)) {
+			result = true;
+		}
+		return result;
+	}
+	
+	/**
+	 * 添加子商户交易配置信息
+	 * 
+	 * @param merTrans
+	 * @param subMerId
+	 */
+	private Boolean insertSubMerTransInfo(MerTrans merTrans, String subMerId,
+			AccountRegist regist) throws Exception {
+		SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(subMerId);
+		Boolean result = false;
+		SubMerTrans subMerTrans = new SubMerTrans();
+		subMerTrans.setSubMerId(subMerId);
+		subMerTrans.setDispMerId(merTrans.getMerSysId());
+		String dispName = "";
+		if (null != regist.getMerchantName()
+				&& !"".equals(regist.getMerchantName())) {
+			dispName = subMerInfo.getSubMerName();
+		} else {
+			dispName = subMerInfo.getSubMerName();
+		}
+		subMerTrans.setDisMerName(dispName);
+		subMerTrans.setTerminalType(merTrans.getTerminalType());
+		subMerTrans.setBusType(merTrans.getBusType());
+		// subMerTrans.setClearTime("01");
+		subMerTrans.setAuthStatus("0");// 认证状态
+		// subMerTrans.setAuthTime(new
+		// SimpleDateFormat("yyyy-MM-dd mm:hh:ss").format(new Date()));
+		subMerTrans.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+		setCheckCode("3023");
+		if (subMerTransDao.insertSubMerTransInfo(subMerTrans) > 0) {
+			result = true;
+		}
+		return result;
+	}
+
+	/**
+	 * 添加子商户交易费率
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean insertSubMerRateInfo(MerTrans merTrans, String subMerId,
+			SubMerTerminal subMerTerminal) throws Exception {
+		setCheckCode("3022");
+		boolean result = false;
+
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		String agentL1Rate = "-1";// 一级代理费率（单位%）扣率
+		String agentL1Rate2 = "-1";//封顶
+		String agentL1HighestFee = "-1";// 封顶值
+		String agentL1ProfitRate = "-1";// 分润占比（单位%）
+		String agentL1NoTop = "-1"; //积分费率
+
+		String agentL2Rate = "-1";// 二级代理费率（单位%）
+		String agentL2Rate2 = "-1";// 封顶
+		String agentL2HighestFee = "-1";// 封顶值
+		String agentL2ProfitRate = "-1";// 分润占比（单位%）
+		String agentL2NoTop = "-1"; //积分费率
+		
+		String agentL3Rate = "-1";// 三级代理费率（单位%）
+		String agentL3Rate2 = "-1";// 封顶
+		String agentL3HighestFee = "-1";// 封顶值
+		String agentL3ProfitRate = "-1";// 分润占比（单位%）
+		String agentL3NoTop = "-1"; //积分费率
+		
+		String agentL4Rate = "-1";// 四级代理费率（单位%）
+		String agentL4Rate2 = "-1";// 封顶
+		String agentL4HighestFee = "-1";// 封顶值
+		String agentL4ProfitRate = "-1";// 分润占比（单位%）
+		String agentL4NoTop = "-1"; //积分费率
+
+		// 一级代理商
+		if (null != subMerTerminal.getAgentIdL1() && !"".equals(subMerTerminal.getAgentIdL1())
+				&& !"-1".equals(subMerTerminal.getAgentIdL1())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL1());
+			if(null != agenctInfo) {
+				agentL1Rate = agenctInfo.getAgentRate1();
+				agentL1Rate2 = agenctInfo.getAgentRate2();
+				agentL1HighestFee = agenctInfo.getAgentHighestFee();
+				agentL1ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL1NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL1Rate || "".equals(agentL1Rate) || "-1".equals(agentL1Rate)){
+					agentL1Rate = "-1";
+				}
+				if(null == agentL1Rate2 || "".equals(agentL1Rate2) || "-1".equals(agentL1Rate2)){
+					agentL1Rate2 = "-1";
+				}
+				if(null == agentL1HighestFee || "".equals(agentL1HighestFee) || "-1".equals(agentL1HighestFee)){
+					agentL1HighestFee = "-1";
+				}
+				if(null == agentL1ProfitRate || "".equals(agentL1ProfitRate) || "-1".equals(agentL1ProfitRate)){
+					agentL1ProfitRate = "-1";
+				}
+				if(null == agentL1NoTop || "".equals(agentL1NoTop) || "-1".equals(agentL1NoTop)){
+					agentL1NoTop = "-1";
+				}
+			}
+		}
+		// 二级代理商
+		if (null != subMerTerminal.getAgentIdL2() && !"".equals(subMerTerminal.getAgentIdL2())
+				&& !"-1".equals(subMerTerminal.getAgentIdL2())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL2());
+			if(null != agenctInfo) {
+				agentL2Rate = agenctInfo.getAgentRate1();
+				agentL2Rate2 = agenctInfo.getAgentRate2();
+				agentL2HighestFee = agenctInfo.getAgentHighestFee();
+				agentL2ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL2NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL2Rate || "".equals(agentL2Rate) || "-1".equals(agentL2Rate)){
+					agentL2Rate = "-1";
+				}
+				if(null == agentL2Rate2 || "".equals(agentL2Rate2) || "-1".equals(agentL2Rate2)){
+					agentL2Rate2 = "-1";
+				}
+				if(null == agentL2HighestFee || "".equals(agentL2HighestFee) || "-1".equals(agentL2HighestFee)){
+					agentL2HighestFee = "-1";
+				}
+				if(null == agentL2ProfitRate || "".equals(agentL2ProfitRate) || "-1".equals(agentL2ProfitRate)){
+					agentL2ProfitRate = "-1";
+				}
+				if(null == agentL2NoTop || "".equals(agentL2NoTop) || "-1".equals(agentL2NoTop)){
+					agentL2NoTop = "-1";
+				}
+			}
+			
+		}
+		
+		// 三级代理商
+		if (null != subMerTerminal.getAgentIdL3() && !"".equals(subMerTerminal.getAgentIdL3())
+				&& !"-1".equals(subMerTerminal.getAgentIdL3())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL3());
+			if(null != agenctInfo) {
+				agentL3Rate = agenctInfo.getAgentRate1();
+				agentL3Rate2 = agenctInfo.getAgentRate2();
+				agentL3HighestFee = agenctInfo.getAgentHighestFee();
+				agentL3ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL3NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL3Rate || "".equals(agentL3Rate) || "-1".equals(agentL3Rate)){
+					agentL3Rate = "-1";
+				}
+				if(null == agentL3Rate2 || "".equals(agentL3Rate2) || "-1".equals(agentL3Rate2)){
+					agentL3Rate2 = "-1";
+				}
+				if(null == agentL3HighestFee || "".equals(agentL3HighestFee) || "-1".equals(agentL3HighestFee)){
+					agentL3HighestFee = "-1";
+				}
+				if(null == agentL3ProfitRate || "".equals(agentL3ProfitRate) || "-1".equals(agentL3ProfitRate)){
+					agentL3ProfitRate = "-1";
+				}
+				if(null == agentL3NoTop || "".equals(agentL3NoTop) || "-1".equals(agentL3NoTop)){
+					agentL3NoTop = "-1";
+				}
+			}
+			
+		}
+			
+		// 四级代理商
+		if (null != subMerTerminal.getAgentIdL4() && !"".equals(subMerTerminal.getAgentIdL4())
+				&& !"-1".equals(subMerTerminal.getAgentIdL4())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL4());
+			if(null != agenctInfo) {
+				agentL4Rate = agenctInfo.getAgentRate1();
+				agentL4Rate2 = agenctInfo.getAgentRate2();
+				agentL4HighestFee = agenctInfo.getAgentHighestFee();
+				agentL4ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL4NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL4Rate || "".equals(agentL4Rate) || "-1".equals(agentL4Rate)){
+					agentL4Rate = "-1";
+				}
+				if(null == agentL4Rate2 || "".equals(agentL4Rate2) || "-1".equals(agentL4Rate2)){
+					agentL4Rate2 = "-1";
+				}
+				if(null == agentL4HighestFee || "".equals(agentL4HighestFee) || "-1".equals(agentL4HighestFee)){
+					agentL4HighestFee = "-1";
+				}
+				if(null == agentL4ProfitRate || "".equals(agentL4ProfitRate) || "-1".equals(agentL4ProfitRate)){
+					agentL4ProfitRate = "-1";
+				}
+				if(null == agentL4NoTop || "".equals(agentL4NoTop) || "-1".equals(agentL4NoTop)){
+					agentL4NoTop = "-1";
+				}
+			}
+			
+		}
+				
+		map.put("subMerId", subMerId);
+		map.put("rateType", "03");
+		map.put("transRate", "-1");
+		map.put("transRateH", "-1");
+		map.put("transHighestFee", "-1");
+		map.put("lowestFee", "-1");
+		
+		map.put("agentL1Rate", agentL1Rate);
+		map.put("agentL1RateH", agentL1Rate2);
+		map.put("agentL1HighestFee", agentL1HighestFee);
+		map.put("agentL1NoTop", agentL1NoTop);
+		map.put("agentL1ProfitRate", agentL1ProfitRate);
+		map.put("agentL2Rate", agentL2Rate);
+		map.put("agentL2RateH", agentL2Rate2);
+		map.put("agentL2HighestFee", agentL2HighestFee);
+		map.put("agentL2NoTop", agentL2NoTop);
+		map.put("agentL2ProfitRate", agentL2ProfitRate);
+		
+		map.put("agentL3Rate", agentL3Rate);
+		map.put("agentL3RateH", agentL3Rate2);
+		map.put("agentL3HighestFee", agentL3HighestFee);
+		map.put("agentL3NoTop", agentL3NoTop);
+		map.put("agentL3ProfitRate", agentL3ProfitRate);
+		
+		map.put("agentL4Rate", agentL4Rate);
+		map.put("agentL4RateH", agentL4Rate2);
+		map.put("agentL4HighestFee", agentL4HighestFee);
+		map.put("agentL4NoTop", agentL4NoTop);
+		map.put("agentL4ProfitRate", agentL4ProfitRate);
+		
+		map.put("createTime", DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+		map.put("status", "1");
+		
+		if (subMerRateDao.insertSubMerRateInfo(map) > 0) {
+			result = true;
+		}
+		return result;
+	}
+
+	// 实人认证YJH
+	public String realPeopleAuthentication(SubMerInfo subMerInfo)
+			throws Exception {
+		String serialNo = "-1";// 流水号
+		String authStatus = "-1";// 认证状态
+
+		try {
+			// 获取人脸数据
+			byte datas[] = null;
+			BASE64Encoder encoder = new BASE64Encoder();
+			String path = rb.getString("ImagesUrl");
+			path += "/SubMerImages/" + subMerInfo.getMerSysId() + "/"
+					+ subMerInfo.getSubMerId() + "/" + "person.jpg";
+			FileInputStream is = null;
+			File file = new File(path);
+			if (file.exists()) {
+				is = new FileInputStream(path);
+				int i = is.available(); // 得到文件大小
+				datas = new byte[i];
+				is.read(datas); // 读数据
+				is.close();
+			}
+			String orderId = ValueTool.createByTime();
+			String userName = subMerInfo.getLegalPerson();
+			String idCard = subMerInfo.getLegalIdcard();
+			String imgInfo = "";
+			if (null != datas) {
+				imgInfo = encoder.encode(datas);
+			}
+			String merchentId = ValueTool.AUTH_MER_ID;
+			String orderTime = DateUtil.getDate("yyyyMMddHHmmss");
+			// 报文第一段
+			String first = merchentId;
+			// 报文第二段
+			String Second = "201|" + orderId + "|" + orderTime + "|" + userName
+					+ "|" + idCard + "|" + imgInfo;
+			// 报文第三段
+			String Third = merchentId + "201" + orderId + "" + orderTime + ""
+					+ idCard + "" + ValueTool.AUTH_MER_SIGN_KEY + "";
+
+			// 发送请求
+			AuthenticationUtil authenticationUtil = new AuthenticationUtil();
+			System.out.println("Second:" + Second);
+			String data = authenticationUtil.encrypt(first, Second, Third);// 加密并组合
+			RemoteAccessor remoteAccessor = new RemoteAccessor();
+			String paths = rb.getString("shimingUrl");
+			String decryptXml = remoteAccessor.getResponseByStream(paths,
+					"utf-8", data);
+			String[] ss = decryptXml.split("\\|");
+			if (ss[0].equals("0")) {// 解析成功
+				String respXml = new AuthenticationUtil().decrypt(ss[1]);
+				String[] result = respXml.split("\\|");
+				String respCode = result[5];// 返回码
+				serialNo = result[4];// 流水号
+				System.out.println("respCode:" + respCode + " miaoshu:"
+						+ result[6]);
+				if (!"".equals(respCode) && "0000".equals(respCode)) {// 认证成功
+					authStatus = "2";
+				} else {
+					authStatus = "4";
+				}
+			}
+			if (ss[0].equals("1")) {// 解析失败
+				BASE64Decoder decoder = new BASE64Decoder();
+				System.out.println(">>>>>>>" + ss[1]
+						+ new String(decoder.decodeBuffer(ss[2]), "utf-8"));
+				authStatus = "4";
+			}
+		} catch (Exception e) {
+			authStatus = "4";
+		}
+		// authStatus = "2";
+		// serialNo = "00";
+		return authStatus + "|" + serialNo;
+	}
+
+	/**
+	 * 添加子商户信息
+	 * 
+	 * @param regist
+	 * @return
+	 */
+	public boolean insertSubMerInfo(AccountRegist regist,
+			SubMerTerminal subMerTerminal, String status, Long subMerId,
+			MerTrans merTrans) throws Exception {
+
+		status = "0";
+
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(String.valueOf(subMerId));
+		subMerInfo.setLineNum(regist.getLineNum());
+		subMerInfo.setOpenBank(regist.getOpenBank());
+		if (null != regist) {
+			String subMerName = "";
+			String shortName = "";
+			if (null != regist.getMerchantName()
+					&& !"".equals(regist.getMerchantName())) {
+				subMerName = regist.getMerchantName();
+				shortName = regist.getMerchantName();
+			} else {
+				subMerName = regist.getLegalManName();
+				shortName = regist.getLegalManName();
+			}
+			subMerInfo.setSubMerName(subMerName);
+			subMerInfo.setShortName(shortName);
+			subMerInfo.setLegalPerson(regist.getLegalManName());
+			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+			String settAccType = "-1";
+			if (!"".equals(regist.getSettleAccountType())
+					&& null != regist.getSettleAccountType()) {
+				settAccType = regist.getSettleAccountType();
+			}
+			subMerInfo.setSettAccType(settAccType);
+			String settAccName = "-1";
+			if (!"".equals(regist.getSettleAccount())
+					&& null != regist.getSettleAccount()) {
+				settAccName = regist.getSettleAccount();
+			}
+			subMerInfo.setSettAccountName(regist.getLegalManName());
+			String settAccNo = "-1";
+			if (!"".equals(regist.getSettleAccountNo())
+					&& null != regist.getSettleAccountNo()) {
+				settAccNo = regist.getSettleAccountNo();
+			}
+			subMerInfo.setSettAccountNo(settAccNo);
+			String settAgency = "ICBC";
+			if (!"".equals(regist.getSettleAgency())
+					&& null != regist.getSettleAgency()
+					&& regist.getSettleAgency().indexOf("null") == -1) {
+				settAgency = regist.getSettleAgency();
+			}
+			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+			String merSysId = "";
+			String agentIdL1 = "";
+			String agentIdL2 = "";
+			String agentIdL3 = "";
+			String agentIdL4 = "";
+			if (null != subMerTerminal) {
+				merSysId = subMerTerminal.getMerSysId();
+				agentIdL1 = subMerTerminal.getAgentIdL1();
+				agentIdL2 = subMerTerminal.getAgentIdL2();
+				agentIdL3 = subMerTerminal.getAgentIdL3();
+				agentIdL4 = subMerTerminal.getAgentIdL4();
+			}
+			subMerInfo.setMerSysId(merSysId);
+			subMerInfo.setMcc(merTrans.getBasicMcc());
+			subMerInfo.setRegion(merTrans.getBasicRegion());
+			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+			subMerInfo.setAgentIdL1(agentIdL1);
+			subMerInfo.setAgentIdL2(agentIdL2);
+			subMerInfo.setAgentIdL3(agentIdL3);
+			subMerInfo.setAgentIdL4(agentIdL4);
+			if ("1".equals(merTrans.getAutoApprove())) {
+				subMerInfo.setBillCycle("01");
+			} else {
+				subMerInfo.setBillCycle("01");
+			}
+			subMerInfo.setBillStatus("1");
+			subMerInfo.setMerKind("个体户");// 默认公司性质
+			subMerInfo.setContactor(regist.getLegalManName());
+			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.insertSubMerInfo(subMerInfo);
+		if (result > 0) {
+			boo = true;
+		}
+		return boo;
+	}
+	
+	/**
+	 * 更换绑定机具
+	 * @Title:        updateSubMerInfo 
+	 * @Description:  
+	 * @param:        @param regist
+	 * @param:        @param subMerTerminal
+	 * @param:        @param status
+	 * @param:        @param subMerId
+	 * @param:        @param merTrans
+	 * @param:        @return
+	 * @param:        @throws Exception    
+	 * @return:       boolean    
+	 * @throws 
+	 * @author        Eason Jiang
+	 * @Date          2015-9-8 下午3:59:32
+	 */
+	public boolean updateSubMerInfo(AccountRegist regist,
+			SubMerTerminal subMerTerminal, String status, Long subMerId,
+			MerTrans merTrans) throws Exception {
+		status = "0";
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(String.valueOf(subMerId));
+		subMerInfo.setOldSubMerId(regist.getMerchantId());
+//		subMerInfo.setLineNum(regist.getLineNum());
+//		subMerInfo.setOpenBank(regist.getOpenBank());
+		String merSysId = "";
+		if (null != regist) {
+//			String subMerName = "";
+//			String shortName = "";
+//			if (null != regist.getMerchantName()
+//					&& !"".equals(regist.getMerchantName())) {
+//				subMerName = regist.getMerchantName();
+//				shortName = regist.getMerchantName();
+//			} else {
+//				subMerName = regist.getLegalManName();
+//				shortName = regist.getLegalManName();
+//			}
+//			subMerInfo.setSubMerName(subMerName);
+//			subMerInfo.setShortName(shortName);
+//			subMerInfo.setLegalPerson(regist.getLegalManName());
+//			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+//			String settAccType = "-1";
+//			if (!"".equals(regist.getSettleAccountType())
+//					&& null != regist.getSettleAccountType()) {
+//				settAccType = regist.getSettleAccountType();
+//			}
+//			subMerInfo.setSettAccType(settAccType);
+//			String settAccName = "-1";
+//			if (!"".equals(regist.getSettleAccount())
+//					&& null != regist.getSettleAccount()) {
+//				settAccName = regist.getSettleAccount();
+//			}
+//			subMerInfo.setSettAccountName(regist.getLegalManName());
+//			String settAccNo = "-1";
+//			if (!"".equals(regist.getSettleAccountNo())
+//					&& null != regist.getSettleAccountNo()) {
+//				settAccNo = regist.getSettleAccountNo();
+//			}
+//			subMerInfo.setSettAccountNo(settAccNo);
+//			String settAgency = "ICBC";
+//			if (!"".equals(regist.getSettleAgency())
+//					&& null != regist.getSettleAgency()
+//					&& regist.getSettleAgency().indexOf("null") == -1) {
+//				settAgency = regist.getSettleAgency();
+//			}
+//			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+			String agentIdL1 = "";
+			String agentIdL2 = "";
+			String agentIdL3 = "";
+			String agentIdL4 = "";
+			if (null != subMerTerminal) {
+				merSysId = subMerTerminal.getMerSysId();
+				agentIdL1 = subMerTerminal.getAgentIdL1();
+				agentIdL2 = subMerTerminal.getAgentIdL2();
+				agentIdL3 = subMerTerminal.getAgentIdL3();
+				agentIdL4 = subMerTerminal.getAgentIdL4();
+			}
+			subMerInfo.setMerSysId(merSysId);
+			subMerInfo.setMcc(merTrans.getBasicMcc());
+			subMerInfo.setRegion(merTrans.getBasicRegion());
+//			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+			subMerInfo.setAgentIdL1(agentIdL1);
+			subMerInfo.setAgentIdL2(agentIdL2);
+			subMerInfo.setAgentIdL3(agentIdL3);
+			subMerInfo.setAgentIdL4(agentIdL4);
+			if ("1".equals(merTrans.getAutoApprove())) {
+				subMerInfo.setBillCycle("01");
+			} else {
+				subMerInfo.setBillCycle("01");
+			}
+//			subMerInfo.setBillStatus("1");
+//			subMerInfo.setMerKind("个体户");// 默认公司性质
+//			subMerInfo.setContactor(regist.getLegalManName());
+//			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.updateSubMerInfoReg(subMerInfo);
+		if (result > 0) {
+			//切换图片
+			String oldPath = rb.getString("ImagesUrl");
+			oldPath += "/SubMerImages/-1/"
+					+ regist.getMerchantId();
+			String newPath = rb.getString("ImagesUrl");
+			newPath += "/SubMerImages/"+merSysId+"/"
+					+ String.valueOf(subMerId);
+			File oldFile = new File(oldPath);
+			oldFile.renameTo(new File(newPath));
+			boo = true;
+		}
+		return boo;
+	}
+	
+	/**
+	 * 注册第一步
+	 * @Title:        insertSubMerInfo 
+	 * @Description:  
+	 * @param:        @param regist
+	 * @param:        @param subMerTerminal
+	 * @param:        @param status
+	 * @param:        @param subMerId
+	 * @param:        @param merTrans
+	 * @param:        @return
+	 * @param:        @throws Exception    
+	 * @return:       boolean    
+	 * @throws 
+	 * @author        Eason Jiang
+	 * @Date          2015-8-27 上午10:36:06
+	 */
+	public boolean insertSubMerInfo(AccountRegist regist, String status, String subMerId) throws Exception {
+
+		status = "0";
+
+		boolean boo = false;
+		MobileUser mobileUser = new MobileUser();
+		mobileUser.setSubMerId(subMerId);
+		mobileUser.setLoginName(regist.getMobileNum());
+		mobileUser.setLoginPwd(regist.getAccountPwd());
+		mobileUser.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+		mobileUser.setStatus("0"); //初始用户
+		int result=mobileUserDao.insertMobileUser(mobileUser);
+		setCheckCode("9009");
+		if(result > 0){
+			boo = true;
+			setCheckCode("0000");
+		}
+	
+		return boo;
+	}
+	
+	/**
+	 * 注册第二部
+	 * @Title:        insertSubMer 
+	 * @Description:  
+	 * @param:        @param regist
+	 * @param:        @param subMerTerminal
+	 * @param:        @param status
+	 * @param:        @param subMerId
+	 * @param:        @param merTrans
+	 * @param:        @return
+	 * @param:        @throws Exception    
+	 * @return:       boolean    
+	 * @throws 
+	 * @author        Eason Jiang
+	 * @Date          2015-8-31 下午6:04:06
+	 */
+	public boolean insertSubMer(AccountRegist regist,String status, String subMerId) throws Exception {
+
+		status = "0";
+
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(subMerId);
+		subMerInfo.setLineNum(regist.getLineNum());
+		subMerInfo.setOpenBank(regist.getOpenBank());
+		if (null != regist) {
+			String subMerName = "";
+			String shortName = "";
+			if (null != regist.getMerchantName()
+					&& !"".equals(regist.getMerchantName())) {
+				subMerName = regist.getMerchantName();
+				shortName = regist.getMerchantName();
+			} else {
+				subMerName = regist.getLegalManName();
+				shortName = regist.getLegalManName();
+			}
+			subMerInfo.setSubMerName(subMerName);
+			subMerInfo.setShortName(shortName);
+			subMerInfo.setLegalPerson(regist.getLegalManName());
+			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+			String settAccType = "-1";
+			if (!"".equals(regist.getSettleAccountType())
+					&& null != regist.getSettleAccountType()) {
+				settAccType = regist.getSettleAccountType();
+			}
+			subMerInfo.setSettAccType(settAccType);
+			String settAccName = "-1";
+			if (!"".equals(regist.getSettleAccount())
+					&& null != regist.getSettleAccount()) {
+				settAccName = regist.getSettleAccount();
+			}
+			subMerInfo.setSettAccountName(settAccName);
+			String settAccNo = "-1";
+			if (!"".equals(regist.getSettleAccountNo())
+					&& null != regist.getSettleAccountNo()) {
+				settAccNo = regist.getSettleAccountNo();
+			}
+			subMerInfo.setSettAccountNo(settAccNo);
+			String settAgency = "ICBC";
+			if (!"".equals(regist.getSettleAgency())
+					&& null != regist.getSettleAgency()
+					&& regist.getSettleAgency().indexOf("null") == -1) {
+				settAgency = regist.getSettleAgency();
+			}
+			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+			String merSysId = "-1";
+			String agentIdL1 = "-1";
+			String agentIdL2 = "-1";
+			String agentIdL3 = "-1";
+			String agentIdL4 = "-1";
+			subMerInfo.setMerSysId(merSysId);
+//			subMerInfo.setMcc(merTrans.getBasicMcc());
+//			subMerInfo.setRegion(merTrans.getBasicRegion());
+			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+			subMerInfo.setAgentIdL1(agentIdL1);
+			subMerInfo.setAgentIdL2(agentIdL2);
+			subMerInfo.setAgentIdL3(agentIdL3);
+			subMerInfo.setAgentIdL4(agentIdL4);
+//			if ("1".equals(merTrans.getAutoApprove())) {
+//				subMerInfo.setBillCycle("01");
+//			} else {
+//				subMerInfo.setBillCycle("01");
+//			}
+			subMerInfo.setBillStatus("1");
+			subMerInfo.setMerKind("个体户");// 默认公司性质
+			subMerInfo.setContactor(regist.getLegalManName());
+			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.insertSubMerInfo(subMerInfo);
+		if (result > 0) {
+			boo = true;
+			setCheckCode("0000");
+		}
+		return boo;
+	}
+	
+	public boolean updateSubMer(AccountRegist regist,String status, String subMerId) throws Exception {
+		
+		status = "0";
+		
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(subMerId);
+		subMerInfo.setOldSubMerId(subMerId);
+		subMerInfo.setLineNum(regist.getLineNum());
+		subMerInfo.setOpenBank(regist.getOpenBank());
+		if (null != regist) {
+			String subMerName = "";
+			String shortName = "";
+			if (null != regist.getMerchantName()
+					&& !"".equals(regist.getMerchantName())) {
+				subMerName = regist.getMerchantName();
+				shortName = regist.getMerchantName();
+			} else {
+				subMerName = regist.getLegalManName();
+				shortName = regist.getLegalManName();
+			}
+			subMerInfo.setSubMerName(subMerName);
+			subMerInfo.setShortName(shortName);
+			subMerInfo.setLegalPerson(regist.getLegalManName());
+			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+			String settAccType = "-1";
+			if (!"".equals(regist.getSettleAccountType())
+					&& null != regist.getSettleAccountType()) {
+				settAccType = regist.getSettleAccountType();
+			}
+			subMerInfo.setSettAccType(settAccType);
+			String settAccName = "-1";
+			if (!"".equals(regist.getSettleAccount())
+					&& null != regist.getSettleAccount()) {
+				settAccName = regist.getSettleAccount();
+			}
+			subMerInfo.setSettAccountName(settAccName);
+			String settAccNo = "-1";
+			if (!"".equals(regist.getSettleAccountNo())
+					&& null != regist.getSettleAccountNo()) {
+				settAccNo = regist.getSettleAccountNo();
+			}
+			subMerInfo.setSettAccountNo(settAccNo);
+			String settAgency = "ICBC";
+			if (!"".equals(regist.getSettleAgency())
+					&& null != regist.getSettleAgency()
+					&& regist.getSettleAgency().indexOf("null") == -1) {
+				settAgency = regist.getSettleAgency();
+			}
+			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+//			subMerInfo.setMerSysId(merSysId);
+//			subMerInfo.setMcc(merTrans.getBasicMcc());
+//			subMerInfo.setRegion(merTrans.getBasicRegion());
+			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+//			subMerInfo.setAgentIdL1(agentIdL1);
+//			subMerInfo.setAgentIdL2(agentIdL2);
+//			subMerInfo.setAgentIdL3(agentIdL3);
+//			subMerInfo.setAgentIdL4(agentIdL4);
+//			if ("1".equals(merTrans.getAutoApprove())) {
+//				subMerInfo.setBillCycle("01");
+//			} else {
+//				subMerInfo.setBillCycle("01");
+//			}
+			subMerInfo.setBillStatus("1");
+			subMerInfo.setMerKind("个体户");// 默认公司性质
+			subMerInfo.setContactor(regist.getLegalManName());
+			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.updateSubMerInfoReg(subMerInfo);
+		if (result > 0) {
+			boo = true;
+			setCheckCode("0000");
+		}
+		return boo;
+	}
+	
+	
+	public boolean changeCard(AccountRegist regist,String status, String subMerId) throws Exception {
+		status = "0";
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(subMerId);
+//		subMerInfo.setLineNum(regist.getLineNum());
+//		subMerInfo.setOpenBank(regist.getOpenBank());
+		String settAccType = "-1";
+		if (!"".equals(regist.getSettleAccountType())
+				&& null != regist.getSettleAccountType()) {
+			settAccType = regist.getSettleAccountType();
+		}
+		subMerInfo.setSettAccType(settAccType);
+//		String settAccName = "-1";
+//		if (!"".equals(regist.getSettleAccount())
+//				&& null != regist.getSettleAccount()) {
+//			settAccName = regist.getSettleAccount();
+//		}
+//		subMerInfo.setSettAccountName(settAccName);
+		String settAccNo = "-1";
+		if (!"".equals(regist.getSettleAccountNo())
+				&& null != regist.getSettleAccountNo()) {
+			settAccNo = regist.getSettleAccountNo();
+		}
+		subMerInfo.setSettAccountNo(settAccNo);
+		String settAgency = "ICBC";
+		if (!"".equals(regist.getSettleAgency())
+				&& null != regist.getSettleAgency()
+				&& regist.getSettleAgency().indexOf("null") == -1) {
+			settAgency = regist.getSettleAgency();
+		}
+		subMerInfo.setSettAgency(settAgency);
+		setCheckCode("9009");
+		boolean result = subMerInfoDao.update(subMerInfo);
+		if (result) {
+			boo = true;
+			setCheckCode("0000");
+		}
+		return boo;
+	}
+	
+	
+	@SuppressWarnings("unused")
+	@Override
+	public Object regMer(AccountLogIn accountLogIn) {
+		accountLogIn.copyBusBeanParent(accountLogIn);
+		setCheckCode("");
+
+		String transRate = "";// 刷卡费率
+		try {
+			if (accountLogIn != null) {
+				// 查询设备信息
+				SubMerTerminal subMerTerminal = new SubMerTerminal();
+				subMerTerminal.setTsn(accountLogIn.getTerminalId());
+				subMerTerminal.setLoginName(accountLogIn.getAccountName());
+				subMerTerminal.setLoginPwd(accountLogIn.getAccountPwd());
+				subMerTerminal = subMerTerminalDao
+						.getSubMerTerminal(subMerTerminal);
+				if (subMerTerminal != null) {
+					// 查询子商户信息
+					SubMerInfo subMerInfo = new SubMerInfo();
+					subMerInfo = subMerInfoDao.getSubMerInfoById(subMerTerminal
+							.getSubMerId());
+					setCheckCode("9006");
+					if (null != subMerInfo) {
+						// 组装返回内容
+						accountLogIn.setTerminalId(subMerTerminal.getTsn());
+						accountLogIn.setFactoryId(subMerTerminal.getFactory());
+						accountLogIn
+								.setMerchantId(subMerTerminal.getSubMerId());
+						accountLogIn
+								.setMerchantName(subMerInfo.getSubMerName());
+						accountLogIn.setAccountName(subMerTerminal
+								.getLoginName());
+						accountLogIn.setPersonalMerRegNo(subMerInfo.getRegNo());
+						accountLogIn.setTaxNo(subMerInfo.getTaxNo());
+						accountLogIn.setLegalManIdcard(subMerInfo
+								.getLegalIdcard());
+						if ("-1".equals(subMerInfo.getSettAccountName()))
+							subMerInfo.setSettAccountName("");
+						if ("-1".equals(subMerInfo.getSettAccountNo()))
+							subMerInfo.setSettAccountNo("");
+						if ("-1".equals(subMerInfo.getSettAgency()))
+							subMerInfo.setSettAgency("");
+						accountLogIn.setSettleAccount(subMerInfo
+								.getSettAccountName());
+						accountLogIn.setSettleAccountNo(subMerInfo
+								.getSettAccountNo());
+						accountLogIn
+								.setSettleAgency(subMerInfo.getSettAgency());
+						String merStatus = "";
+						merStatus = subMerInfo.getStatus();
+						if ("2".equals(merStatus)) {
+							merStatus = "1";
+						} else if ("5".equals(merStatus)) {
+							merStatus = "2";
+						} else {
+							merStatus = "0";
+						}
+						accountLogIn.setAccountStatus(merStatus);
+						String authStatus = "";
+						if (null != subMerInfo.getSettAccType()
+								&& !"".equals(subMerInfo.getSettAccType())
+								&& "1".equals(subMerInfo.getSettAccType())) {
+							authStatus = "null";
+						} else {
+							authStatus = subMerInfo.getAuthStatus();
+						}
+						accountLogIn.setAuthStatus(authStatus);
+						accountLogIn.setSettleAccountType(subMerInfo
+								.getSettAccType());
+						accountLogIn.setApplication("AccountLogIn.Rsp");
+						setCheckCode("0000");
+
+						// 子商户交易费率
+						SubMerRate subMerRate = new SubMerRate();
+						subMerRate.setSubMerId(subMerTerminal.getSubMerId());
+						subMerRate = subMerRateDao
+								.getSubMerRateBySubMerId(subMerRate);
+						if (null != subMerRate) {
+							transRate = subMerRate.getTeransRate();
+							if ("-1".equals(transRate)) {
+								transRate = "0";
+							}
+						}
+						accountLogIn.setTransRate(transRate);
+					}
+				} else {
+					setCheckCode("9017");
+				}
+
+				// 修改设备最近登录时间
+				SubMerTerminal terminal = new SubMerTerminal();
+				terminal.setTsn(accountLogIn.getTerminalId());
+				terminal.setLastLoginTime(DateUtil
+						.getDate("yyyy-MM-dd HH:mm:ss"));
+				subMerTerminalDao.updateSubMerByLastLoginTime(terminal);
+			} else {
+				setCheckCode("9017");
+			}
+		} catch (Exception e) {
+			setCheckCode("9017");
+			e.printStackTrace();
+		}
+		accountLogIn.setRespCode(checkCode);
+		accountLogIn.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return accountLogIn;
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public Object userMer(AccountLogIn accountLogIn) {
+		accountLogIn.copyBusBeanParent(accountLogIn);
+		setCheckCode("");
+
+		String transRate = "";// 刷卡费率
+		try {
+			if (accountLogIn != null) {
+				MobileUser mobileUser = new MobileUser();
+				mobileUser.setLoginName(accountLogIn.getAccountName());
+//				mobileUser.setLoginPwd(accountLogIn.getAccountPwd());
+				mobileUser = mobileUserDao.getMobileUser(mobileUser);
+				// 查询设备信息
+				SubMerTerminal subMerTerminal = new SubMerTerminal();
+				subMerTerminal.setLoginName(accountLogIn.getAccountName());
+				subMerTerminal.setLoginPwd(accountLogIn.getAccountPwd());
+				subMerTerminal = subMerTerminalDao
+						.getSubMerTerminal(subMerTerminal);
+				if(subMerTerminal!=null&&mobileUser==null &&accountLogIn.getAccountPwd().equals(subMerTerminal.getLoginPwd())){
+					mobileUser = new MobileUser();
+					mobileUser.setLoginName(subMerTerminal.getLoginName());
+					mobileUser.setTerminalId(subMerTerminal.getTsn());
+					mobileUser.setSubMerId(subMerTerminal.getSubMerId());
+					mobileUser.setLoginPwd(subMerTerminal.getLoginPwd());
+					mobileUser.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+					mobileUser.setStatus("2"); //初始用户
+					mobileUserDao.insertMobileUser(mobileUser);
+				}
+				if (mobileUser != null) {
+						setCheckCode("9006");
+						if(!accountLogIn.getAccountPwd().equals(mobileUser.getLoginPwd())){
+							setCheckCode("9017");//密码错
+						}else{
+							// 组装返回内容
+							accountLogIn
+									.setMerchantId(mobileUser.getSubMerId());
+							accountLogIn.setAccountName(mobileUser
+									.getLoginName());
+							accountLogIn.setApplication("UserLogIn.Rsp");
+							accountLogIn.setUserStatus(mobileUser.getStatus());
+							accountLogIn.setMerchantId(mobileUser.getSubMerId());
+							SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(mobileUser.getSubMerId());
+							if(subMerInfo!=null){
+								accountLogIn.setMerchantName(subMerInfo.getSubMerName());
+								accountLogIn.setAccountStatus(subMerInfo.getStatus());
+								accountLogIn.setAuthStatus(subMerInfo.getAuthStatus());
+								accountLogIn.setReMack(subMerInfo.getRemark());
+							}
+							// 修改设备最近登录时间
+							MobileUser user = new MobileUser();
+							user.setId(mobileUser.getId());
+							user.setLastLoginTime(DateUtil
+									.getDate("yyyy-MM-dd HH:mm:ss"));
+							mobileUserDao.updateUserByLastLoginTime(user);
+							setCheckCode("0000");
+						}
+				} else {
+					// 查询Mobile 信息
+					setCheckCode("9010");
+				}
+			} else {
+				setCheckCode("9998");
+			}
+		} catch (Exception e) {
+			setCheckCode("9998");
+			e.printStackTrace();
+		}
+		accountLogIn.setMsgExt("9:00-21:00");
+		accountLogIn.setRespCode(checkCode);
+		accountLogIn.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return accountLogIn;
+	}
+	
+	@Override
+	public Object regBank(SettBank settBank) {
+		settBank.copyBusBeanParent(settBank);
+		setCheckCode("");
+		try {
+			if (settBank != null) {
+				List<BankBehalfBranch> bankBehalfBranchList = bankBehalfBranchDao
+						.selectBankBehalfBranchList();
+				SettBankList settBankList = null;
+				List<SettBankList> settBankLists = new ArrayList<SettBankList>();
+				Iterator<BankBehalfBranch> bankBehalfBranchIt = bankBehalfBranchList
+						.iterator();
+				while (bankBehalfBranchIt.hasNext()) {
+					settBankList = new SettBankList();
+					BankBehalfBranch bankBehalfBranch = (BankBehalfBranch) bankBehalfBranchIt
+							.next();
+					settBankList.setBankNo(bankBehalfBranch.getCode());
+					settBankList.setBankName(bankBehalfBranch.getBankName());
+					settBankLists.add(settBankList);
+				}
+				settBank.setBankList(settBankLists);
+				settBank.setApplication("SettBankList.Rsp");
+				setCheckCode("0000");
+			} else {
+				setCheckCode("9014");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if ("".equals(checkCode)) {
+			checkCode = "3001";
+		}
+		settBank.setRespCode(checkCode);
+		settBank.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return settBank;
+	}
+
+	/**
+	 * 收款开通
+	 */
+	@Override
+	public Object openReceivablesBus(OpenPurchase openPurchase) {
+		openPurchase.copyBusBeanParent(openPurchase);
+		setCheckCode("");
+		try {
+			// 获取子商户设备信息
+			SubMerTerminal terminal = new SubMerTerminal();
+			terminal.setSubMerId(openPurchase.getMerchantId());
+			terminal.setTsn(openPurchase.getTerminalId());
+			// terminal.setFactory(openPurchase.getFactoryId());
+			setCheckCode("3034");
+			SubMerTerminal subMerTerminal = subMerTerminalDao
+					.getSubMerTerInfo(terminal);
+			if (null != subMerTerminal && !"".equals(subMerTerminal)) {
+				// 查询商户收款功能是否已开通
+				SubMerInfo info = subMerInfoDao.getSubMerInfoById(openPurchase
+						.getMerchantId());
+				setCheckCode("9006");
+				if (null != info) {
+					setCheckCode("3035");
+					if (info.getSettAgency() == null
+							|| "".equals(info.getSettAgency())
+							|| "null".equals(info.getSettAgency())
+							|| "-1".equals(info.getSettAgency())) {
+						// 收款功能开通
+						SubMerInfo subMerInfo = new SubMerInfo();
+						subMerInfo.setSubMerId(openPurchase.getMerchantId());
+						subMerInfo
+								.setSubMerName(openPurchase.getMerchantName());
+						subMerInfo.setSettAccountName(openPurchase
+								.getSettleAccountName());
+						subMerInfo.setSettAccountNo(openPurchase
+								.getSettleAccountNo());
+						subMerInfo.setSettAgency(openPurchase.getBankNo());
+						setCheckCode("3028");
+						if (subMerInfoDao.updateSubMerInfoByOpenCur(subMerInfo)) {
+							// 修改子商户交易配置中AUTH_STATUS字段
+							SubMerTrans subMerTrans = new SubMerTrans();
+							subMerTrans.setSubMerId(openPurchase
+									.getMerchantId());
+							subMerTrans.setAuthStatus("3");// 3已开通收款
+							setCheckCode("3036");
+							subMerTransDao.updateSubMerTransInfo(subMerTrans);
+
+							// 修改实人认证AUTH_STATUS字段
+							SubMerAuthInfo subMerAuthInfo = new SubMerAuthInfo();
+							subMerAuthInfo.setSubMerId(openPurchase
+									.getMerchantId());
+							subMerAuthInfo.setAuthStatus("3");
+							setCheckCode("3032");
+							subMerAuthInfoDao
+									.updateSubMerAuthInfoByStatus(subMerAuthInfo);
+
+							openPurchase.setAccountStatus("1");
+							setCheckCode("0000");
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		openPurchase.setTerminalId(openPurchase.getTerminalId());
+		openPurchase.setMerchantId(openPurchase.getMerchantId());
+		openPurchase.setMerchantName("");
+		openPurchase.setSettleAccountName("");
+		openPurchase.setSettleAccountNo("");
+		openPurchase.setBankNo("");
+		String accStatus = "2";
+		if (!"".equals(openPurchase.getAccountStatus())
+				&& null != openPurchase.getAccountStatus()) {
+			accStatus = openPurchase.getAccountStatus();
+		}
+		openPurchase.setAccountStatus(accStatus);
+		openPurchase.setTerminalInFo("");
+		openPurchase.setMsgExt(openPurchase.getMsgExt());
+		openPurchase.setMisc(openPurchase.getMisc());
+		if ("".equals(checkCode)) {
+			checkCode = "3001";
+		}
+		openPurchase.setRespCode(checkCode);
+		openPurchase.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return openPurchase;
+	}
+
+	@Override
+	public Object regEnquiry(Enquiry enquiry) {
+		enquiry.copyBusBeanParent(enquiry);
+		setCheckCode("");
+		try {
+			// 组查询条件
+			int curPage = 1;
+			int pageCount = 10;
+			if (enquiry.getCurPage() != null
+					&& !"".equals(enquiry.getCurPage()))
+				curPage = Integer.parseInt(enquiry.getCurPage());
+			if (enquiry.getPageCount() != null
+					&& !"".equals(enquiry.getPageCount()))
+				pageCount = Integer.parseInt(enquiry.getPageCount());
+			Map map = PageUtil.getPageMap(curPage, pageCount);
+			OrderInfo orderInfo = new OrderInfo();
+			orderInfo.setTerminalId(enquiry.getTerminalId());
+			if ("100000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("01");
+			else if ("200000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("04");
+			else if ("100002".equals(enquiry.getTransType()))
+				orderInfo.setTransType("07");
+			else if ("100003".equals(enquiry.getTransType()))
+				orderInfo.setTransType("06");
+			else if ("100004".equals(enquiry.getTransType()))
+				orderInfo.setTransType("09");
+			// 查询
+			int count = 0;
+			SubMerTerminal merTerminal = new SubMerTerminal();
+			merTerminal.setTsn(enquiry.getTerminalId());
+			// merTerminal.setFactory(enquiry.getFactoryId());
+			SubMerInfo subMerInfo = subMerInfoDao
+					.getSubMerInfoByTerminalId(merTerminal);
+			if (subMerInfo != null && subMerInfo.getSubMerId() != null) {
+
+				if (null == enquiry.getMerchantId()
+						|| "".equals(enquiry.getMerchantId())) {
+					orderInfo.setSubMerId(subMerInfo.getSubMerId());
+				} else {
+					orderInfo.setSubMerId(enquiry.getMerchantId());
+				}
+//				map.put("tsn", enquiry.getTerminalId());
+				// map.put("factoryId", enquiry.getFactoryId());
+				map.put("orderInfo", orderInfo);
+				map.put("beginTime", enquiry.getBeginTime());
+				map.put("endTime", enquiry.getEndTime());
+
+				count = orderInfoDao.selectEnquiryListCount(map);
+				List<OrderInfo> orderInfoList = orderInfoDao
+						.selectEnquiryList(map);
+				// 拼返回内容
+				List<EnquiryList> enquiryLists = new ArrayList<EnquiryList>();
+				Iterator<OrderInfo> orderInfoIt = orderInfoList.iterator();
+				while (orderInfoIt.hasNext()) {
+					OrderInfo orderInfo1 = (OrderInfo) orderInfoIt.next();
+					EnquiryList enquiryList = new EnquiryList();
+					if ("01".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100000");
+					else if ("04".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("200000");
+					else if ("07".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100002");
+					else if ("06".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100003");
+					else if ("09".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100004");
+					enquiryList.setTransId(orderInfo1.getMerOrderId());
+					enquiryList.setMerchantOrderId(orderInfo1.getMerOrderId());
+					enquiryList.setTransAmt(orderInfo1.getMerAmt());
+					enquiryList.setTransTime(orderInfo1.getTransTime());
+					enquiryList.setCurrency(orderInfo1.getCurrency());
+					enquiryList.setOrderRateType(orderInfo1.getOrderRateType());
+					enquiryLists.add(enquiryList);
+				}
+				enquiry.setEnquiryList(enquiryLists);
+				enquiry.setApplication("EnquiryList.Rsp");
+				enquiry.setVersion("1.0.0");
+				enquiry.setMerchantId(subMerInfo.getSubMerId());
+				enquiry.setMerchantName(subMerInfo.getSubMerName());
+				setCheckCode("0000");
+			} else {
+				setCheckCode("2002");
+			}
+			enquiry.setTotalCount(count + "");
+			enquiry.setCurPage(curPage + "");
+			enquiry.setPageCount(pageCount + "");
+		} catch (Exception e) {
+			setCheckCode("2002");
+			e.printStackTrace();
+		} finally {
+			enquiry.setRespCode(checkCode);
+			enquiry.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		}
+		return enquiry;
+	}
+
+	
+	@Override
+	public Object regNewEnquiry(Enquiry enquiry) {
+		enquiry.copyBusBeanParent(enquiry);
+		setCheckCode("");
+		try {
+			// 组查询条件
+			int curPage = 1;
+			int pageCount = 10;
+			if (enquiry.getCurPage() != null
+					&& !"".equals(enquiry.getCurPage()))
+				curPage = Integer.parseInt(enquiry.getCurPage());
+			if (enquiry.getPageCount() != null
+					&& !"".equals(enquiry.getPageCount()))
+				pageCount = Integer.parseInt(enquiry.getPageCount());
+			Map map = PageUtil.getPageMap(curPage, pageCount);
+			OrderInfo orderInfo = new OrderInfo();
+			orderInfo.setTerminalId(enquiry.getTerminalId());
+			if ("100000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("01");
+			else if ("200000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("04");
+			else if ("100002".equals(enquiry.getTransType()))
+				orderInfo.setTransType("07");
+			else if ("100003".equals(enquiry.getTransType()))
+				orderInfo.setTransType("06");
+			else if ("100004".equals(enquiry.getTransType()))
+				orderInfo.setTransType("09");
+			// 查询
+			int count = 0;
+			SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(enquiry.getMerchantId());
+			if (subMerInfo != null && subMerInfo.getSubMerId() != null) {
+
+				if (null == enquiry.getMerchantId()
+						|| "".equals(enquiry.getMerchantId())) {
+					orderInfo.setSubMerId(subMerInfo.getSubMerId());
+				} else {
+					orderInfo.setSubMerId(enquiry.getMerchantId());
+				}
+				// map.put("factoryId", enquiry.getFactoryId());
+				map.put("orderInfo", orderInfo);
+				map.put("beginTime", enquiry.getBeginTime());
+				map.put("endTime", enquiry.getEndTime());
+
+				count = orderInfoDao.selectNewEnquiryListCount(map);
+				List<OrderInfo> orderInfoList = orderInfoDao
+						.selectNewEnquiryList(map);
+				// 拼返回内容
+				List<EnquiryList> enquiryLists = new ArrayList<EnquiryList>();
+				Iterator<OrderInfo> orderInfoIt = orderInfoList.iterator();
+				while (orderInfoIt.hasNext()) {
+					OrderInfo orderInfo1 = (OrderInfo) orderInfoIt.next();
+					EnquiryList enquiryList = new EnquiryList();
+					if ("01".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100000");
+					else if ("04".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("200000");
+					else if ("07".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100002");
+					else if ("06".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100003");
+					else if ("09".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100004");
+					enquiryList.setTransId(orderInfo1.getMerOrderId());
+					enquiryList.setMerchantOrderId(orderInfo1.getMerOrderId());
+					enquiryList.setTransAmt(orderInfo1.getMerAmt());
+					enquiryList.setTransTime(orderInfo1.getTransTime());
+					enquiryList.setCurrency(orderInfo1.getCurrency());
+					enquiryList.setOrderRateType(orderInfo1.getOrderRateType());
+					enquiryLists.add(enquiryList);
+				}
+				enquiry.setEnquiryList(enquiryLists);
+				enquiry.setApplication("NewEnquiryList.Rsp");
+				enquiry.setVersion("1.0.0");
+				enquiry.setMerchantId(subMerInfo.getSubMerId());
+				enquiry.setMerchantName(subMerInfo.getSubMerName());
+				setCheckCode("0000");
+			} else {
+				setCheckCode("2002");
+			}
+			enquiry.setTotalCount(count + "");
+			enquiry.setCurPage(curPage + "");
+			enquiry.setPageCount(pageCount + "");
+		} catch (Exception e) {
+			setCheckCode("2002");
+			e.printStackTrace();
+		} finally {
+			enquiry.setRespCode(checkCode);
+			enquiry.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		}
+		return enquiry;
+	}
+	
+	
+	@Override
+	public Object terminalValidate(TerminalValidate terminalValidate) {
+		terminalValidate.copyBusBeanParent(terminalValidate);
+		setCheckCode("");
+		String merSysId = ""; // 机构商号
+		String subMerId = ""; // 子商户号
+		String terminalStatus = ""; // 终端状态
+		String version = ""; // 版本号
+		String versionDesc = ""; // 版本信息描述
+		String updateType = ""; // 更新状态
+		String updatePath = ""; // 更新地址
+		String t0Status = "";// T+0状态 0 未开通 1 已开通
+
+		String lowsetMentionAmt = "";// 最低提现金额
+		String t0MerRate = "";// T0费率
+		String d1MerRate = "";// D1费率
+
+		String agreementStatus = "";// 电子协议阅读状态 0：未阅读 1：已阅读
+
+		try {
+			SubMerTerminal subMerTerminal = new SubMerTerminal();
+			subMerTerminal.setTsn(terminalValidate.getTerminalId());
+			// 根据终端ID获取终端信息
+			subMerTerminal = subMerTerminalDao
+					.selectSubMerTerminalByTerminalId(subMerTerminal);
+			if (subMerTerminal == null) {
+				setCheckCode("9001");
+			} else {
+				subMerId = subMerTerminal.getSubMerId();
+				if ("-1".equals(subMerId)) {
+					subMerId = "";
+				}
+
+				terminalStatus = subMerTerminal.getStatus();// 终端状态
+				merSysId = subMerTerminal.getMerSysId();// 终端机构号
+
+				// 厂商风控
+				if (null != subMerTerminal.getFactory()
+						&& !"".equals(subMerTerminal.getFactory())) {
+					FactoryRisk factoryRisk = new FactoryRisk();
+					factoryRisk.setFactoryNo(subMerTerminal.getFactory());
+					factoryRisk = factoryRiskDao
+							.selectFactoryRiskById(factoryRisk);
+
+					if (null != factoryRisk
+							&& null != factoryRisk.getLowsetMentionAmt()
+							&& !"".equals(factoryRisk.getLowsetMentionAmt())) {
+						lowsetMentionAmt = factoryRisk.getLowsetMentionAmt();// 起结金额
+					}
+
+				}
+
+				// 机构交易配置
+				if (null != merSysId && !"".equals(merSysId)) {
+					MerTrans merTrans = merTransDao
+							.selectMerTransByMerSysId(merSysId);
+					if (null != merTrans) {
+						t0MerRate = merTrans.getT0MerRate();
+						d1MerRate = merTrans.getD1MerRate();
+					}
+				}
+
+				if (null != subMerId && !"".equals(subMerId)) {
+					// 根据子商户号获取子商户交易配置信息
+					SubMerTrans subMerTrans = new SubMerTrans();
+					subMerTrans.setSubMerId(subMerId);
+					subMerTrans = subMerTransDao
+							.selectSubMerTransById(subMerTrans);
+					if (null != subMerTrans) {
+						t0Status = subMerTrans.getT0Status();
+					}
+
+					// 子商户表
+					SubMerInfo subMerInfo = subMerInfoDao
+							.getSubMerInfoById(subMerId);
+					if (null != subMerInfo) {
+						if (null == subMerInfo.getAgreementStatus()
+								|| "".equals(subMerInfo.getAgreementStatus())) {
+							agreementStatus = "0";
+						} else {
+							agreementStatus = subMerInfo.getAgreementStatus();
+						}
+					}
+
+				}
+
+				// 获取机构终端信息
+				MerTerminalInfo merTerminalInfo = new MerTerminalInfo();
+				merTerminalInfo.setMerSysId(subMerTerminal.getMerSysId()); //104
+				merTerminalInfo.setTerminalSysterm(terminalValidate
+						.getTerminalSysterm());  //01
+				merTerminalInfo.setVersion(terminalValidate.getVersionCode());
+				merTerminalInfo.setStatus("1");
+				MerTerminalInfo info = merTerminalInfoDao
+						.selectMerTerminalInfo(merTerminalInfo);// 当前设备版本
+				setCheckCode("3051");
+				if (null != info) {
+					if ("0".equals(info.getStatus())) {// 设备版本未启用
+						setCheckCode("3056");
+					} else {
+						// 获取机构终端版本管理表id最大并且为启用的版本号
+						MerTerminalInfo terminalInfo = new MerTerminalInfo();
+						// terminalInfo.setMerSysId(subMerTerminal.getMerSysId());
+						terminalInfo.setTerminalSysterm(terminalValidate
+								.getTerminalSysterm());
+
+						MerTerminalInfo infos = merTerminalInfoDao
+								.selectMaxIdMerTerminalInfo(terminalInfo);
+						// 机构设置的最新版本与当前设备版本不一致
+						if (!"".equals(infos.getVersion())
+								&& !terminalValidate.getVersionCode().equals(
+										infos.getVersion())) {
+							version = infos.getVersion();
+							versionDesc = infos.getVersionDesc();
+							updateType = infos.getUpdateType();
+							if ("01".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = "," + infos.getUpdatePath();
+							} else if ("02".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = infos.getUpdatePath() + "" + ",";
+							}
+							updatePath = infos.getUpdatePath();
+							// 修改子商户设备的版本信息
+							SubMerTerminal terminal = new SubMerTerminal();
+							terminal.setTsn(terminalValidate.getTerminalId());
+							terminal.setVersion(infos.getVersion());
+							setCheckCode("3021");
+							if (subMerTerminalDao
+									.updateSubMerTerminalVersion(terminal)) {
+								setCheckCode("0000");
+							}
+						} else {
+							// 最新信息
+							version = info.getVersion();
+							versionDesc = info.getVersionDesc();
+							updateType = "00";
+							if ("01".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = "," + info.getUpdatePath();
+							} else if ("02".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = info.getUpdatePath() + "" + ",";
+							}
+							setCheckCode("0000");
+						}
+
+					}
+				}
+			}
+		} catch (Exception e) {
+			setCheckCode("9020");
+			e.printStackTrace();
+		}
+		terminalValidate.setTerminalId(terminalValidate.getTerminalId());
+		terminalValidate.setVersionCode(version);
+		terminalValidate.setTerminalStatus(terminalStatus);
+		terminalValidate.setVersionDesc(versionDesc);
+		terminalValidate.setUpdateType(updateType);
+		terminalValidate.setMerchantId(subMerId);
+		terminalValidate.setUpdatePath(updatePath);
+		terminalValidate.setMerSysId(merSysId);
+		terminalValidate.setT0Status(t0Status);
+
+		terminalValidate.setD1MerRate(d1MerRate);
+		terminalValidate.setT0MerRate(t0MerRate);
+		terminalValidate.setLowsetMentionAmt(lowsetMentionAmt);
+		terminalValidate.setAgreementStatus(agreementStatus);
+
+		terminalValidate.setRespCode(checkCode);
+		terminalValidate.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return terminalValidate;
+	}
+
+	// 修改终端状态
+	@Override
+	public Object updateStatus(TerminalEnable terminalId) {
+		terminalId.copyBusBeanParent(terminalId);
+		SubMerTerminal subMerTerminal = new SubMerTerminal();
+		subMerTerminal.setTsn(terminalId.getTerminalId());
+		// subMerTerminal.setFactory(terminalId.getFactoryId());
+		setCheckCode("9001");
+		subMerTerminal = subMerTerminalDao
+				.selectSubMerTerminalByTerminalId(subMerTerminal);
+		if (subMerTerminal != null) {
+			setCheckCode("3025");
+			if (subMerTerminal.getStatus().equals("0")) {
+				int update = 0;
+				setCheckCode("3038");
+				update = subMerTerminalDao.updateStatus(terminalId);
+				if (update > 0) {
+					System.out.println("更新终端成功！");
+					setCheckCode("0000");
+				}
+			}
+
+		}
+		terminalId.setRespCode(checkCode);
+		terminalId.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return terminalId;
+	}
+
+	/**
+	 * 账户信息查询
+	 */
+	@Override
+	public Object accountEnquiry(AccountEnquiry accountEnquiry) {
+		accountEnquiry.copyBusBeanParent(accountEnquiry);
+		SubMerTerminal subMerTerminal = new SubMerTerminal();
+		subMerTerminal.setTsn(accountEnquiry.getTerminalId());
+		subMerTerminal.setSubMerId(accountEnquiry.getMerchantId());
+		SubMerInfo subMerInfo = subMerInfoDao.accountEnquiry(subMerTerminal);
+		setCheckCode("3001");
+		String merchantName = "";
+		String legalManName = "";
+		String legalManIdcard = "";
+		String mobileNum = "";
+		String settleAccount = "";
+		String settleAccountNo = "";
+		String settleAgency = "";
+		String merStatus = "";
+		String settleAccountType = "";
+		String grade = "";
+		String gradeStatus = "";
+
+		String subAuthStatus = "";
+		if (null != subMerInfo) {
+			String autoApprove = "";
+			MerTrans merTrans = merTransDao.getMerTransInfo(subMerInfo
+					.getMerSysId());
+			if (null != merTrans) {
+				autoApprove = merTrans.getAutoApprove();// 机构是否开通自动审核 1开通
+			}
+			String settAccType = subMerInfo.getSettAccType();// 子商户结算账户类型 是2对私
+			// 还是1对公
+			subAuthStatus = subMerInfo.getAuthStatus();// 子商户认证类型
+
+			String realPeopleStatus = "";
+			String serialNo = "";
+			String opt = "-1";
+			// 实人认证
+			if ("1".equals(autoApprove) && "2".equals(settAccType)
+					&& "1".equals(subAuthStatus)) {// 实名成功
+				try {
+					String strResult = realPeopleAuthentication(subMerInfo);
+					String str[] = strResult.split("\\|");
+					realPeopleStatus = str[0];
+					serialNo = str[1];
+					opt = "00";
+				} catch (Exception e) {
+					opt = "-1";
+					e.printStackTrace();
+				}
+			} else if ("1".equals(autoApprove) && "2".equals(settAccType)
+					&& "4".equals(subAuthStatus)) {// 实人失败
+				try {
+					String strResult = realPeopleAuthentication(subMerInfo);
+					String str[] = strResult.split("\\|");
+					realPeopleStatus = str[0];
+					serialNo = str[1];
+					opt = "00";
+				} catch (Exception e) {
+					opt = "-1";
+					e.printStackTrace();
+				}
+			}
+			// 当操作了实人认证 需要修改相关数据库数据
+			if ("00".equals(opt)) {
+				// 修改子商户交易配置-认证状态
+				SubMerTrans subMerTrans = new SubMerTrans();
+				subMerTrans.setSubMerId(subMerInfo.getSubMerId());
+				subMerTrans.setAuthStatus(realPeopleStatus);
+				subMerTrans
+						.setAuthTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+				if (subMerTransDao.updateSubMerTransInfo(subMerTrans) != 1) {
+					setCheckCode("3047");
+				}
+
+				// 添加实人数据到数据库
+				SubMerAuthInfo auth = new SubMerAuthInfo();
+				auth.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+				auth.setSubMerId(subMerInfo.getSubMerId());
+				auth.setRemitType("2");
+				auth.setRealName(subMerInfo.getLegalPerson());
+				auth.setIdNum(subMerInfo.getLegalIdcard());
+				if ("-1".equals(realPeopleStatus)) {
+					realPeopleStatus = "4";
+				}
+				auth.setAuthStatus(realPeopleStatus);
+				auth.setSerialNo(serialNo);
+				auth.setTerminalId(accountEnquiry.getTerminalId());
+				// 添加认证信息到数据库
+				if (subMerAuthInfoDao.addSubMerAuthInfo(auth) != 1) {
+					setCheckCode("3048");
+				}
+				subAuthStatus = realPeopleStatus;
+			}
+			merchantName = subMerInfo.getSubMerName();
+			legalManName = subMerInfo.getLegalPerson();
+			legalManIdcard = subMerInfo.getLegalIdcard();
+			mobileNum = subMerInfo.getContactorPhone();
+			settleAccount = subMerInfo.getSettAccountName();
+			settleAccountNo = subMerInfo.getSettAccountNo();
+			settleAgency = subMerInfo.getSettAgency();
+			merStatus = subMerInfo.getStatus();
+			settleAccountType = subMerInfo.getSettAccType();
+			grade = subMerInfo.getGrade();
+			gradeStatus = subMerInfo.getGradeStatus();
+			setCheckCode("0000");
+		}
+		accountEnquiry.setTerminalId(accountEnquiry.getTerminalId());
+		accountEnquiry.setMerchantId(accountEnquiry.getMerchantId());
+		accountEnquiry.setMerchantName(merchantName);
+		accountEnquiry.setLegalManName(legalManName);
+		accountEnquiry.setLegalManIdcard(legalManIdcard);
+		accountEnquiry.setMobileNum(mobileNum);
+		accountEnquiry
+				.setPersonalMerRegNo(accountEnquiry.getPersonalMerRegNo());
+		accountEnquiry.setTaxNo(accountEnquiry.getTaxNo());
+		accountEnquiry.setOccNo(accountEnquiry.getOccNo());
+		if ("-1".equals(settleAccount)) {
+			settleAccount = "";
+		}
+		accountEnquiry.setSettleAccount(settleAccount);
+		if ("-1".equals(settleAccountNo)) {
+			settleAccountNo = "";
+		}
+		accountEnquiry.setSettleAccountNo(settleAccountNo);
+		accountEnquiry.setSettleAgency(settleAgency);
+
+		if ("2".equals(merStatus)) {
+			merStatus = "1";
+		} else if ("5".equals(merStatus)) {
+			merStatus = "2";
+		} else {
+			merStatus = "0";
+		}
+		accountEnquiry.setMerStatus(merStatus);
+
+		if (null != settleAccountType && !"".equals(settleAccountType)
+				&& "1".equals(settleAccountType)) {
+			accountEnquiry.setAuthStatus("null");
+		} else {
+			accountEnquiry.setAuthStatus(subAuthStatus);
+		}
+		accountEnquiry.setSettleAccountType(settleAccountType);
+		accountEnquiry.setRespCode(checkCode);
+		accountEnquiry.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		accountEnquiry.setGrade(grade); //认证等级
+		accountEnquiry.setGradeStatus(gradeStatus); //认证状态
+		return accountEnquiry;
+	}
+
+	// 找回密码
+	@Override
+	public Object updatePwd(SelectPassWord selectPassWord) {
+		selectPassWord.copyBusBeanParent(selectPassWord);
+		SubMerTerminal subMerTerminal = new SubMerTerminal();
+		subMerTerminal.setTsn(selectPassWord.getTerminalId());
+		// subMerTerminal.setFactory(selectPassWord.getFactoryId());
+		subMerTerminal.setSubMerId(selectPassWord.getMerchantId());
+		subMerTerminal.setLoginName(selectPassWord.getPhoneNum());
+		setCheckCode("9006");
+		// 修改终端前查询终端是否存在
+		subMerTerminal = subMerTerminalDao
+				.selectSubMerTerminalByUpdatePwd(subMerTerminal);
+		if (subMerTerminal != null) {
+			subMerTerminal.setLoginPwd(selectPassWord.getPwd());
+			setCheckCode("3042");
+			int update = 0;
+			try {
+				update = subMerTerminalDao.updatePwd(subMerTerminal);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setCheckCode("9999");// 更新失败，返回错误报文
+			}
+			if (update > 0) {
+				System.out.println("更新密码！");
+				setCheckCode("0000");
+			}
+		}
+		selectPassWord.setRespCode(checkCode);
+		selectPassWord.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return selectPassWord;
+	}
+
+	/**
+	 * 终端注销
+	 */
+	@Override
+	public String terminalCancel(SubMerTerminal terminal) {
+		String returns = "";
+
+		TerminalCancel terminalCancel = new TerminalCancel();
+		terminalCancel.setApplication("TerminalCancel.Req");
+		terminalCancel.setVersion("1.0.0");
+		terminalCancel.setSendTime(new SimpleDateFormat("yyyyMMddmmhhss")
+				.format(new Date()));
+		terminalCancel.setTerminalId(terminal.getTsn());
+		terminalCancel.setFactoryId(terminal.getFactory());
+
+		String data = "";// 3段内容
+		try {
+			data = xmlUtilnew.ObjToXml(terminalCancel);
+			System.out.println(data);
+			RefundUtil refundUtil = new RefundUtil();
+			data = refundUtil.encrypt(data, terminal.getTsn());
+			System.out.println("3段内容>>>>>>>:" + data);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		RemoteAccessor remoteAccessor = new RemoteAccessor();
+		String decryptXml = "";
+		try {
+			String url = rb.getString("posp-url");
+			System.out.println("url:" + url);
+			decryptXml = remoteAccessor.getResponseByStream(url, "utf-8", data);
+			System.out.println("返回XML>>>>" + decryptXml);
+			String[] ss = decryptXml.split("\\|");
+			if (ss[0].equals("0")) {
+				returns = "0";
+			}
+			if (ss[0].equals("1")) {
+				String str = new RefundUtil().decrypt(ss[1]);
+				String[] result = str.split("\\|");
+				if ("0000".equals(result[1])) {// 获取正确返回的code
+					returns = "1";
+				} else {
+					returns = "0";
+				}
+			}
+		} catch (Exception e) {
+			returns = "0";
+			e.printStackTrace();
+		}
+		return returns;
+	}
+
+	/**
+	 * 上账
+	 * 
+	 * @throws Exception
+	 * @throws UnsupportedEncodingException
+	 */
+	@Override
+	public String upAccount(AccountManage accountManages) throws Exception {
+		Random random = new Random();
+		String res = "";
+		for (int i = 0; i < 7; i++) {
+			res += random.nextInt(10);
+		}
+		System.out.print(res);
+		// 组装数据结构
+		String[] reqMsg = BankUtils.toBusinessBalanceReCharge(
+				accountManages.getMerSysId(), RSACoder.KEY_FTB_PUBLICKEY,
+				accountManages.getMerAmt(), accountManages.getFeeAmt(), res
+						+ accountManages.getId());
+		System.out.println("reqMsg[1]:" + reqMsg[1]);
+		String respMsg = "";
+		String status = "0";
+		String result = "";
+		try {
+			respMsg = new RemoteAccessor().getResponseByPost(
+					PropertiesUtils.getPropertiesValueInPath("busUrl"),
+					"UTF-8", new String[] { "msg", reqMsg[1] });
+		} catch (Exception e) {
+			status = "3";
+			return "上账失败，系统错误";
+		}
+
+		if (respMsg == null || "".equals(respMsg)) {
+			status = "2";
+			return "上账失败，系统错误";
+		}
+		String[] msgs = respMsg.split("\\|");
+
+		if ("0".equals(msgs[0])) {
+			status = "2";
+			// 错误
+			// 错误响应格式：0|错误码|BASE64(错误描述)
+			result = "上账失败,"
+					+ new String(Base64.decodeBase64(msgs[2]), "UTF-8");
+		} else {
+			// 正常响应格式：1|BASE64(3DES(报文))|BASE64(MD5(报文))
+			String xml = new String(RSACoder.decryptDesc(
+					Base64.decodeBase64(msgs[1]), reqMsg[0].getBytes()),
+					"UTF-8");
+			System.out.println("上账返回的xml:" + xml);
+			TransInfoReq transInfo = (TransInfoReq) XmlUtil.XmlToObj(xml,
+					TransInfoReq.class);
+			if ("0000".equals(transInfo.getRespCode())) {
+				status = "1";
+				result = "上账成功!";
+			} else {
+				status = "2";
+				result = "上账失败!";
+			}
+		}
+		if ("1".equals(status) && "1".equals(accountManages.getAccountType())) {// 上账成功、上账类型为1
+			// 清算款上账
+			// 修改商户日清分统计表的 ---清分状态为1待清分
+			MerSettleStatictis merSettleStatictis = new MerSettleStatictis();
+			merSettleStatictis.setClearStatus("1");
+			merSettleStatictis.setMid(accountManages.getMerSysId());
+			merSettleStatictis.setMerType("0");
+			merSettleStatictis.setSettleDate(accountManages.getSettleDate());
+			merSettleStatictisDao.updateClearStatus(merSettleStatictis);
+
+		}
+		AccountManage manage = new AccountManage();
+		manage.setId(accountManages.getId());
+		manage.setMerSysId(accountManages.getMerSysId());
+		manage.setSettleDate(accountManages.getSettleDate());
+		manage.setStatus(status);
+		// 修改预存款状态
+		accountManageDao.updateAccountManageByStatus(manage);
+		return result;
+	}
+
+	/**
+	 * 实名认证
+	 */
+	@Override
+	public String authentication(AccountRegist accountRegist) throws Exception {
+		String authStatus = "-1";// 认证状态 4：认证失败
+		String serialNo = "-1";// 流水号
+		try {
+			String orderId = ValueTool.createByTime();
+			String orderTime = DateUtil.getDate("yyyyMMddHHmmss");
+			String userName = accountRegist.getLegalManName();
+			String idCard = accountRegist.getLegalManIdcard();
+
+			String merchantId = ValueTool.AUTH_MER_ID;
+			String first = merchantId;
+			String Second = "101|" + orderId + "|" + orderTime + "|" + userName
+					+ "|" + idCard;
+			String Third = merchantId + "101" + orderId + "" + orderTime
+					+ idCard + "" + ValueTool.AUTH_MER_SIGN_KEY + "";
+
+			AuthenticationUtil authenticationUtil = new AuthenticationUtil();
+			String data = authenticationUtil.encrypt(first, Second, Third);// 加密并组合
+			RemoteAccessor remoteAccessor = new RemoteAccessor();
+
+			String path = rb.getString("shimingUrl");
+
+			// 发送请求
+			String decryptXml = remoteAccessor.getResponseByStream(path,
+					"utf-8", data);
+			String[] ss = decryptXml.split("\\|");
+			if (ss[0].equals("0")) {// 解析成功
+				String respXml = new AuthenticationUtil().decrypt(ss[1]);// 得到正确的报文内容
+				System.out.println(respXml);
+				String[] result = respXml.split("\\|");
+				String respCode = result[5];// 返回码
+				serialNo = result[4];// 流水号
+				if (!"".equals(respCode) && "1".equals(respCode)) {// 认证成功
+					authStatus = "1";
+				} else {
+					authStatus = "4";
+				}
+			}
+			if (ss[0].equals("1")) {// 解析失败
+				authStatus = "4";
+			}
+		} catch (Exception e) {
+			return authStatus + "|" + serialNo;
+		}
+		return authStatus + "|" + serialNo;
+	}
+
+	/**
+	 * 商户提现申请记录
+	 */
+	@Override
+	public Object drawMoneyRecord(DrawMoneyRecord drawMoneyRecord)
+			throws Exception {
+		drawMoneyRecord.copyBusBeanParent(drawMoneyRecord);
+		setCheckCode("");
+		try {
+			// 组查询条件
+			int curPage = 1;
+			int pageCount = 10;
+			if (drawMoneyRecord.getCurPage() != null
+					&& !"".equals(drawMoneyRecord.getCurPage())) {
+				curPage = Integer.parseInt(drawMoneyRecord.getCurPage());
+			}
+			if (drawMoneyRecord.getPageCount() != null
+					&& !"".equals(drawMoneyRecord.getPageCount())) {
+				pageCount = Integer.parseInt(drawMoneyRecord.getPageCount());
+			}
+			Map map = PageUtil.getPageMap(curPage, pageCount);
+
+			// 查询
+			Integer count = null;
+			map.put("subMerId", drawMoneyRecord.getMerchantId());
+			map.put("beginTime", drawMoneyRecord.getBeginTime());
+			map.put("endTime", drawMoneyRecord.getEndTime());
+			count = subMerCashoutDao.getSubMerCashoutBySubIdCount(map); // 总条数
+			if (null == count) {
+				count = 0;
+			}
+			if (count > 0) {
+				List<SubMerCashout> list = subMerCashoutDao
+						.getSubMerCashoutBySubId(map); // 总数据
+				// 拼返回内容
+				List<DrawMoneyRecordList> drawMoneyRecordLists = new ArrayList<DrawMoneyRecordList>();
+
+				Iterator<SubMerCashout> subMerCashoutList = list.iterator();
+				while (subMerCashoutList.hasNext()) {
+					SubMerCashout info = (SubMerCashout) subMerCashoutList
+							.next();
+					DrawMoneyRecordList drawMoneyRecordList = new DrawMoneyRecordList();
+					drawMoneyRecordList.setOrderAmt(info.getOrderAmt());
+					drawMoneyRecordList.setCurrency("156");
+					drawMoneyRecordList.setMerchantOrderId(info.getTransId());
+					drawMoneyRecordList.setMerchantOrderTime(info
+							.getCreateTime());
+					drawMoneyRecordList.setOrderStatus(info.getOrderStatus());
+					drawMoneyRecordLists.add(drawMoneyRecordList);
+				}
+
+				SubMerInfo subMerInfo = subMerInfoDao
+						.getSubMerInfoById(drawMoneyRecord.getMerchantId());
+				String subMerName = "";
+				if (null != subMerInfo) {
+					subMerName = subMerInfo.getSubMerName();
+				}
+				drawMoneyRecord.setDrawMoneyRecordLists(drawMoneyRecordLists);
+				drawMoneyRecord.setMerchantId(drawMoneyRecord.getMerchantId());
+				drawMoneyRecord.setMerchantName(subMerName);
+				drawMoneyRecord.setTerminalId(drawMoneyRecord.getTerminalId());
+				drawMoneyRecord.setBeginTime(drawMoneyRecord.getBeginTime());
+				drawMoneyRecord.setEndTime(drawMoneyRecord.getEndTime());
+				setCheckCode("0000");
+				drawMoneyRecord.setTotalCount(count + "");
+				drawMoneyRecord.setCurPage(curPage + "");
+				drawMoneyRecord.setPageCount(pageCount + "");
+			} else {
+				setCheckCode("2002");
+			}
+		} catch (Exception e) {
+			setCheckCode("2002");
+			e.printStackTrace();
+		} finally {
+			drawMoneyRecord.setRespCode(checkCode);
+			drawMoneyRecord.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		}
+		return drawMoneyRecord;
+	}
+
+	/**
+	 * 查询余额
+	 */
+	@Override
+	public Object queryBalance(QueryBalance queryBalance) {
+		queryBalance.copyBusBeanParent(queryBalance);
+		setCheckCode("");
+		SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(queryBalance
+				.getMerchantId());
+		queryBalance.setMerchantId(queryBalance.getMerchantId());
+		queryBalance.setTerminalId(queryBalance.getTerminalId());
+		setCheckCode("3054");
+		if (null != subMerInfo) {
+			queryBalance.setMerchantName(subMerInfo.getSubMerName());
+			queryBalance.setAccountBalance(subMerInfo.getgAccStatus());
+			setCheckCode("0000");
+		}
+		queryBalance.setBalanceCurrency("156");
+		queryBalance.setRespCode(checkCode);
+		queryBalance.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return queryBalance;
+	}
+
+	/**
+	 * 短信下发
+	 */
+	@Override
+	public Object phoneNumber(PhoneNumber phoneNumber) {
+		phoneNumber.copyBusBeanParent(phoneNumber);
+		setCheckCode("3061");
+
+		String phoneNo = phoneNumber.getPhoneNum();
+		String code = getSixRandom(100000, 999999).toString();
+
+		String result = HFSendData.sendData(phoneNo, code);
+		if (!"error".equals(result)) {
+			if ("00".equals(result.split("[|]")[0])) {
+				setCheckCode("0000");
+				PhoneVerifyCode phoneVerifyCode = new PhoneVerifyCode();
+				phoneVerifyCode.setTerminalId(phoneNumber.getTerminalId());
+				phoneVerifyCode.setPhone(phoneNumber.getPhoneNum());
+				phoneVerifyCode.setCode(Md5Util.getMD5(code));
+				phoneVerifyCode.setCreateTime(DateUtil
+						.getDate("yyyyMMddHHmmss"));
+				phoneVerifyCodeDao.insertPhoneVerifyCode(phoneVerifyCode);
+			}
+		} else {
+			setCheckCode("9999");
+		}
+		phoneNumber.setRespCode(checkCode);
+		phoneNumber.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		phoneNumber.setMsgExt1(Md5Util.getMD5(code));
+
+		/*
+		 * try { URL url = new
+		 * URL("http://www.chinapnr.com/hfsubms/clientAction!sendInfos.ac");
+		 * String phoneNo = phoneNumber.getPhoneNum(); String code =
+		 * getSixRandom(100000, 999999).toString(); URLConnection connection =
+		 * url.openConnection(); connection.setDoOutput(true);
+		 * OutputStreamWriter out = new
+		 * OutputStreamWriter(connection.getOutputStream(), "8859_1");
+		 * out.write("phoneNo=" + phoneNo + "&checkCode=" + code + ""); //
+		 * 向页面传递数据。post的关键所在！ out.flush(); out.close(); //
+		 * 一旦发送成功，用以下方法就可以得到服务器的回应： String sCurrentLine; String sTotalString;
+		 * sCurrentLine = ""; sTotalString = ""; InputStream l_urlStream;
+		 * l_urlStream = connection.getInputStream(); // 传说中的三层包装阿！
+		 * BufferedReader l_reader = new BufferedReader(new
+		 * InputStreamReader(l_urlStream)); while ((sCurrentLine =
+		 * l_reader.readLine()) != null) { sTotalString += sCurrentLine +
+		 * "\r\n";
+		 * 
+		 * } System.out.println("==================" + sTotalString);
+		 * phoneNumber.setRespCode("00".equals(sTotalString.split("[|]")[0]) ?
+		 * "0000" : sTotalString .split("[|]")[0]);
+		 * phoneNumber.setRespDesc("00".equals(sTotalString.split("[|]")[0]) ?
+		 * "成功" : "失败"); phoneNumber.setMsgExt1(Md5Util.getMD5(code));
+		 * 
+		 * if ("00".equals(sTotalString.split("[|]")[0])) { PhoneVerifyCode
+		 * phoneVerifyCode = new PhoneVerifyCode();
+		 * phoneVerifyCode.setTerminalId(phoneNumber.getTerminalId());
+		 * phoneVerifyCode.setPhone(phoneNumber.getPhoneNum());
+		 * phoneVerifyCode.setCode(Md5Util.getMD5(code));
+		 * phoneVerifyCode.setCreateTime(DateUtil.getDate("yyyyMMddHHmmss"));
+		 * phoneVerifyCodeDao.insertPhoneVerifyCode(phoneVerifyCode); } } catch
+		 * (Exception e) { setCheckCode("9999"); e.printStackTrace(); }
+		 */
+
+		return phoneNumber;
+	}
+
+	/**
+	 * 
+	 * @Description:获取六位随机数
+	 * @Auther: lijialiang
+	 * @Date: 2014-12-17 上午11:27:48
+	 */
+	private Integer getSixRandom(final int min, final int max) {
+		Random rand = new Random();
+		int tmp = Math.abs(rand.nextInt());
+		return tmp % (max - min + 1) + min;
+	}
+}

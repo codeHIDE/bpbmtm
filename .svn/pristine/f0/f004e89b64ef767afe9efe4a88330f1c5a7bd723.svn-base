@@ -1,0 +1,127 @@
+package com.bypay.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.bypay.domain.OrderInfo;
+
+public interface OrderInfoDao {
+
+	/**
+	 * 查询所有 OrderInfo 历史交易查询
+	 */
+	List<OrderInfo> selecrOrderHistoryList(Map map);
+
+	/**
+	 * 查询历史交易的条数分页用
+	 */
+	Map selectOrderHistoryCount(Map map);
+
+	/**
+	 * 查询当日交易的条数分页用
+	 */
+	Map selectOrderTheDateCount(Map map);
+	Map selectOrderTheDateCountRate(Map map);
+
+	/**
+	 * 查询当天交易信息
+	 */
+	List<OrderInfo> selectOrderTheDate(Map map);
+	List<OrderInfo> selectOrderTheDateRate(Map map);
+
+	/**
+	 * 转账信息查询
+	 * 
+	 * @param map
+	 * @return
+	 */
+	List<OrderInfo> selectTransfer(Map map);
+
+	/**
+	 * 查询转账信息的条数
+	 * 
+	 * @param orderInfo
+	 * @return
+	 */
+	Map selectTransferCount(Map map);
+
+	/**
+	 * 应用交易查询的条数
+	 * @param orderInfo
+	 * @return
+	 */
+	Map selectApplyCount(Map map);
+
+	/**
+	 * 应用交易查询
+	 * @param map
+	 * @return
+	 */
+	List<OrderInfo> selectApplyList(Map map);
+
+	/**
+	 * 应用交易详情
+	 * @param orderInfo
+	 * @return
+	 */
+	OrderInfo selectOrderDetail(Map map);
+	/**
+	 * 交易列表
+	 */
+	List<OrderInfo> selectEnquiryList(Map map);
+	List<OrderInfo> selectNewEnquiryList(Map map);
+	/**
+	 * 交易列表总条数
+	 */
+	Integer selectEnquiryListCount(Map map);
+	Integer selectNewEnquiryListCount(Map map);
+
+	/**
+	 * 根据订单ID获取订单信息
+	 * @param orderId
+	 * @return
+	 */
+	OrderInfo getOrderInfo(String orderId);
+
+	/**
+	 * 修改订单信息表的RESERVED字段为-1,表示此订单已标记过为异常
+	 * @param orderId
+	 */
+	int updateOrderReserved(String orderId);
+	/**
+	 * 
+	 * @Description: 查询通道下总手续费
+	 * @Auther: ljl
+	 * @param map
+	 * @return
+	 * @Date: 2014-9-12 上午10:25:20
+	 */
+    Map<String, Object> selectTotalTractCost(Map<String, Object> map);
+    /**
+     * 查询制定子商户交易
+     */
+    List<OrderInfo> selectOrderInfoBySubMerId(OrderInfo orderInfo);
+    /**
+     * 添加调账订单
+     */
+    Integer insertOrderInfo(OrderInfo OrderInfo);
+    
+    /**
+     * 设置订单为已代付
+     * @Title:        updateOrderSettle 
+     * @Description:  
+     * @param:        @param orderId
+     * @param:        @return    
+     * @return:       int    
+     * @throws 
+     * @author        Eason Jiang
+     * @Date          2015-6-30 下午3:15:27
+     */
+    int updateOrderSettle(String orderId);
+    
+    void updateOrder(OrderInfo info);
+    
+    OrderInfo selectbyRight(String orderId);
+    
+	OrderInfo selectLastOrder(OrderInfo info);
+}

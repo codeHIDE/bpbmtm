@@ -1,0 +1,301 @@
+package com.bypay.service.task;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.ResourceBundle;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.bypay.domain.SubMerCashout;
+import com.bypay.domain.SubMerCashoutBatch;
+import com.bypay.domain.SubMerInfo;
+import com.bypay.service.SubMerCashoutBatchService;
+import com.bypay.service.SubMerCashoutService;
+import com.bypay.service.SubMerInfoService;
+import com.bypay.util.DateUtil;
+import com.bypay.util.FTPUtil;
+import com.bypay.util.FileUtil;
+import com.google.common.collect.Maps;
+
+@Component("statisticsTodayComponent")
+public class StatisticsTodayTask {
+	
+	private static Logger logger = Logger.getLogger(StatisticsTodayTask.class);
+	
+	
+	@Autowired
+	private SubMerCashoutService subMerCashoutService;
+	@Autowired
+	private SubMerCashoutBatchService subMerCashoutBatchService;
+	@Autowired
+	private SubMerInfoService subMerInfoService;
+	
+	private static final String ENTER = "\r\n"; //回车换行符
+
+	private static final String DOT = "|";   //逗号
+	
+	private static final String UNDERLINE = "_";
+	
+	ResourceBundle rb = ResourceBundle.getBundle("com/bypay/config/path", Locale.getDefault()); // 存放路径
+
+	public void execute() {
+		SubMerCashout subMerCashout = new SubMerCashout();
+		subMerCashout.setCreateTime(DateUtil.getDate(new Date(), "yyyy-MM-dd")
+				.replace("-", ""));
+		subMerCashout.setOrderStatus("0"); //用户订单状态为申请
+		subMerCashout.setGrade("0"); //只查询普通的商户
+		Map<String, Object> map = Maps.newHashMap();
+		map.put("subMerCashout", subMerCashout);
+		List<SubMerCashout> subMerCashouts = subMerCashoutService
+				.selectSubMerCashoutListNotPage(map);
+		Long orderAmtTotal = 0L; // 提现总金额
+		Long transFeeTotal = 0L; // 提现总手续费
+		Long orderCountTotal = 0L; // 总条数
+		for (SubMerCashout subMerCashout2 : subMerCashouts) {
+			SubMerInfo subMerInfo = subMerInfoService
+					.getSubMerInfoById(subMerCashout2.getSubMerId());
+			if ("1".equals(subMerInfo.getBillStatus())) {
+				if (StringUtils.isNotBlank(subMerCashout2.getOrderAmt())) {
+					orderAmtTotal += Long.parseLong(subMerCashout2
+							.getOrderAmt());
+				}
+				if (StringUtils.isNotBlank(subMerCashout2.getTransFee())) {
+					transFeeTotal += Long.parseLong(subMerCashout2
+							.getTransFee());
+				}
+			}
+			orderCountTotal++;
+		}
+		SubMerCashoutBatch subMerCashoutBatch = new SubMerCashoutBatch();
+		subMerCashoutBatch.setBatchTime(DateUtil.getDate(new Date(), "HH"));
+		subMerCashoutBatch.setOrderAmt(String.valueOf(orderAmtTotal));
+		subMerCashoutBatch.setCreateDate(DateUtil.getDate(new Date(),
+				"yyyy-MM-dd"));
+		subMerCashoutBatch.setFinishTime(null);
+		subMerCashoutBatch.setTransFee(String.valueOf(transFeeTotal));
+		subMerCashoutBatch.setOrderCount(String.valueOf(orderCountTotal));
+		subMerCashoutBatch.setStatus("1"); // 生成代发文件等待代发
+		String batchId = subMerCashoutBatchService
+				.insertSubMerCashoutBatch(subMerCashoutBatch);
+
+		for (SubMerCashout subMerCashout3 : subMerCashouts) {
+			SubMerInfo subMerInfo = subMerInfoService
+					.getSubMerInfoById(subMerCashout3.getSubMerId());
+			if ("1".equals(subMerInfo.getBillStatus())) {
+				subMerCashout3.setBatchId(batchId);
+				// 操作完之后更改数据状态
+				subMerCashout3.setOrderStatus("1");
+				subMerCashoutService.updateSubMerCashout(subMerCashout3);
+			}
+		}
+
+	}
+	
+	public static void main(String[] args) {
+		String fileDate = DateUtil.getDate(new Date(), "YYYYMMdd_HHm");
+		
+	}
+	
+	public void cashout(){
+		logger.info("开始生成T0文件");
+		DecimalFormat df = new DecimalFormat("0.00");
+		SubMerCashout subMerCashout = new SubMerCashout();
+		String fileDate = DateUtil.getDate(new Date(), "YYYYMMdd_HHmm");
+		String date = DateUtil.getDate(new Date(), "yyyyMMdd");
+		subMerCashout.setCreateTime(date);
+		subMerCashout.setOrderStatus("0"); //用户订单状态为申请
+//		subMerCashout.setGrade("0"); //只查询普通的商户
+
+		List<SubMerCashout> subMerCashouts = subMerCashoutService.selectSubMerCashoutList2(subMerCashout);
+		
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < subMerCashouts.size(); i++){
+			SubMerCashout subMer = subMerCashouts.get(i);
+			sb.append("NAPP").append(date).append(subMer.getId()).append(DOT);
+			sb.append(date).append(DOT);
+			sb.append(subMer.getSettAccountNo()).append(DOT);
+			sb.append(subMer.getSettAccountName()).append(DOT);
+			sb.append(subMer.getLineNum()).append(DOT);
+			sb.append(getBankNameByCode(subMer.getSettAgency())).append(subMer.getOpenBank()).append(DOT);
+			sb.append("156").append(DOT);
+			Double orderAmt = Double.valueOf(subMer.getOrderAmt()) / 100.0;
+			sb.append(df.format(orderAmt)).append(DOT);
+			sb.append("测试").append(DOT);
+			sb.append(ENTER);
+		}
+		if( subMerCashouts.size() > 0){
+//			String fileName = "D0_"+fileDate+"_t";		//D0_日期_时间_t.txt103环境
+			String fileName = "T0_"+fileDate+"_t";		//T0_日期_时间_t.txt23环境
+			String path = rb.getString("cashOutT0");
+			String type = "txt";
+			boolean result = FileUtil.generateFile(sb.toString(), path, fileName, type);
+			if( !result ){
+				System.out.println("生成文件失败");
+				logger.info("生成文件失败！");
+				return ;
+			}
+			//获取上传信息
+			String host = rb.getString("sftp.host");
+			String port = rb.getString("sftp.port");
+			String userName = rb.getString("sftp.username");
+			String passWord = rb.getString("sftp.password");
+			String uploadDir = rb.getString("sftp.upload.dir");
+//			String uploadFile = path + File.separator + fileName+"."+type;
+			
+			//上传文件并且改名
+//			SFTPUtils sftp = new SFTPUtils();
+//			ChannelSftp channel = sftp.connect(host, Integer.valueOf(port), username, password); //打开连接
+			boolean uploadResult = FTPUtil.uploadFileRename(host, Integer.valueOf(port), userName, passWord, path, fileName + "." +type, uploadDir); 
+				//sftp.upload(uploadDir, uploadFile, channel); //上传文件
+			//sftp.connectionClose(channel); //关闭连接
+			
+			if( uploadResult ){
+				System.out.println("上传文件成功!");
+				logger.info("上传文件成功！");
+				for(int j =0; j < subMerCashouts.size(); j++){
+					SubMerCashout cashOut = subMerCashouts.get(j);
+					SubMerCashout cashOutSuccess = new SubMerCashout();
+					cashOutSuccess.setId(cashOut.getId());
+					cashOutSuccess.setOrderStatus("2");
+					cashOutSuccess.setFinishTime(DateUtil.getDate("yyyyMMddHHmmss"));
+					subMerCashoutService.updateSubMerCashout(cashOutSuccess);
+				}
+			}else{
+				logger.info("上传文件失败！");
+				for(int j =0; j < subMerCashouts.size(); j++){
+					SubMerCashout cashOut = subMerCashouts.get(j);
+					SubMerCashout cashOutSuccess = new SubMerCashout();
+					cashOutSuccess.setId(cashOut.getId());
+					cashOutSuccess.setOrderStatus("9");
+					cashOutSuccess.setFinishTime(DateUtil.getDate("yyyyMMddHHmmss"));
+					subMerCashoutService.updateSubMerCashout(cashOutSuccess);
+				}
+			}
+		}else{
+			logger.info("没有体现记录,不生成T0文件");
+		}
+		execute();
+	}
+
+	
+	public void cashoutMS(){ 
+		logger.info("开始生成民生银行T0文件");
+		DecimalFormat df = new DecimalFormat("0.00");
+		SubMerCashout subMerCashout = new SubMerCashout();
+		String date = DateUtil.getDate(new Date(), "yyyyMMdd");
+		subMerCashout.setCreateTime(date);
+		subMerCashout.setOrderStatus("0"); //用户订单状态为申请
+//		subMerCashout.setGrade("0"); //只查询普通的商户
+
+		List<SubMerCashout> subMerCashouts = subMerCashoutService.selectSubMerCashoutList2(subMerCashout);
+		
+		StringBuilder sb = new StringBuilder();
+		StringBuffer top = new StringBuffer();		//报文头
+		BigDecimal totalMoney = new BigDecimal(0);	//总金额
+		for(int i = 0; i < subMerCashouts.size(); i++){
+			SubMerCashout subMer = subMerCashouts.get(i);
+			sb.append(subMer.getBatchId()).append(DOT);		//第三方流水号
+			sb.append(subMer.getSettAccountNo()).append(DOT);		//卡号
+			sb.append(subMer.getSettAccountName()).append(DOT);		//户名
+			sb.append(subMer.getLineNum()).append(DOT);				//支付行号
+			sb.append(getBankNameByCode(subMer.getSettAgency())).append(subMer.getOpenBank()).append(DOT);	//开户行
+			sb.append(subMer.getOrderAmt()).append(DOT);		//金额已分为单位
+			totalMoney = totalMoney.add(new BigDecimal(subMer.getOrderAmt()));		//总金额计算
+			sb.append("ruiyin").append(DOT);		//摘要
+					//备注
+			sb.append(ENTER);
+		}
+		//开始制作表头
+		top.append("P").append(DOT).append(subMerCashouts.size()).append(DOT).append(totalMoney.toString()).append(ENTER);		//P|总笔数|总金额
+		//文件名req_yyyyMMdd_NNN.txt
+		if( subMerCashouts.size() > 0){
+			String batchId = subMerCashouts.get(0).getBatchId();
+			String fileName = "T0_"+date+"_"+batchId;
+			String path = rb.getString("cashOutT0");
+			String type = "txt";
+			boolean result = FileUtil.generateFile(sb.toString(), path, fileName, type);
+			if( !result ){
+				System.out.println("生成文件失败");
+				logger.info("生成文件失败！");
+				return ;
+			}
+			//获取上传信息
+			String host = rb.getString("sftp.host");
+			String port = rb.getString("sftp.port");
+			String userName = rb.getString("sftp.username");
+			String passWord = rb.getString("sftp.password");
+			String uploadDir = rb.getString("sftp.upload.dir");
+//			String uploadFile = path + File.separator + fileName+"."+type;
+			
+			//上传文件
+//			SFTPUtils sftp = new SFTPUtils();
+//			ChannelSftp channel = sftp.connect(host, Integer.valueOf(port), username, password); //打开连接
+			boolean uploadResult = FTPUtil.uploadFile(host, Integer.valueOf(port), userName, passWord, path, fileName + "." +type, uploadDir); 
+				//sftp.upload(uploadDir, uploadFile, channel); //上传文件
+			//sftp.connectionClose(channel); //关闭连接
+			
+			if( uploadResult ){
+				System.out.println("上传文件成功!");
+				logger.info("上传文件成功！");
+				for(int j =0; j < subMerCashouts.size(); j++){
+					SubMerCashout cashOut = subMerCashouts.get(j);
+					SubMerCashout cashOutSuccess = new SubMerCashout();
+					cashOutSuccess.setId(cashOut.getId());
+					cashOutSuccess.setOrderStatus("2");
+					cashOutSuccess.setFinishTime(DateUtil.getDate("yyyyMMddHHmmss"));
+					subMerCashoutService.updateSubMerCashout(cashOutSuccess);
+				}
+			}else{
+				logger.info("上传文件失败！");
+				for(int j =0; j < subMerCashouts.size(); j++){
+					SubMerCashout cashOut = subMerCashouts.get(j);
+					SubMerCashout cashOutSuccess = new SubMerCashout();
+					cashOutSuccess.setId(cashOut.getId());
+					cashOutSuccess.setOrderStatus("9");
+					cashOutSuccess.setFinishTime(DateUtil.getDate("yyyyMMddHHmmss"));
+					subMerCashoutService.updateSubMerCashout(cashOutSuccess);
+				}
+			}
+		}else{
+			logger.info("没有体现记录,不生成T0文件");
+		}
+		execute();
+	}
+	
+	
+	private String getBankNameByCode(String bankCode){
+		
+		if( StringUtils.isBlank(bankCode)){
+			return "";
+		}
+		Map<String, String> map = new HashMap<String, String>();
+		map.put("ICBC", "工商银行");
+		map.put("ABC", "农业银行");
+		map.put("CMB", "招商银行");
+		map.put("CCB", "建设银行");
+		map.put("BCCB", "北京银行");
+		map.put("BOC", "中国银行");
+		map.put("BOCOM", "交通银行");
+		map.put("CBHB", "渤海银行");
+		map.put("CEB", "光大银行");
+		map.put("CIB", "兴业银行");
+		map.put("CITIC", "中信银行");
+		map.put("CZB", "浙商银行");
+		map.put("GDB", "广发银行");
+		map.put("HXB", "华夏银行");
+		map.put("PINGAN", "平安银行");
+		map.put("SRCB", "上海农村商业银行");
+		map.put("FRCU", "沙县农商行");
+		map.put("PSBC", "中国邮政储蓄银行");
+		return map.get(bankCode.toUpperCase());
+			
+	}
+}

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.UserTypeDao">
+	<resultMap id="userType" type="com.bypay.domain.UserType">
+		<result property="id" column="id" />
+		<result property="userTypeId" column="userTypeId" />
+		<result property="transType" column="transType" />
+		<result property="transFee" column="transFee" />
+		<result property="costFee" column="costFee" />
+		<result property="typeName" column="typeName" />
+	</resultMap>
+
+	<select id="selectUserType"  resultMap="userType" parameterType="java.util.Map">
+		SELECT *
+		FROM USER_TYPE
+		WHERE 1=1
+		<if test="userType.userTypeId != null and userType.userTypeId != '' ">
+		AND userTypeId = #{userType.userTypeId}
+		</if>
+		ORDER BY ID desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectUserTypeCount" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(1)
+		FROM USER_TYPE
+		WHERE 1=1
+		<if test="userType.userTypeId != null and userType.userTypeId != '' ">
+		AND userTypeId = #{userType.userTypeId}
+		</if>
+	</select>
+	
+	<insert id="insertUserType"  parameterType="com.bypay.domain.RuleInfo">
+	 	INSERT INTO USER_TYPE (userTypeId,transType,transFee,costFee,typeName)
+	 	values(#{userTypeId},#{transType},#{transFee},#{costFee},#{typeName})
+	</insert>
+</mapper>

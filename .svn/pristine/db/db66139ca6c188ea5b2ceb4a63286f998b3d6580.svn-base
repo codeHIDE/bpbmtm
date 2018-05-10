@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.AgentManagerDao">
+	<resultMap id="agentManager" type="com.bypay.domain.AgentManager">
+		<result property="id" column="ID" />
+		<result property="agentId" column="AGENT_ID" />
+		<result property="level" column="LEVEL" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPwd" column="LOGIN_PWD" />
+		<result property="purview" column="PURVIEW" />
+		<result property="realName" column="REAL_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="loginCount" column="LOGIN_COUNT" />
+		<result property="lastLoginTime" column="LAST_LOGIN_TIME" />
+		<result property="loginIp" column="LOGIN_IP" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="status" column="STATUS" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	
+	
+	<!-- 修改管理员密码 -->
+	<update id="updateAgenctInfoPassword" parameterType="com.bypay.domain.AgentManager">
+		update AGENT_MANAGER set LOGIN_PWD=#{loginPwd} 
+		where  AGENT_ID=#{agentId}
+	</update>
+</mapper>

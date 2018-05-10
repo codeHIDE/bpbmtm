@@ -1,0 +1,23 @@
+package com.bypay.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.bypay.domain.SumMerProfit;
+
+public interface SumMerProfitDao {
+    
+    public void insertMerProfit(SumMerProfit sumMerProfit);
+    
+    public List<Map> getSumList(Map<String,String> map);
+    
+    public List<SumMerProfit> selectSumMerList(Map map);
+
+    public Integer selectSumMerCount(Map map);
+    
+    public SumMerProfit selectById(SumMerProfit sumMerProfit);
+    
+    public void updateProfit(SumMerProfit sumMerProfit);
+    
+    public Map getApplyList(Map map);
+}

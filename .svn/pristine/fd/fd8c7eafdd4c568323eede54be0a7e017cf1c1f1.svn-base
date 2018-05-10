@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerInfoUpdateDao">
+	<resultMap id="merInfoUpdate" type="com.bypay.domain.MerInfoUpdate">
+		<result property="id" column="ID" />
+		<result property="mid" column="MID" />
+		<result property="merType" column="MER_TYPE" />
+		<result property="modifyType" column="MODIFY_TYPE" />
+		<result property="value" column="VALUE" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="updateTime" column="UPDATE_TIME" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	<select id="selectSubMerUpdateByStatus" resultMap="merInfoUpdate">
+		SELECT VALUE,ID,MODIFY_TYPE FROM MER_INFO_UPDATE WHERE STATUS = 1
+	</select>
+	<select id="selectSubMerUpdate" resultMap="merInfoUpdate" parameterType="java.util.Map">
+		SELECT * FROM MER_INFO_UPDATE WHERE 1=1
+		<if test="merInfoUpdate.merType != null and merInfoUpdate.merType != '' and merInfoUpdate.merType != -1">
+		AND MER_TYPE = #{merInfoUpdate.merType}
+		</if>
+		<if test="merInfoUpdate.mid != null and merInfoUpdate.mid != '' ">
+		AND MID = #{merInfoUpdate.mid}
+		</if>
+		<if test="merInfoUpdate.status != null and merInfoUpdate.status != '' and merInfoUpdate.status != -1">
+		AND STATUS = #{merInfoUpdate.status}
+		</if>
+		<if test="merInfoUpdate.modifyType != null and merInfoUpdate.modifyType != '' and merInfoUpdate.modifyType != -1">
+		AND MODIFY_TYPE = #{merInfoUpdate.modifyType}
+		</if>
+		limit #{page}  , #{pageSize}
+	</select>
+	<select id="selectSubMerUpdateCount" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(1) FROM MER_INFO_UPDATE WHERE 1=1
+		<if test="merInfoUpdate.merType != null and merInfoUpdate.merType != '' and merInfoUpdate.merType != -1">
+		AND MER_TYPE = #{merInfoUpdate.merType}
+		</if>
+		<if test="merInfoUpdate.mid != null and merInfoUpdate.mid != '' ">
+		AND MID = #{merInfoUpdate.mid}
+		</if>
+		<if test="merInfoUpdate.status != null and merInfoUpdate.status != '' and merInfoUpdate.status != -1">
+		AND STATUS = #{merInfoUpdate.status}
+		</if>
+		<if test="merInfoUpdate.modifyType != null and merInfoUpdate.modifyType != '' and merInfoUpdate.modifyType != -1">
+		AND MODIFY_TYPE = #{merInfoUpdate.modifyType}
+		</if>
+	</select>
+	<select id="selectSubMerUpdateById" resultMap="merInfoUpdate" parameterType = "String">
+		SELECT ID,MID,VALUE,STATUS,MODIFY_TYPE FROM MER_INFO_UPDATE WHERE ID = #{id}
+	</select>
+	
+	<update id="updateSubMerUpdateStatus" parameterType="com.bypay.domain.MerInfoUpdate">
+		UPDATE MER_INFO_UPDATE SET 
+		STATUS = #{status}
+		<if test="updateTime != null and updateTime != ''">
+		,UPDATE_TIME = #{updateTime}
+		</if>
+		 WHERE ID = #{id}
+	</update>
+	<insert id="insertMerInfoUpdate" parameterType="com.bypay.domain.MerInfoUpdate">
+		INSERT INTO MER_INFO_UPDATE( MID, MER_TYPE, MODIFY_TYPE, VALUE, STATUS, CREATE_TIME, UPDATE_TIME, REMARK) 
+    	VALUES(#{mid}, #{merType}, #{modifyType}, #{value}, #{status}, #{createTime}, #{updateTime}, #{remark})
+	</insert>
+	
+	<select id="selectMerInfoUpdateStatus" resultMap="merInfoUpdate">
+		SELECT * FROM MER_INFO_UPDATE WHERE STATUS = 1
+	</select>
+</mapper>

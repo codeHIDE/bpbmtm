@@ -1,0 +1,350 @@
+package com.bypay.action;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import com.bypay.common.BaseAction;
+import com.bypay.dao.ChannelAddInfoDao;
+import com.bypay.dao.ChannelFeeTypeDao;
+import com.bypay.dao.ChannelMerInfoDao;
+import com.bypay.domain.ChannelAddInfo;
+import com.bypay.domain.ChannelFeeType;
+import com.bypay.domain.ChannelMerInfo;
+import com.bypay.util.ChannelAddKey;
+import com.bypay.util.PageUtil;
+import com.richerpay.core.model.CoreTransInfo;
+import com.richerpay.dubbo.service.JManageService;
+
+public class ChannelAction  extends BaseAction {
+	private Logger logger = LoggerFactory.getLogger(ChannelAction.class);
+	/** *分页开始** */
+	private int page = 1;
+	private int pageSize = 15;
+	private List<ChannelAddInfo> channelAddInfoList; 
+	private List<ChannelMerInfo> channelMerInfoList; 
+	private List<ChannelFeeType> channelFeeTypeList; 
+	private ChannelAddInfo channelAddInfo;
+	private ChannelMerInfo channelMerInfo;
+	private ChannelFeeType channelFeeType;
+	@Inject
+	private ChannelAddInfoDao channelAddInfoDao;
+	@Inject
+	private ChannelMerInfoDao channelMerInfoDao;
+	@Inject
+	private ChannelFeeTypeDao channelFeeTypeDao;
+	private List<ChannelFeeType> feeList;
+	
+	@Autowired
+    private JManageService manageService;
+	
+	public void selectChannel() {
+		  try {
+		      if (channelAddInfo == null) {
+		    	  channelAddInfo = new ChannelAddInfo();
+		      }
+		      Map map = PageUtil.getPageMap(page, pageSize);
+		      map.put("channelAddInfo", channelAddInfo);
+		      int count = 0;
+		      count = channelAddInfoDao.selectChannelAddInfoCount(map);
+		      channelAddInfoList = channelAddInfoDao.selectChannelAddInfo(map);
+		      JSONArray array = JSONArray.fromObject(channelAddInfoList);
+		      JSONObject object = new JSONObject();
+		      object.put("Rows", array.toString());
+		      object.put("Total", count);
+		      getResponse().getWriter().write(object.toString());
+		    } catch (Exception e) {
+		      e.printStackTrace();
+		    }
+	  }
+
+	public void selectChannelFee() {
+		  try {
+		      if (channelFeeType == null) {
+		    	  channelFeeType = new ChannelFeeType();
+		      }
+		      Map map = PageUtil.getPageMap(page, pageSize);
+		      map.put("channelFeeType", channelFeeType);
+		      int count = 0;
+		      count = channelFeeTypeDao.selectChannelFeeTypeCount(map);
+		      channelFeeTypeList = channelFeeTypeDao.selectChannelFeeType(map);
+		      JSONArray array = JSONArray.fromObject(channelFeeTypeList);
+		      JSONObject object = new JSONObject();
+		      object.put("Rows", array.toString());
+		      object.put("Total", count);
+		      getResponse().getWriter().write(object.toString());
+		    } catch (Exception e) {
+		      e.printStackTrace();
+		    }
+	  }
+	
+	public void selectChannelMer() {
+		  try {
+		      if (channelMerInfo == null) {
+		    	  channelMerInfo = new ChannelMerInfo();
+		      }
+		      Map map = PageUtil.getPageMap(page, pageSize);
+		      map.put("channelMerInfo", channelMerInfo);
+		      int count = 0;
+		      count = channelMerInfoDao.selectChannelMerInfoCount(map);
+		      channelMerInfoList = channelMerInfoDao.selectChannelMerInfo(map);
+		      JSONArray array = JSONArray.fromObject(channelMerInfoList);
+		      JSONObject object = new JSONObject();
+		      object.put("Rows", array.toString());
+		      object.put("Total", count);
+		      getResponse().getWriter().write(object.toString());
+		    } catch (Exception e) {
+		      e.printStackTrace();
+		    }
+	  }
+	
+	public void addChannel(){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		channelAddInfo.setOpenDate(sdf.format(new Date()));
+		channelAddInfo.setChStat(0);
+		channelAddInfoDao.insertChannelAddInfo(channelAddInfo);
+		try {
+			getResponse().getWriter().write("添加成功");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void addChannelFee(){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		channelFeeType.setLastUpdTs(sdf.format(new Date()));
+		channelFeeTypeDao.insertChannelFeeType(channelFeeType);
+		try {
+			getResponse().getWriter().write("添加成功");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public String addChannelMer(){
+		feeList = channelFeeTypeDao.selectAllChannelFeeType();
+		channelAddInfoList = channelAddInfoDao.selectAllChannelAddInfo();
+		return "addChannelMer";
+	}
+	
+	public void addChannelMerInfo(){
+	    ChannelMerInfo oldInfo = new ChannelMerInfo();
+	    oldInfo.setChMerId(channelMerInfo.getChMerId());
+	    oldInfo.setChTermId(channelMerInfo.getChTermId());
+	    oldInfo = channelMerInfoDao.selectChannelMerInfoByMerId(oldInfo);
+	    if(oldInfo!=null){
+	        try {
+	            getResponse().getWriter().write("添加失败,检查商户号终端号");
+	        } catch (IOException e) {
+	            // TODO Auto-generated catch block
+	            e.printStackTrace();
+	        }
+	        return;
+	    }
+	    
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		channelMerInfo.setProvId(StringUtils.isEmpty(channelMerInfo
+				.getProvId()) ? "0" : channelMerInfo.getProvId());
+		
+		if (StringUtils.equals(channelMerInfo.getChAddId(), "14")) {// 闪付特殊处理
+			channelMerInfo.setChZMK(ChannelAddKey.chZMK_SF);
+			channelMerInfo.setChZPK(ChannelAddKey.chZPK_SF);
+			channelMerInfo.setChZAK(ChannelAddKey.chZAK_SF);
+			channelMerInfo.setChZEK(ChannelAddKey.chZEK_SF);
+			channelMerInfo.setChEncKey(ChannelAddKey.chEncKey_SF);
+		} else if (StringUtils.equals(channelMerInfo.getChAddId(), "17")) {// 讯联传统特殊处理
+			channelMerInfo.setChZMK(ChannelAddKey.chZMK_XLCT);
+			channelMerInfo.setChZPK(ChannelAddKey.chZPK_XLCT);
+			channelMerInfo.setChZAK(ChannelAddKey.chZAK_XLCT);
+		} else if (StringUtils.equals(channelMerInfo.getChAddId(), "16")) {// 讯联移动特殊处理
+			channelMerInfo.setChZMK(ChannelAddKey.chZMK_XLYD);
+			channelMerInfo.setChZPK(ChannelAddKey.chZPK_XLYD);
+			channelMerInfo.setChZAK(ChannelAddKey.chZAK_XLYD);
+		} else if (StringUtils.equals(channelMerInfo.getChAddId(), "21")) {// 迅联增值特殊处理
+			channelMerInfo.setChZMK(ChannelAddKey.chZMK_XLZZ);
+			channelMerInfo.setChZPK(ChannelAddKey.chZPK_XLZZ);
+			channelMerInfo.setChZAK(ChannelAddKey.chZAK_XLZZ);
+		} else if (StringUtils.equals(channelMerInfo.getChAddId(), "31")) {// 德付特殊处理
+			channelMerInfo.setChZMK(ChannelAddKey.chZMK_DFCT);
+			channelMerInfo.setChZPK(ChannelAddKey.chZPK_DFCT);
+			channelMerInfo.setChZAK(ChannelAddKey.chZAK_DFCT);
+		} else if (StringUtils.equals(channelMerInfo.getChAddId(), "33")) {// 迅联手机
+			channelMerInfo.setChZMK(ChannelAddKey.chZMK_XLSZ);
+//			channelMerInfo.setChZPK(StringUtils.EMPTY);
+//			channelMerInfo.setChZAK(StringUtils.EMPTY);
+		}
+			String batchNo = "000001";
+			channelMerInfo.setChBatchId(batchNo);
+			channelMerInfo.setChTermSeqId(batchNo);
+			channelMerInfo.setOpenDate(sdf.format(new Date()));
+			channelMerInfo.setChStat(0);
+			channelMerInfoDao.insertChannelMerInfo(channelMerInfo);
+		try {
+			getResponse().getWriter().write("添加成功");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void sign(){
+	    String chId = getRequest().getParameter("chId");
+	    ChannelMerInfo channelMerInfo = new ChannelMerInfo();
+	    channelMerInfo.setChId(Long.parseLong(chId));
+        channelMerInfo = channelMerInfoDao.selectChannelMerInfoById(channelMerInfo);
+        StringBuffer sb = new StringBuffer();
+        if (StringUtils.isNotEmpty(channelMerInfo.getChMerId())) {
+            CoreTransInfo cti = new CoreTransInfo();
+            cti.setChMerId(channelMerInfo.getChMerId());
+            cti.setChTermId(channelMerInfo.getChTermId());
+            logger.info("CoreTransInfo="+JSONObject.fromObject(cti));
+            if (StringUtils.isEmpty(channelMerInfo.getChZMK())) {// 判断主秘钥
+                                                                    // 如果没有则调用下载
+                cti = manageService.doChannelTMKDownload(cti);// 渠道主密钥下载
+                logger.info("doChannelTMKDownload="+JSONObject.fromObject(cti));
+                
+                if (!"00".equals(cti.getResponseCode())) {// 主密钥下载失败
+                    logger.error("chMerId:" + cti.getChMerId()
+                            + "============TMKDownloadFalse_1");
+                    sb.append("渠道商户号:").append(cti.getChMerId())
+                            .append("渠道终端号:").append(cti.getChTermId())
+                            .append(",错误代码:")
+                            .append(cti.getResponseCode()).append("-");
+                }
+            }
+            cti = manageService.doChannelSignIn(cti);// 签到操作
+            logger.info("doChannelSignIn="+JSONObject.fromObject(cti));
+            if (!"00".equals(cti.getResponseCode())) {// 签到失败
+                sb.append("渠道商户号:").append(cti.getChMerId())
+                        .append("渠道终端号:").append(cti.getChTermId())
+                        .append(",错误代码").append(cti.getResponseCode())
+                        .append("-");
+                logger.error("chMerId:" + cti.getChMerId()
+                        + "============regFalse_2");
+            } else {
+                logger.info("chMerId:" + cti.getChMerId()
+                        + "============regSuccess");
+            }
+        }
+        if(sb.length()<=3){
+            sb.append("签到成功");
+        }
+        try {
+            getResponse().getWriter().write(sb.toString());
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    
+    
+	}
+	
+	
+	public List<ChannelMerInfo> getChannelMerInfoList() {
+		return channelMerInfoList;
+	}
+
+
+
+	public void setChannelMerInfoList(List<ChannelMerInfo> channelMerInfoList) {
+		this.channelMerInfoList = channelMerInfoList;
+	}
+
+
+
+	public ChannelMerInfo getChannelMerInfo() {
+		return channelMerInfo;
+	}
+
+
+
+	public void setChannelMerInfo(ChannelMerInfo channelMerInfo) {
+		this.channelMerInfo = channelMerInfo;
+	}
+
+
+
+	public ChannelMerInfoDao getChannelMerInfoDao() {
+		return channelMerInfoDao;
+	}
+
+
+
+	public void setChannelMerInfoDao(ChannelMerInfoDao channelMerInfoDao) {
+		this.channelMerInfoDao = channelMerInfoDao;
+	}
+
+
+
+	public List<ChannelAddInfo> getChannelAddInfoList() {
+		return channelAddInfoList;
+	}
+
+	public void setChannelAddInfoList(List<ChannelAddInfo> channelAddInfoList) {
+		this.channelAddInfoList = channelAddInfoList;
+	}
+
+	public ChannelAddInfo getChannelAddInfo() {
+		return channelAddInfo;
+	}
+
+	public void setChannelAddInfo(ChannelAddInfo channelAddInfo) {
+		this.channelAddInfo = channelAddInfo;
+	}
+
+	public ChannelAddInfoDao getChannelAddInfoDao() {
+		return channelAddInfoDao;
+	}
+
+	public void setChannelAddInfoDao(ChannelAddInfoDao channelAddInfoDao) {
+		this.channelAddInfoDao = channelAddInfoDao;
+	}
+
+	public ChannelFeeType getChannelFeeType() {
+		return channelFeeType;
+	}
+
+	public void setChannelFeeType(ChannelFeeType channelFeeType) {
+		this.channelFeeType = channelFeeType;
+	}
+
+	public List<ChannelFeeType> getFeeList() {
+		return feeList;
+	}
+
+	public void setFeeList(List<ChannelFeeType> feeList) {
+		this.feeList = feeList;
+	}
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public int getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(int pageSize) {
+        this.pageSize = pageSize;
+    }
+
+	
+}

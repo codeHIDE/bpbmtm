@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.WaresSpecInfoDao">
+
+<resultMap id="waresSpecInfo" type="com.bypay.domain.WaresSpecInfo">
+		<result property="specId" column="specId" />
+		<result property="specName" column="specName" />
+		<result property="waresId" column="waresId" />
+		<result property="waresPrice" column="waresPrice" />
+		<result property="waresShowPrice" column="waresShowPrice" />
+		<result property="userType" column="userType" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+	
+	<select id="selectSpec"  resultMap="waresSpecInfo" parameterType="java.util.Map">
+		SELECT *
+		FROM WARES_SPEC_INFO
+		WHERE 1=1
+		<if test="waresSpecInfo.waresId != null and waresSpecInfo.waresId != '' ">
+		AND waresId = #{waresSpecInfo.waresId}
+		</if>
+		ORDER BY specId desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectSpecCount" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(1)
+		FROM WARES_SPEC_INFO
+		WHERE 1=1
+		<if test="waresSpecInfo.waresId != null and waresSpecInfo.waresId != '' ">
+		AND waresId = #{waresSpecInfo.waresId}
+		</if>
+	</select>
+	
+	<insert id="insertSpec"  parameterType="com.bypay.domain.WaresSpecInfo">
+	 	INSERT WARES_SPEC_INFO(specName,waresId,waresPrice,waresShowPrice,userType,createTime)
+	 	values(#{specName},#{waresId},#{waresPrice},#{waresShowPrice},#{userType},#{createTime})
+	</insert>
+	
+</mapper>

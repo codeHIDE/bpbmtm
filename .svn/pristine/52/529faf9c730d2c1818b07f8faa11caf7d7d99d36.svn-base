@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.RegionCodeDao">
+	<resultMap id="regionCode" type="com.bypay.domain.RegionCode">
+		<result property="id" column="ID" />
+		<result property="code" column="CODE" />
+		<result property="name" column="NAME" />
+		<result property="level" column="LEVEL" />
+		<result property="superCode" column="SUPER_CODE" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	
+
+	<sql id="baseColumn">
+	</sql>
+	
+	<insert id="insertRegionCode" parameterType="com.bypay.domain.RegionCode">
+		insert into REGION_CODE(
+		CODE,NAME,LEVEL,SUPER_CODE,REMARK)
+		values(#{code},#{name},#{level},#{superCode},#{remark})
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectRegionCodeList"  resultMap="regionCode" parameterType="java.util.Map">
+			select * from REGION_CODE 
+			<if test="page!=null and pageSize!=null">
+			limit #{page},#{pageSize}
+			</if>
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectRegionCodeListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.RegionCode">
+		SELECT COUNT(*) from REGION_CODE 
+	</select>
+	
+	<!-- 删除样式 -->
+		<delete id="deleteRegionCode" parameterType="com.bypay.domain.RegionCode">
+		delete  from REGION_CODE where  ID=#{id}
+	</delete>
+	
+	<select id="selectRegionCodeList2" parameterType="com.bypay.domain.RegionCode" resultMap="regionCode">
+		SELECT LEVEL,NAME,CODE,SUPER_CODE FROM REGION_CODE
+		<where>
+			<if test="superCode != null and superCode != ''">
+				AND SUPER_CODE = #{superCode}
+			</if>
+			<if test="level != null and level != ''">
+				AND LEVEL = #{level}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectRegionCodeAll" parameterType="com.bypay.domain.RegionCode" resultMap="regionCode">
+		SELECT RC1.NAME AS CODE,RC2.NAME AS SUPER_CODE FROM REGION_CODE RC1 
+		LEFT JOIN REGION_CODE RC2 ON RC1.CODE = RC2.SUPER_CODE
+		WHERE	RC1.CODE = #{code} AND RC2.CODE = #{superCode} AND RC1.LEVEL = 1 AND RC2.LEVEL = 2
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MccCodeDao">
+	<resultMap id="mccCode" type="com.bypay.domain.MccCode">
+		<result property="id" column="ID" />
+		<result property="mcc" column="MCC" />
+		<result property="desc" column="DESC" />
+		<result property="profit" column="PROFIT" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	
+
+	<sql id="baseColumn">
+		MCC,DESC, PROFIT, REMARK		
+	</sql>
+	
+	<select id="selectMccCode" resultMap="mccCode">
+		SELECT CSS_NAME,CSS_ID FROM CSS_CONFIG
+	</select>
+	
+	<insert id="insertMccCode" parameterType="com.bypay.domain.MccCode">
+		insert into MCC_CODE(MCC,`DESC`,PROFIT,REMARK)values(#{mcc},#{desc},#{profit},#{remark})
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectMccCodeList"  resultMap="mccCode" parameterType="java.util.Map">
+			select * from MCC_CODE 
+			limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectMccCodeListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.MccCode">
+		SELECT COUNT(*) from MCC_CODE 
+	</select>
+	
+	<!-- 删除样式 -->
+		<delete id="deleteMccCode" parameterType="com.bypay.domain.MccCode">
+		delete  from MCC_CODE where  ID=#{id}
+	</delete>
+	
+	<select id="selectMccCodeAll" resultMap="mccCode">
+	SELECT MC.MCC,MC.DESC,MC.PROFIT FROM MCC_CODE MC
+	</select>
+	
+	<!-- 查询MCC添加通道时用 -->
+	  <select id="selectMccCodeByDesc" resultMap="mccCode"  parameterType="java.util.Map">
+    	SELECT MCC,`DESC`  FROM MCC_CODE 
+    </select>
+</mapper>

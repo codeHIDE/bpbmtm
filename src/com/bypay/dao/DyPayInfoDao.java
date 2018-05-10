@@ -1,0 +1,21 @@
+package com.bypay.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.bypay.domain.DyPayInfo;
+
+public interface DyPayInfoDao {
+    public void insertInfo(DyPayInfo dyPayInfo);
+    
+    public void updateInfo(DyPayInfo dyPayInfo);
+    public void updateInfoById(DyPayInfo dyPayInfo);
+    
+    public List<DyPayInfo> selectDyPayInfoInfo(Map map);
+
+    public Integer selectDyPayInfoInfoCount(Map map);
+    
+    public DyPayInfo selectInfoById(DyPayInfo dyPayInfo);
+    
+    public DyPayInfo selectInfoByOrderId(DyPayInfo dyPayInfo);
+}

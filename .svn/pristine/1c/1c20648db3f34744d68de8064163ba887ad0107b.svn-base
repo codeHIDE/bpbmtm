@@ -1,0 +1,560 @@
+package com.bypay.action;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+
+import javax.inject.Inject;
+import javax.xml.bind.JAXBException;
+
+import com.bypay.common.BaseAction;
+import com.bypay.domain.clientTool.AccountRegist;
+import com.bypay.domain.clientTool.DrawMoneyRecord;
+import com.bypay.domain.clientTool.PhoneNumber;
+import com.bypay.service.impl.util.BusProcessing;
+import com.bypay.service.impl.util.DataProcessing;
+import com.bypay.util.BASE64Util;
+import com.bypay.util.DateUtil;
+import com.bypay.util.DesUtil;
+import com.bypay.util.RemoteAccessor;
+import com.bypay.util.ValueTool;
+import com.bypay.util.XmlUtilnew;
+import com.bypay.util.XmlUtilnews;
+
+@SuppressWarnings("serial")
+public class ClientInterfaceAction extends BaseAction{
+	
+	@Inject
+	private DataProcessing dataProcessing;
+	@Inject
+	private BusProcessing busProcessing;
+	@Inject
+	private XmlUtilnew xmlUtilnew;
+	
+	/**
+	 * 客户端请求入口
+	 * @throws UnsupportedEncodingException 
+	 */
+	public void inlet() throws UnsupportedEncodingException{
+		//接收数据
+		String requestContent = "";
+		String outXml = "";
+		try {
+			requestContent = getRequestContent();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		System.out.println("获取数据::"+requestContent);
+		//解密 合法性判断
+		Object in = dataProcessing.hostMethod(requestContent);
+		Object out = new Object();
+		//业务处理
+		System.out.println(dataProcessing.getCheckCode());
+		try{
+			if(dataProcessing.getCheckCode().equals("0000")){
+				out = busProcessing.toBus(in);
+				//正确返回组包
+				outXml = xmlUtilnew.ObjToXml(out);
+				System.out.println("返回数据::::::"+outXml);
+				//加密
+				outXml = "1|"+
+				 BASE64Util.encodeBySun(DesUtil.encrypt(outXml.getBytes("utf-8"), 
+						 ValueTool.tmsDesKey.getBytes()));
+				
+			}else{
+				//错误包组包
+				outXml = "0|"+dataProcessing.getCheckCode()+"|"+
+				 BASE64Util.encodeBySun(ValueTool.SYS_CODE.get(dataProcessing.getCheckCode()).getBytes("UTF-8"));
+			}
+		} catch (JAXBException e) {
+			outXml = "0|"+"9999"+"|"+
+			BASE64Util.encodeBySun(ValueTool.SYS_CODE.get("9999").getBytes("UTF-8"));
+			e.printStackTrace();
+		} catch (Exception e) {
+			outXml = "0|"+"3020"+"|"+
+			BASE64Util.encodeBySun(ValueTool.SYS_CODE.get("3020").getBytes("UTF-8"));
+			e.printStackTrace();
+		}
+		try
+		{
+			System.out.println("**************返回日志**************");
+			System.out.println(outXml);
+			System.out.println("**************返回日志**************");
+			PrintWriter writerXml = getResponse().getWriter();
+			writerXml.write(outXml);
+			writerXml.flush();
+			writerXml.close();
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+		//返回
+//		OutputStream outStream = null;
+//		try
+//		{
+//			out = getResponse().getOutputStream();
+//			TransUtil.notice(outStream, outXml);
+//		} catch (IOException e2)
+//		{
+//			e2.printStackTrace();
+//		}
+//		
+	}
+	
+	
+	
+	
+	
+	private String getRequestContent() throws IOException {
+		String reqXml = "";
+		InputStream inputStream = getRequest().getInputStream();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(
+				inputStream));
+		String tempStr = "";
+		while ((tempStr = reader.readLine()) != null) {
+			reqXml += tempStr;
+		}
+		return reqXml;
+	}
+	
+	public static void main(String[] args) throws JAXBException {
+//		AccountEnquiry accountEnquiry = new AccountEnquiry();
+//		accountEnquiry.setApplication("AccountEnquiry.Req");
+//		accountEnquiry.setFactoryId("06");
+//		accountEnquiry.setTerminalId("10809ADBCA08");
+//		accountEnquiry.setMerchantId("398111058120007");
+//		
+//		String data = XmlUtilnew.ObjToXml(accountEnquiry);
+		
+		AccountRegist accountRegist = new AccountRegist();
+		accountRegist.setApplication("AccountRegist.Req");
+		accountRegist.setTerminalId("1050000000009A1F8207");
+		accountRegist.setFactoryId("06");
+		accountRegist.setMerchantName("测试商户");
+		accountRegist.setLegalManName("闫伟涛");
+		accountRegist.setLegalManIdcard("610427199407173912");
+		accountRegist.setMobileNum("15000388994");
+		accountRegist.setPersonalMerRegNo("111111");
+		accountRegist.setTaxNo("1111");
+		accountRegist.setOccNo("111");
+		accountRegist.setSettleAccountType("1");
+		accountRegist.setSettleAccount("11111");
+		accountRegist.setSettleAccountNo("11111");
+		accountRegist.setSettleAgency("11111");
+		accountRegist.setAccountPwd("1111");
+		accountRegist.setTerminalInFo("111");
+		accountRegist.setMerchantId("111111111111");
+		accountRegist.setMsgExt("11");
+		accountRegist.setMisc("1111");
+//		String data = xmlUtilnew.ObjToXml(accountRegist);
+		
+		
+//		OpenPurchase openPurchase = new OpenPurchase();
+//		openPurchase.setApplication("OpenPurchase.Req");
+//		openPurchase.setTerminalId("1000000002");
+//		openPurchase.setMerchantId("173665683924719");
+//		openPurchase.setMerchantName("111111");
+//		openPurchase.setSettleAccountName("123321");
+//		openPurchase.setSettleAccountNo("123321");
+//		openPurchase.setBankNo("123321");
+//		openPurchase.setAccountStatus("");
+//		openPurchase.setTerminalInFo("");
+//		openPurchase.setMsgExt("");
+// 		openPurchase.setMisc("");
+//		String data = XmlUtilnew.ObjToXml(openPurchase);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+	}
+
+	public static void main1(String[] args) throws JAXBException {
+		XmlUtilnew xmlUtilnew = new XmlUtilnew();
+		DrawMoneyRecord drawMoneyRecord = new DrawMoneyRecord();
+		drawMoneyRecord.setApplication("DrawMoneyRecord.Req");
+		drawMoneyRecord.setVersion("1.0.0");
+		drawMoneyRecord.setSendTime(DateUtil.getDate("yyyyMMddHHmmss"));
+		drawMoneyRecord.setTerminalId("1111");
+		drawMoneyRecord.setMerchantId("111");
+		System.out.println(System.getProperty("java.endorsed.dirs")); 
+//		Jaxb2Marshaller jaxb2Marshaller = new Jaxb2Marshaller();
+//		StringWriter sw = new StringWriter();
+//		Result result = new StreamResult(sw);
+//		jaxb2Marshaller.marshal(drawMoneyRecord, result);
+		String data = XmlUtilnews.ObjToXml(drawMoneyRecord);
+//			sw.toString();
+//			xmlUtilnew.ObjToXml(drawMoneyRecord);
+		
+		System.out.println(data);
+		try {
+			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (Exception e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		RemoteAccessor remoteAccessor = new RemoteAccessor();
+		try {
+			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bpbmtm/clientAction!inlet.ac", "utf-8", data);
+			System.out.println("2222222222222222222222222"+ddd);
+				
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	public static void main4(String[] args) throws JAXBException {
+//		AccountLogIn accountLogIn = new AccountLogIn();
+//		accountLogIn.setApplication("AccountLogIn.Req");
+//		accountLogIn.setVersion("1.0.0");
+//		accountLogIn.setSendTime(DateUtil.getDate("yyyyMMddHHmmss"));
+//		accountLogIn.setSendSeqId("1234567890");
+//		accountLogIn.setTerminalId("10000000004");
+//		accountLogIn.setMerchantId("173665683924603");
+//		accountLogIn.setMerchantName("111111");
+//		accountLogIn.setAccountName("admin");
+//		accountLogIn.setAccountPwd("admin");
+//		accountLogIn.setTaxNo("123123123123");
+//		accountLogIn.setOccNo("123123123123");
+//		String data = XmlUtilnew.ObjToXml(accountLogIn);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+		
+	}
+//	public static void main3(String[] args) throws JAXBException {
+//		SettBank settBank = new SettBank();
+//		settBank.setApplication("SettBankList.Req");
+//		settBank.setTerminalId("222");
+//		List<SettBankList> dd = new ArrayList<SettBankList>();
+//		SettBankList settBankList = new SettBankList();
+//		settBankList.setBankName("33");
+//		settBankList.setBankNo("44");
+//		dd.add(settBankList);
+//		settBank.setSettBankList(dd);
+//		String data = XmlUtilnew.ObjToXml(settBank);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+	public static void main0(String[] args) throws JAXBException {
+//		SettBank settBank = new SettBank();
+//		settBank.setApplication("SettBankList.Req");
+//		settBank.setTerminalId("222");
+//		List<SettBankList> dd = new ArrayList<SettBankList>();
+//		SettBankList settBankList = new SettBankList();
+//		settBankList.setBankName("33");
+//		settBankList.setBankNo("44");
+//		dd.add(settBankList);
+//		settBank.setBankList(dd);
+//		String data = XmlUtilnew.ObjToXml(settBank);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:5010/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			
+//			byte[] dateList =DesUtil.decrypt(BASE64Util.decodeBySun(ddd), ValueTool.tmsDesKey.getBytes());
+//			System.out.println("2222222222222222222222222"+new String(dateList,"UTF-8"));
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+//	public static void main1(String[] args) throws JAXBException {
+//		AccountLogIn accountLogIn = new AccountLogIn();
+//		accountLogIn.setApplication("AccountLogIn.Req");
+//		accountLogIn.setVersion("1.0.0");
+//		accountLogIn.setSendTime(DateUtil.getDate("yyyyMMddHHmmss"));
+//		accountLogIn.setSendSeqId("1234567890");
+//		accountLogIn.setTerminalId("10000000004");
+//		accountLogIn.setMerchantId("173665683924603");
+//		accountLogIn.setMerchantName("111111");
+//		accountLogIn.setAccountName("admin");
+//		accountLogIn.setAccountPwd("admin");
+//		accountLogIn.setTaxNo("123123123123");
+//		accountLogIn.setOccNo("123123123123");
+//		String data = XmlUtilnew.ObjToXml(accountLogIn);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//	}
+//	
+//	public static void main(String[] args) throws JAXBException {
+//		SettBank settBank = new SettBank();
+//		settBank.setApplication("SettBankList.Req");
+//		settBank.setTerminalId("222");
+//		List<SettBankList> dd = new ArrayList<SettBankList>();
+//		SettBankList settBankList = new SettBankList();
+//		settBankList.setBankName("33");
+//		settBankList.setBankNo("44");
+//		dd.add(settBankList);
+//		settBank.setSettBankList(dd);
+//		String data = XmlUtilnew.ObjToXml(settBank);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+//	
+//	public static void main(String[] args) throws JAXBException {
+//		Enquiry enquiry = new Enquiry();
+//		enquiry.setApplication("EnquiryList.Req");
+//		enquiry.setTerminalId("22");
+//		enquiry.setPlatFormId("111");
+//		enquiry.setSendTime("2014-05-29");
+//		enquiry.setSendSeqId("1234567890");
+//		String data = XmlUtilnew.ObjToXml(enquiry);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+	public static void main3(String[] args) throws JAXBException {
+//		Enquiry enquiry = new Enquiry();
+//		enquiry.setApplication("EnquiryList.Req");
+//		enquiry.setTerminalId("22");
+//		enquiry.setPlatFormId("111");
+//		enquiry.setSendTime("2014-05-29");
+//		enquiry.setSendSeqId("1234567890");
+//		String data = XmlUtilnew.ObjToXml(enquiry);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}
+	public static void mainas(String[] args) throws JAXBException {
+//		TerminalValidate terminalValidate = new TerminalValidate();
+//		terminalValidate.setApplication("TerminalValidate.Req");
+//		terminalValidate.setTerminalId("1000000003");
+//		terminalValidate.setFactoryId("08");
+//		terminalValidate.setVersionCode("5");
+//		terminalValidate.setTerminalSysterm("ANDROID");
+//		String data = XmlUtilnew.ObjToXml(terminalValidate);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//				
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}
+	
+//	//测试终端启用 YJH
+//	public static void main(String[] args) throws JAXBException {
+//		TerminalEnable enable = new TerminalEnable();
+//		enable.setApplication("TerminalEnable.Req");
+//		enable.setVersion("1.0.0");
+//		enable.setSendTime(DateUtil.getDate("yyyyMMddHHmmss"));
+//		enable.setSendSeqId("1234567890");
+//		enable.setTerminalId("1000000002");
+//		String data = XmlUtilnew.ObjToXml(enable);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//	}
+	
+	//测试修改密码 YJH
+	public static void mains(String[] args) throws JAXBException {
+//		SelectPassWord selectPassWord = new SelectPassWord();
+//		selectPassWord.setApplication("FindPwd.Req");
+//		selectPassWord.setPhoneNum("15221480511");
+//		selectPassWord.setMerchantId("173665683924719");
+//		selectPassWord.setTerminalId("1050000000009A1F7007");
+////		enable.setVersion("1.0.0");
+////		enable.setSendTime(DateUtil.getDate("yyyyMMddHHmmss"));
+////		enable.setSendSeqId("1234567890");
+////		enable.setTerminalId("1000000002");
+//		String data = XmlUtilnew.ObjToXml(selectPassWord);
+//		System.out.println(data);
+//		try {
+//			data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+//		} catch (UnsupportedEncodingException e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		} catch (Exception e1) {
+//			// TODO Auto-generated catch block
+//			e1.printStackTrace();
+//		}
+//		RemoteAccessor remoteAccessor = new RemoteAccessor();
+//		try {
+//			String ddd = remoteAccessor.getResponseByStream("http://localhost:8080/bmtm1.0/clientAction!inlet.ac", "utf-8", data);
+//			System.out.println("2222222222222222222222222"+ddd);
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+	}
+	public static void main112(String[] args) {
+		String xml = "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|#]";
+		//解密
+		String xmlData = "";
+		try {
+			xmlData=new String(DesUtil.decrypt(BASE64Util.decodeBySun(xml),
+					ValueTool.tmsDesKey.getBytes()),"utf-8");
+			System.out.println(xmlData);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	   public static void main2(String[] args) throws JAXBException {
+	     PhoneNumber accountLogIn = new PhoneNumber();
+	      accountLogIn.setApplication("PhoneNumber.Req");
+	      accountLogIn.setVersion("1.0.0");
+	      accountLogIn.setSendTime(DateUtil.getDate("yyyyMMddHHmmss"));
+	      accountLogIn.setSendSeqId("1234567890");
+	      accountLogIn.setTerminalId("10000000004");
+	      accountLogIn.setPhoneNum("18710797979");
+	      
+	      String data = XmlUtilnews.ObjToXml(accountLogIn);
+	      System.out.println(data);
+	      try {
+	          data = BASE64Util.encodeBySun(DesUtil.encrypt(data.getBytes("utf-8"), ValueTool.tmsDesKey.getBytes()));
+	      } catch (UnsupportedEncodingException e1) {
+	          // TODO Auto-generated catch block
+	          e1.printStackTrace();
+	      } catch (Exception e1) {
+	          // TODO Auto-generated catch block
+	          e1.printStackTrace();
+	      }
+	      RemoteAccessor remoteAccessor = new RemoteAccessor();
+	      try {
+	          String ddd = remoteAccessor.getResponseByStream("http://192.168.12.177:8080/bpbmtm/clientAction!inlet.ac", "utf-8", data);
+	          System.out.println("2222222222222222222222222"+ddd);
+	              
+	      } catch (Exception e) {
+	          e.printStackTrace();
+	      }
+	        
+	    }
+}

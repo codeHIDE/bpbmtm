@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.CdateConfigDao">
+	<resultMap id="cdateConfig" type="com.bypay.domain.CdateConfig">
+		<result property="id" column="ID" />
+		<result property="cdate" column="CDATE" />
+		<result property="weekdy" column="WEEKDY" />
+		<result property="isWork" column="IS_WORK" />
+		<result property="isXend" column="IS_XEND" />
+		<result property="isMend" column="IS_MEND" />
+		<result property="isQend" column="IS_QEND" />
+		<result property="isHend" column="IS_HEND" />
+		<result property="isYend" column="IS_YEND" />
+		<result property="reserved1" column="RESERVED1" />
+	</resultMap>
+	
+	<insert id="insertCdateConfig" parameterType="com.bypay.domain.CdateConfig">
+		insert into CDATE_CONFIG(
+		CDATE,WEEKDY,IS_WORK,IS_XEND,IS_MEND,IS_QEND,IS_HEND,IS_YEND
+		) values(#{cdate},#{weekdy},#{isWork}, #{isXend}, #{isMend}
+		, #{isQend},#{isHend},#{isYend})
+	</insert>
+	
+	<delete id="deleteCdateConfig">
+		delete  from CDATE_CONFIG
+	</delete>
+</mapper>

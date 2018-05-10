@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.PlatModelDao">
+	<resultMap id="platModel" type="com.bypay.domain.PlatModel">
+		<result property="id" column="ID" />
+		<result property="modelName" column="MODEL_NAME" />
+		<result property="modelNo" column="MODEL_NO" />
+		<result property="path" column="PATH" />
+		<result property="desc" column="DESC" />
+		<result property="superNo" column="SUPER_NO" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	<select id="selectPlatModel" resultMap="platModel">
+		select * from PLAT_MODEL
+	</select>
+	
+	<select id="selectPlatModelList" resultMap="platModel" parameterType="java.util.Map">
+		SELECT * FROM PLAT_MODEL limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectPlatModelListCount" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(1) FROM MER_MODEL
+	</select>
+	
+	<insert id="insertPlatModel" parameterType="com.bypay.domain.PlatModel">
+		INSERT INTO PLAT_MODEL(MODEL_NAME, MODEL_NO, PATH, PLAT_MODEL.DESC, SUPER_NO, REMARK) 
+    	VALUES(#{modelName}, #{modelNo}, #{path}, #{desc}, #{superNo}, #{remark})
+	</insert>
+	
+	<update id="updatePlatModel" parameterType="com.bypay.domain.PlatModel">
+		UPDATE PLAT_MODEL SET 
+		MODEL_NAME = #{modelName},
+		MODEL_NO = #{modelNo},
+		PATH = #{path},
+		PLAT_MODEL.DESC = #{desc},
+		SUPER_NO = #{superNo},
+		REMARK = #{remark}
+		WHERE ID = #{id}
+	</update>
+	
+	<delete id="deletePlatModel" parameterType="com.bypay.domain.PlatModel">
+		DELETE FROM PLAT_MODEL WHERE ID = #{id}
+	</delete>
+	
+	<select id="selectPlatModelById" parameterType="com.bypay.domain.PlatModel" resultMap="platModel">
+		SELECT * FROM PLAT_MODEL WHERE ID = #{id}
+	</select>
+</mapper>

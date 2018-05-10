@@ -1,0 +1,45 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{
+	background:url(../images/login_bg.jpg) repeat-x;
+	padding:0;
+	margin:0;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:12px;
+}
+div, h1, h2, h3, h4, p, form, label, input, textarea, img, span{
+	margin:0; padding:0;
+}
+
+ul{
+	margin:0; 
+	padding:0; 
+	list-style-type:none;
+	font-size:0;
+	line-height:0;
+}
+.spacer{
+	clear:both; 
+	font-size:0; 
+	line-height:0;
+}
+/*------------------------------------------------login--------------------*/
+
+#login{ width:1000px; margin:0 auto;}
+#login div{ float:left;}
+#login .login_main{ width:780px;}
+#login .login_title{ background:url(../images/login_title.jpg) no-repeat; height:63px; width:760px; padding:10px 0 0 20px;}
+#login .login_form{ background:url(../images/login_main.jpg) no-repeat; height:303px; width:780px;}
+#login .login_form div{ padding:10px 0 0 30px; width:400px;}
+#login .login_form div td{ padding:4px;}
+#login .login_form div span{ font-size:14px; font-weight:bold; color:#777;}
+#login .login_form div .input1,#login .login_form div .input2{ background:url(../images/login_input.gif) no-repeat; width:192px; height:31px; line-height:31px; border:0;margin:0; padding:0; padding-left:4px; color:#444; font-family:Tahoma; font-weight:bold; }
+#login .login_form div .input2{ width:122px;background:url(../images/login_input2.gif) no-repeat;}
+
+#login .login_copyright{ text-align:center; line-height:22px; color:#777; width:780px;}
+#login .login_copyright span{ margin:0 10px; color:#c3c3c3;}
+#login .login_copyright a{text-decoration:none; color:#777;}
+#login .login_copyright a:hover{ text-decoration: underline;}
+
+.login_but{background:url(../images/login_btn.gif);width:194px;height:42px;border: 0;}

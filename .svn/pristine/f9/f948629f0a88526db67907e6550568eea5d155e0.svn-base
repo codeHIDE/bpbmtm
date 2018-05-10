@@ -1,0 +1,96 @@
+package com.bypay.action;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import com.bypay.common.BaseAction;
+import com.bypay.dao.UserTypeDao;
+import com.bypay.domain.UserType;
+import com.bypay.util.PageUtil;
+
+public class MemberAction extends BaseAction {
+	/** *分页开始** */
+	private int page = 1;
+	private int pageSize = 15;
+	private UserType userType;
+	private List<UserType> userTypeList; // 用于存储查询所有的子商务信息集合
+	@Inject
+	private UserTypeDao userTypeDao; 
+	public void selectUserType(){
+		try {
+			if (userType == null) {
+				userType = new UserType();
+			}
+			Map map = PageUtil.getPageMap(page, pageSize);
+			map.put("userType", userType);
+			int count = userTypeDao.selectUserTypeCount(map);
+			userTypeList = userTypeDao.selectUserType(map);
+			JSONArray array = JSONArray.fromObject(userTypeList);
+			JSONObject object = new JSONObject();
+			object.put("Rows", array.toString());
+			object.put("Total", count);
+			getResponse().getWriter().write(object.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void addUserType(){
+		userTypeDao.insertUserType(userType);
+		try {
+			getResponse().getWriter().write("添加成功");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public int getPage() {
+		return page;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public UserType getUserType() {
+		return userType;
+	}
+
+	public void setUserType(UserType userType) {
+		this.userType = userType;
+	}
+
+	public List<UserType> getUserTypeList() {
+		return userTypeList;
+	}
+
+	public void setUserTypeList(List<UserType> userTypeList) {
+		this.userTypeList = userTypeList;
+	}
+
+	public UserTypeDao getUserTypeDao() {
+		return userTypeDao;
+	}
+
+	public void setUserTypeDao(UserTypeDao userTypeDao) {
+		this.userTypeDao = userTypeDao;
+	}
+	
+	
+	
+}

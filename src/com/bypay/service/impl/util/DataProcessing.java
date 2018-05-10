@@ -1,0 +1,461 @@
+package com.bypay.service.impl.util;
+
+import javax.xml.bind.JAXBException;
+
+import org.apache.commons.lang3.StringUtils;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.springframework.stereotype.Service;
+
+import com.bypay.domain.clientTool.AccountBalance;
+import com.bypay.domain.clientTool.AccountEnquiry;
+import com.bypay.domain.clientTool.AccountLogIn;
+import com.bypay.domain.clientTool.AccountRegist;
+import com.bypay.domain.clientTool.CheckVersion;
+import com.bypay.domain.clientTool.CreditInfoList;
+import com.bypay.domain.clientTool.DrawMoneyRecord;
+import com.bypay.domain.clientTool.Enquiry;
+import com.bypay.domain.clientTool.GFinvestment;
+import com.bypay.domain.clientTool.OpenPurchase;
+import com.bypay.domain.clientTool.PhoneNumber;
+import com.bypay.domain.clientTool.QueryBalance;
+import com.bypay.domain.clientTool.SelectPassWord;
+import com.bypay.domain.clientTool.SettBank;
+import com.bypay.domain.clientTool.TerminalEnable;
+import com.bypay.domain.clientTool.TerminalValidate;
+import com.bypay.domain.clientTool.XunlianOrder;
+import com.bypay.util.BASE64Util;
+import com.bypay.util.DesUtil;
+import com.bypay.util.ValueTool;
+import com.bypay.util.XmlUtil;
+
+@Service
+public class DataProcessing {
+
+  private String checkCode;
+
+  public String getCheckCode() {
+    return checkCode;
+  }
+
+  public void setCheckCode(String checkCode) {
+    this.checkCode = checkCode;
+  }
+
+  public Object hostMethod(String xml) {
+    checkCode = "0000";
+    // 解密
+    String xmlData = "";
+    try {
+      if ("".equals(xml)) {
+        checkCode = "3001";
+        return null;
+      }
+      xmlData = new String(DesUtil.decrypt(BASE64Util.decodeBySun(xml),
+          ValueTool.tmsDesKey.getBytes()), "utf-8");
+      System.out.println(xmlData);
+    } catch (Exception e) {
+      checkCode = "3002";
+      e.printStackTrace();
+      return null;
+    }
+    Object object = new Object();
+    String application = getApplication(xmlData);
+    try {
+      if ("AccountRegist.Req".equals(application)) {// 注册
+        AccountRegist accountRegist;
+        accountRegist = (AccountRegist) XmlUtil.XmlToObj(xmlData, AccountRegist.class);
+        AccountRegistCheck(accountRegist);
+        object = accountRegist;
+      } else if ("UserRegist.Req".equals(application)) {// 注册第一步
+    	AccountRegist accountRegist;
+        accountRegist = (AccountRegist) XmlUtil.XmlToObj(xmlData, AccountRegist.class);
+        userRegistCheck(accountRegist);
+        object = accountRegist;
+      } else if ("SubMerRegist.Req".equals(application)) {// 注册第二步
+   	   	AccountRegist accountRegist;
+   	   	accountRegist = (AccountRegist) XmlUtil.XmlToObj(xmlData, AccountRegist.class);
+   	   	subMerRegistCheck(accountRegist);
+      	object = accountRegist;
+      } else if ("TerminalRegist.Req".equals(application)) {// 注册第三步 绑定机具
+ 	   	AccountRegist accountRegist;
+   	   	accountRegist = (AccountRegist) XmlUtil.XmlToObj(xmlData, AccountRegist.class);
+   	   	terminalRegistCheck(accountRegist);
+      	object = accountRegist;
+      } else if ("ChangeCard.Req".equals(application)) {// 更换银行卡
+ 	   	AccountRegist accountRegist;
+   	   	accountRegist = (AccountRegist) XmlUtil.XmlToObj(xmlData, AccountRegist.class);
+   	   	cardRegistCheck(accountRegist);
+      	object = accountRegist;
+      } else if ("AccountLogIn.Req".equals(application)) {// 登陆
+        AccountLogIn accountLogIn;
+        accountLogIn = (AccountLogIn) XmlUtil.XmlToObj(xmlData, AccountLogIn.class);
+        AccountLogInCheck(accountLogIn);
+        object = accountLogIn;
+      } else if ("UserLogIn.Req".equals(application)) {// 新登陆
+        AccountLogIn accountLogIn;
+        accountLogIn = (AccountLogIn) XmlUtil.XmlToObj(xmlData, AccountLogIn.class);
+        UserLogInCheck(accountLogIn);
+        object = accountLogIn;
+      } else if ("OpenPurchase.Req".equals(application)) {// 收款开通
+        OpenPurchase openPurchase = new OpenPurchase();
+        openPurchase = (OpenPurchase) XmlUtil.XmlToObj(xmlData, OpenPurchase.class);
+        OpenPurchaseCheck(openPurchase);
+        object = openPurchase;
+      } else if ("EnquiryList.Req".equals(application)) {// 交易列表
+    	  Enquiry enquiry = new Enquiry();
+    	  enquiry = (Enquiry) XmlUtil.XmlToObj(xmlData, Enquiry.class);
+    	  EnquiryCheck(enquiry);
+    	  object = enquiry;
+      } else if ("NewEnquiryList.Req".equals(application)) {// 交易列表(新)
+	    Enquiry enquiry = new Enquiry();
+	    enquiry = (Enquiry) XmlUtil.XmlToObj(xmlData, Enquiry.class);
+	    NewEnquiryCheck(enquiry);
+	    object = enquiry;
+      } else if ("SettBankList.Req".equals(application)) {// 结算银行列表
+        SettBank settBank = new SettBank();
+        settBank = (SettBank) XmlUtil.XmlToObj(xmlData, SettBank.class);
+        object = settBank;
+      } else if ("TerminalValidate.Req".equals(application)) {// 终端验证
+        TerminalValidate terminalValidate = new TerminalValidate();
+        terminalValidate = (TerminalValidate) XmlUtil.XmlToObj(xmlData, TerminalValidate.class);
+        terminalIdCheck(terminalValidate);
+        object = terminalValidate;
+      } else if ("TerminalEnable.Req".equals(application)) {// 终端启用
+        TerminalEnable terminalEnable = new TerminalEnable();
+        terminalEnable = (TerminalEnable) XmlUtil.XmlToObj(xmlData, TerminalEnable.class);
+        terminalEnableChen(terminalEnable);
+        object = terminalEnable;
+      } else if ("AccountEnquiry.Req".equals(application)) {// 账户信息查询
+        AccountEnquiry accountEnquiry = new AccountEnquiry();
+        accountEnquiry = (AccountEnquiry) XmlUtil.XmlToObj(xmlData, AccountEnquiry.class);
+        AccountEnquiryCheck(accountEnquiry);
+        object = accountEnquiry;
+      } else if ("FindPwd.Req".equals(application)) {// 密码找回
+        SelectPassWord selectPassWord = new SelectPassWord();
+        selectPassWord = (SelectPassWord) XmlUtil.XmlToObj(xmlData, SelectPassWord.class);
+        selectPassWordChen(selectPassWord);
+        object = selectPassWord;
+      } else if ("WithDrawRecords.Req".equals(application)) {// 商户提现申请记录
+        DrawMoneyRecord drawMoneyRecord = new DrawMoneyRecord();
+        drawMoneyRecord = (DrawMoneyRecord) XmlUtil.XmlToObj(xmlData, DrawMoneyRecord.class);
+        drawMoneyRecordCheck(drawMoneyRecord);
+        object = drawMoneyRecord;
+      } else if ("QueryBalance.Req".equals(application)) {// 查询余额
+        QueryBalance queryBalance = new QueryBalance();
+        queryBalance = (QueryBalance) XmlUtil.XmlToObj(xmlData, QueryBalance.class);
+        queryBalanceCheck(queryBalance);
+        object = queryBalance;
+      } else if ("PhoneNumber.Req".equals(application)) {// 短信下发
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber = (PhoneNumber) XmlUtil.XmlToObj(xmlData, PhoneNumber.class);
+        queryPhoneNumber(phoneNumber);
+        object = phoneNumber;
+      }else if ("ForgetPwd.Req".equals(application)) {// 忘记密码
+          AccountLogIn accountLogIn;
+          accountLogIn = (AccountLogIn) XmlUtil.XmlToObj(xmlData, AccountLogIn.class);
+          UserLogInCheck(accountLogIn);
+          object = accountLogIn;
+      } else if ("AccountPay.Req".equals(application)) {// 余额支付
+    	  AccountBalance accountLogIn;
+	      accountLogIn = (AccountBalance) XmlUtil.XmlToObj(xmlData, AccountBalance.class);
+	      AccountBalanceCheck(accountLogIn);
+	      object = accountLogIn;
+      } else if ("GFregist.Req".equals(application)) {// 高风投资
+    	  GFinvestment gFinvestment;
+    	  gFinvestment = (GFinvestment) XmlUtil.XmlToObj(xmlData, GFinvestment.class);
+    	  GFinvestmentCheck(gFinvestment);
+	      object = gFinvestment;
+      } else if ("CreditList.Req".equals(application)) {// 信用卡信息
+    	  CreditInfoList creditInfoList;
+    	  creditInfoList = (CreditInfoList) XmlUtil.XmlToObj(xmlData, CreditInfoList.class);
+	      object = creditInfoList;
+      } else if ("CheckVersion.Req".equals(application)) {// 版本号
+    	  CheckVersion creditInfoList;
+    	  creditInfoList = (CheckVersion) XmlUtil.XmlToObj(xmlData, CheckVersion.class);
+	      object = creditInfoList;
+      }  else if ("XunlianOrder.Req".equals(application)) {// 2016.07.13
+    	  XunlianOrder xunlianOrder;
+    	  xunlianOrder = (XunlianOrder) XmlUtil.XmlToObj(xmlData, XunlianOrder.class);
+	      object = xunlianOrder;
+      } 
+    } catch (JAXBException e) {
+      checkCode = "3003";
+      e.printStackTrace();
+    } catch (Exception e) {
+      checkCode = "3004";
+      e.printStackTrace();
+    }
+
+    return object;
+  }
+
+  /**
+   * 
+   * @Description:短信下发验证合法性
+   * @Auther: lijialiang
+   * @Date: 2014-12-11 下午4:52:20
+   */
+  private void queryPhoneNumber(PhoneNumber phoneNumber) {
+    if (StringUtils.isBlank(phoneNumber.getTerminalId()) || StringUtils.isBlank(phoneNumber.getPhoneNum())) {
+      checkCode = "3058";
+    }
+
+  }
+
+  /**
+   * 查询余额：验证合法性
+   * 
+   * @param queryBalance
+   */
+  private void queryBalanceCheck(QueryBalance queryBalance) {
+    if (queryBalance.getMerchantId().equals("")
+        || queryBalance.getMerchantId() == null || queryBalance.getMerchantId().equals(null)) {
+      checkCode = "3053";
+    }
+  }
+
+  /**
+   * 商户提现申请记录：验证合法性
+   * 
+   * @param drawMoneyRecord
+   */
+  private void drawMoneyRecordCheck(DrawMoneyRecord drawMoneyRecord) {
+    if (drawMoneyRecord.getTerminalId().equals("") || drawMoneyRecord.getTerminalId() == null
+        || drawMoneyRecord.getTerminalId().equals(null)
+        || drawMoneyRecord.getMerchantId().equals("") || drawMoneyRecord.getMerchantId() == null
+        || drawMoneyRecord.getMerchantId().equals(null)) {
+      checkCode = "3052";
+    }
+  }
+
+  /**
+   * 账户信息查询 ：验证合法性
+   * 
+   * @param accountEnquiry
+   */
+  private void AccountEnquiryCheck(AccountEnquiry accountEnquiry) {
+    if (accountEnquiry.getTerminalId().equals("") || accountEnquiry.getTerminalId() == null
+        || accountEnquiry.getTerminalId().equals(null) || accountEnquiry.getMerchantId().equals("")
+        || accountEnquiry.getMerchantId() == null || accountEnquiry.getMerchantId().equals(null)
+    // || accountEnquiry.getFactoryId().equals("") ||
+    // accountEnquiry.getFactoryId() == null ||
+    // accountEnquiry.getFactoryId().equals(null)
+    ) {
+      checkCode = "3043";
+    }
+  }
+
+  /**
+   * 验证合法性
+   * 
+   * @param accountRegist
+   */
+  private void AccountRegistCheck(AccountRegist accountRegist) {
+    if (accountRegist.getTerminalId().equals("")
+        || accountRegist.getTerminalId() == null
+        || accountRegist.getTerminalId().equals("null")
+        // || accountRegist.getFactoryId().equals("") ||
+        // accountRegist.getFactoryId() == null ||
+        // accountRegist.getFactoryId().equals("null")
+        || accountRegist.getLegalManName().equals("") || accountRegist.getLegalManName() == null
+        || accountRegist.getLegalManName().equals("null")
+        || accountRegist.getLegalManIdcard().equals("")
+        || accountRegist.getLegalManIdcard() == null
+        || accountRegist.getLegalManIdcard().equals("null")
+        || accountRegist.getMobileNum().equals("") || accountRegist.getMobileNum() == null
+        || accountRegist.getMobileNum().equals("null") || accountRegist.getAccountPwd().equals("")
+        || accountRegist.getAccountPwd() == null || accountRegist.getAccountPwd().equals("null")) {
+    	checkCode = "3005";
+    }
+  }
+  
+  private void subMerRegistCheck(AccountRegist accountRegist) {
+	    if (accountRegist.getLegalManName().equals("") || accountRegist.getLegalManName() == null
+	        || accountRegist.getLegalManName().equals("null")
+	        || accountRegist.getLegalManIdcard().equals("")
+	        || accountRegist.getLegalManIdcard() == null
+	        || accountRegist.getLegalManIdcard().equals("null")
+	        || accountRegist.getMobileNum().equals("") || accountRegist.getMobileNum() == null
+	        || accountRegist.getMobileNum().equals("null") ) {
+	      checkCode = "3005";
+	    }
+	  }
+  
+  private void cardRegistCheck(AccountRegist accountRegist) {
+	    if (accountRegist.getMobileNum().equals("") || accountRegist.getMobileNum() == null
+	        || accountRegist.getMobileNum().equals("null") ) {
+	      checkCode = "3005";
+	    }
+	  }
+  
+  private void terminalRegistCheck(AccountRegist accountRegist) {
+	  if (accountRegist.getTerminalId().equals("")
+		        || accountRegist.getTerminalId() == null
+		        || accountRegist.getTerminalId().equals("null")
+		        || accountRegist.getMobileNum().equals("null") || accountRegist.getAccountPwd().equals("")
+		        || accountRegist.getAccountPwd() == null || accountRegist.getAccountPwd().equals("null")) {
+		    	checkCode = "3005";
+		    }
+  }
+  
+  private void userRegistCheck(AccountRegist accountRegist) {
+	    if (accountRegist.getMobileNum().equals("") || accountRegist.getMobileNum() == null
+	        || accountRegist.getMobileNum().equals("null") || accountRegist.getAccountPwd().equals("")
+	        || accountRegist.getAccountPwd() == null || accountRegist.getAccountPwd().equals("null")) {
+	      checkCode = "3005";
+	    }
+	  }
+  
+  
+
+  /**
+   * 验证合法性
+   * 
+   * @param accountRegist
+   */
+  private void EnquiryCheck(Enquiry enquiry) {
+    if (enquiry.getTerminalId() == null || enquiry.getTerminalId().equals("")
+        || enquiry.getTerminalId().equals("null")
+    // || enquiry.getPlatFormId().equals("") || enquiry.getPlatFormId() == null
+    // || enquiry.getPlatFormId().equals("null")
+    ) {
+      checkCode = "2002";
+    }
+  }
+  
+  private void NewEnquiryCheck(Enquiry enquiry) {
+	    if (enquiry.getMerchantId() == null || enquiry.getMerchantId().equals("")
+	        || enquiry.getMerchantId().equals("null")
+	    // || enquiry.getPlatFormId().equals("") || enquiry.getPlatFormId() == null
+	    // || enquiry.getPlatFormId().equals("null")
+	    ) {
+	      checkCode = "2002";
+	    }
+	  }
+  private void terminalIdCheck(TerminalValidate terminalValidate) {
+    if (terminalValidate.getTerminalId() == null
+        || terminalValidate.getTerminalId().equals("")
+        || terminalValidate.getTerminalId().equals("null")
+        // ||terminalValidate.getFactoryId() == null ||
+        // terminalValidate.getFactoryId().equals("") ||
+        // terminalValidate.getFactoryId().equals("null")
+        || terminalValidate.getVersionCode() == null
+        || terminalValidate.getVersionCode().equals("")
+        || terminalValidate.getVersionCode().equals("null")
+        || terminalValidate.getTerminalSysterm() == null
+        || terminalValidate.getTerminalSysterm().equals("")
+        || terminalValidate.getTerminalSysterm().equals("null")) {
+      checkCode = "3044";
+    }
+  }
+
+  private void OpenPurchaseCheck(OpenPurchase openPurchase) {
+    if (openPurchase.getTerminalId().equals("")
+        || openPurchase.getTerminalId() == null
+        || openPurchase.getTerminalId().equals("null")
+        // || openPurchase.getFactoryId().equals("") ||
+        // openPurchase.getFactoryId() == null ||
+        // openPurchase.getFactoryId().equals("null")
+        || openPurchase.getMerchantId().equals("") || openPurchase.getMerchantId() == null
+        || openPurchase.getMerchantId().equals("null") || openPurchase.getMerchantName().equals("")
+        || openPurchase.getMerchantName() == null || openPurchase.getMerchantName().equals("null")
+        || openPurchase.getSettleAccountName().equals("")
+        || openPurchase.getSettleAccountName() == null
+        || openPurchase.getSettleAccountName().equals("null")
+        || openPurchase.getSettleAccountNo().equals("")
+        || openPurchase.getSettleAccountNo() == null
+        || openPurchase.getSettleAccountNo().equals("null") || openPurchase.getBankNo().equals("")
+        || openPurchase.getBankNo() == null || openPurchase.getBankNo().equals("null")) {
+      checkCode = "3029";
+    }
+  }
+
+  private void AccountLogInCheck(AccountLogIn accountLogIn) {
+    if (accountLogIn.getTerminalId().equals("")
+        || accountLogIn.getTerminalId() == null
+        || accountLogIn.getTerminalId().equals("null")
+        // || accountLogIn.getFactoryId().equals("") ||
+        // accountLogIn.getFactoryId()== null ||
+        // accountLogIn.getFactoryId().equals("null")
+        || accountLogIn.getAccountName().equals("") || accountLogIn.getAccountName() == null
+        || accountLogIn.getAccountName().equals("null") || accountLogIn.getAccountPwd().equals("")
+        || accountLogIn.getAccountPwd() == null || accountLogIn.getAccountPwd().equals("null")) {
+      checkCode = "9998";
+    }
+  }
+  
+  /**
+   * 新版登录
+   * @Title:        UserLogInCheck 
+   * @Description:  
+   * @param:        @param accountLogIn    
+   * @return:       void    
+   * @throws 
+   * @author        Eason Jiang
+   * @Date          2015-8-28 下午6:37:31
+   */
+  private void UserLogInCheck(AccountLogIn accountLogIn) {
+	    if (accountLogIn.getAccountName().equals("") || accountLogIn.getAccountName() == null
+	        || accountLogIn.getAccountName().equals("null") || accountLogIn.getAccountPwd().equals("")
+	        || accountLogIn.getAccountPwd() == null || accountLogIn.getAccountPwd().equals("null")) {
+	      checkCode = "9998";
+	    }
+	  }
+  
+  private void AccountBalanceCheck(AccountBalance accountLogIn) {
+	    if (accountLogIn.getAccountPwd().equals("") || accountLogIn.getAccountPwd() == null
+	        || accountLogIn.getPayAmt().equals("null") || accountLogIn.getAccountPwd().equals("")
+	        || accountLogIn.getAccountPwd() == null || accountLogIn.getAccountPwd().equals("null")) {
+	      checkCode = "9998";
+	    }
+	  }
+
+  private void GFinvestmentCheck(GFinvestment gFinvestment) {
+	    if (gFinvestment.getMobileNum().equals("") || gFinvestment.getMobileNum() == null
+	        || gFinvestment.getLegalManName().equals("null") || gFinvestment.getLegalManName().equals("")
+	        || gFinvestment.getLegalManIdcard() == null || gFinvestment.getLegalManIdcard().equals("null")) {
+	      checkCode = "9998";
+	    }
+	  }
+  
+  public String getApplication(String xml) {
+    String applicationId = "";
+    try {
+      Document document = DocumentHelper.parseText(xml);
+      Element bpcore = document.getRootElement();
+      applicationId = bpcore.attributeValue("application");
+    } catch (Exception e) {
+      checkCode = "3006";
+      e.printStackTrace();
+    }
+    return applicationId;
+  }
+
+  // 终端启用验证
+  private void terminalEnableChen(TerminalEnable terminalEnable) {
+    if (terminalEnable.getTerminalId().equals("") || terminalEnable.getTerminalId() == null
+        || terminalEnable.getTerminalId().equals("null")
+    // || terminalEnable.getFactoryId().equals("") ||
+    // terminalEnable.getFactoryId() == null ||
+    // terminalEnable.getFactoryId().equals("null")
+    ) {
+      checkCode = "3040";
+    }
+  }
+
+  // 密码找回验证
+  private void selectPassWordChen(SelectPassWord selectPassWord) {
+    if (selectPassWord.getTerminalId().equals("") || selectPassWord.getTerminalId() == null
+        || selectPassWord.getTerminalId().equals("null")
+        || selectPassWord.getMerchantId().equals("") || selectPassWord.getMerchantId() == null
+        || selectPassWord.getMerchantId().equals("null") || selectPassWord.getPhoneNum().equals("")
+        || selectPassWord.getPhoneNum() == null || selectPassWord.getPhoneNum().equals("null")
+        || selectPassWord.getPwd().equals("") || selectPassWord.getPwd() == null
+        || selectPassWord.getPwd().equals("null")) {
+      checkCode = "3041";
+    }
+  }
+
+}

@@ -1,0 +1,165 @@
+package com.bypay.dao.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.OrderInfoDao;
+import com.bypay.domain.OrderInfo;
+
+@Repository("orderInfoDao")
+public class OrderInfoDaoImpl implements OrderInfoDao{
+	@Inject
+	private SqlSessionTemplate sqlSessionTemplate;
+	
+	//查询所有 OrderInfo 历史交易查询
+	@Override
+	public List<OrderInfo> selecrOrderHistoryList(Map map) {
+		return sqlSessionTemplate.selectList("selecrOrderHistoryList", map);
+	}
+
+	//查询历史交易的条数分页用 
+	@Override
+	public Map selectOrderHistoryCount(Map map) {
+		return (HashMap)sqlSessionTemplate.selectOne("selectOrderHistoryCount", map);
+	}
+
+	//查询当天交易信息
+	@Override
+	public List<OrderInfo> selectOrderTheDate(Map map) {
+		return sqlSessionTemplate.selectList("selectOrderTheDate", map);
+	}
+
+	//查询当日交易的条数分页用 
+	@Override
+	public Map selectOrderTheDateCount(Map map) {
+		return (HashMap)sqlSessionTemplate.selectOne("selectOrderTheDateCount", map);
+	}
+	@Override
+	public List<OrderInfo> selectOrderTheDateRate(Map map) {
+		return sqlSessionTemplate.selectList("selectOrderTheDateRate", map);
+	}
+	
+	//查询当日交易的条数分页用 
+	@Override
+	public Map selectOrderTheDateCountRate(Map map) {
+		return (HashMap)sqlSessionTemplate.selectOne("selectOrderTheDateCountRate", map);
+	}
+
+	//转账信息查询
+	@Override
+	public List<OrderInfo> selectTransfer(Map map) {
+		return sqlSessionTemplate.selectList("selectTransfer", map);
+	}
+
+	/**
+	 * 查询转账信息的条数
+	 */
+	@Override
+	public Map selectTransferCount(Map map) {
+		return (HashMap)sqlSessionTemplate.selectOne("selectTransferCount", map);
+	}
+
+	/**
+	 * 应用交易查询的条数
+	 */
+	@Override
+	public Map selectApplyCount(Map map) {
+		return (HashMap)sqlSessionTemplate.selectOne("selectApplyCount", map);
+	}
+
+	/**
+	 * 应用交易查询
+	 */
+	@Override
+	public List<OrderInfo> selectApplyList(Map map) {
+		return sqlSessionTemplate.selectList("selectApplyList", map);
+	}
+
+	/**
+	 * 应用交易详情
+	 */
+	@Override
+	public OrderInfo selectOrderDetail(Map map) {
+		return (OrderInfo) sqlSessionTemplate.selectOne("selectOrderDetail", map);
+	}
+
+	@Override
+	public List<OrderInfo> selectEnquiryList(Map map) {
+		return sqlSessionTemplate.selectList("selectEnquiryList",map);
+	}
+	
+	@Override
+	public List<OrderInfo> selectNewEnquiryList(Map map) {
+		return sqlSessionTemplate.selectList("selectNewEnquiryList",map);
+	}
+
+	@Override
+	public Integer selectEnquiryListCount(Map map) {
+		return (Integer) sqlSessionTemplate.selectOne("selectEnquiryListCount", map);
+	}
+	
+	@Override
+	public Integer selectNewEnquiryListCount(Map map) {
+		return (Integer) sqlSessionTemplate.selectOne("selectNewEnquiryListCount", map);
+	}
+
+	/**
+	 * 根据订单ID获取订单信息
+	 */
+	@Override
+	public OrderInfo getOrderInfo(String orderId) {
+		return (OrderInfo) sqlSessionTemplate.selectOne("getOrderInfo", orderId);
+	}
+
+	/**
+	 * 修改订单信息表的RESERVED字段为-1,表示此订单已标记过为异常
+	 */
+	@Override
+	public int updateOrderReserved(String orderId) {
+		return sqlSessionTemplate.update("updateOrderReserved", orderId);
+	}
+	@Override
+	public int updateOrderSettle(String orderId) {
+		return sqlSessionTemplate.update("updateOrderSettle", orderId);
+	}
+	@SuppressWarnings("unchecked")
+  @Override
+	public Map<String,Object> selectTotalTractCost(Map<String,Object> map){
+	    return (HashMap)sqlSessionTemplate.selectOne("selectTotalTractCost", map);
+	}
+
+	@Override
+	public List<OrderInfo> selectOrderInfoBySubMerId(OrderInfo orderInfo) {
+		return sqlSessionTemplate.selectList("selectOrderInfoBySubMerId",orderInfo);
+	}
+
+	@Override
+	public Integer insertOrderInfo(OrderInfo OrderInfo) {
+		return sqlSessionTemplate.insert("insertOrderInfo",OrderInfo);
+	}
+	@Override
+	public void updateOrder(OrderInfo OrderInfo) {
+		sqlSessionTemplate.update("updateByOrder", OrderInfo);
+	}
+	
+	@Override
+	public OrderInfo selectbyRight(String orderId) {
+		return (OrderInfo) sqlSessionTemplate.selectOne("selectbyRight",orderId);
+	}
+	
+	@Override
+	public OrderInfo selectLastOrder(OrderInfo info) {
+		return (OrderInfo) sqlSessionTemplate.selectOne("selectLastOrder", info);
+	}
+	
+	@Override
+	public OrderInfo selectByMerOrder(OrderInfo info) {
+		return (OrderInfo) sqlSessionTemplate.selectOne("selectByMerOrder", info);
+	}
+}

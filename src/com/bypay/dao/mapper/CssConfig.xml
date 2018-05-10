@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.CssConfigDao">
+	<resultMap id="cssConfig" type="com.bypay.domain.CssConfig">
+		<result property="id" column="ID" />
+		<result property="cssName" column="CSS_NAME" />
+		<result property="cssUrl" column="CSS_URL" />
+		<result property="cssId" column="CSS_ID" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	
+	<sql id="baseColumn">
+		CSS_NAME,CSS_URL, CSS_ID, RESERVED1, RESERVED2,	
+		RESERVED3, REMARK		
+		
+	</sql>
+	
+	<select id="selectCssConfig" resultMap="cssConfig">
+		SELECT CSS_NAME,CSS_ID FROM CSS_CONFIG
+	</select>
+	
+		<insert id="insertCssConfig" parameterType="com.bypay.domain.CssConfig">
+		insert into CSS_CONFIG(
+		<include refid="baseColumn" />
+		) values(#{cssName},#{cssUrl},#{cssId}, #{reserved1}, #{reserved2}
+		, #{reserved3},#{remark})
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectCssConfigList"  resultMap="cssConfig" parameterType="java.util.Map">
+			select * from CSS_CONFIG 
+			limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectCssConfigListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.CssConfig">
+		SELECT COUNT(*) from CSS_CONFIG 
+	</select>
+	
+	<!-- 删除样式 -->
+		<delete id="deleteCssConfig" parameterType="com.bypay.domain.CssConfig">
+		delete  from CSS_CONFIG where  ID=#{id}
+	</delete>
+</mapper>

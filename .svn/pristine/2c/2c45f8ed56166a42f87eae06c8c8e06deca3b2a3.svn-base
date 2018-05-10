@@ -1,0 +1,3336 @@
+package com.bypay.service.impl;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
+import java.util.ResourceBundle;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
+
+import sun.misc.BASE64Decoder;
+import sun.misc.BASE64Encoder;
+
+import com.Ostermiller.util.MD5;
+import com.bypay.dao.AccountManageDao;
+import com.bypay.dao.AgenctInfoDao;
+import com.bypay.dao.BankBehalfBranchDao;
+import com.bypay.dao.BlackInfoDao;
+import com.bypay.dao.FactoryRiskDao;
+import com.bypay.dao.MerInfoDao;
+import com.bypay.dao.MerManagerDao;
+import com.bypay.dao.MerSettleStatictisDao;
+import com.bypay.dao.MerTerminalInfoDao;
+import com.bypay.dao.MerTransDao;
+import com.bypay.dao.MobileUserDao;
+import com.bypay.dao.OrderInfoDao;
+import com.bypay.dao.PhoneVerifyCodeDao;
+import com.bypay.dao.ProcedureDao;
+import com.bypay.dao.SubMerAuthInfoDao;
+import com.bypay.dao.SubMerCashoutDao;
+import com.bypay.dao.SubMerInfoDao;
+import com.bypay.dao.SubMerRateDao;
+import com.bypay.dao.SubMerTerminalDao;
+import com.bypay.dao.SubMerTerminalInfoDao;
+import com.bypay.dao.SubMerTransDao;
+import com.bypay.domain.AccountManage;
+import com.bypay.domain.AgenctInfo;
+import com.bypay.domain.BankBehalfBranch;
+import com.bypay.domain.BlackInfo;
+import com.bypay.domain.FactoryRisk;
+import com.bypay.domain.MerInfo;
+import com.bypay.domain.MerManager;
+import com.bypay.domain.MerSettleStatictis;
+import com.bypay.domain.MerTerminalInfo;
+import com.bypay.domain.MerTrans;
+import com.bypay.domain.MobileUser;
+import com.bypay.domain.OrderInfo;
+import com.bypay.domain.PhoneVerifyCode;
+import com.bypay.domain.SubMerAuthInfo;
+import com.bypay.domain.SubMerCashout;
+import com.bypay.domain.SubMerInfo;
+import com.bypay.domain.SubMerRate;
+import com.bypay.domain.SubMerTerminal;
+import com.bypay.domain.SubMerTerminalInfo;
+import com.bypay.domain.SubMerTrans;
+import com.bypay.domain.clientTool.AccountEnquiry;
+import com.bypay.domain.clientTool.AccountLogIn;
+import com.bypay.domain.clientTool.AccountRegist;
+import com.bypay.domain.clientTool.BankUtils;
+import com.bypay.domain.clientTool.DrawMoneyRecord;
+import com.bypay.domain.clientTool.DrawMoneyRecordList;
+import com.bypay.domain.clientTool.Enquiry;
+import com.bypay.domain.clientTool.EnquiryList;
+import com.bypay.domain.clientTool.OpenPurchase;
+import com.bypay.domain.clientTool.PhoneNumber;
+import com.bypay.domain.clientTool.QueryBalance;
+import com.bypay.domain.clientTool.RegisterMerInfo;
+import com.bypay.domain.clientTool.SelectPassWord;
+import com.bypay.domain.clientTool.SettBank;
+import com.bypay.domain.clientTool.SettBankList;
+import com.bypay.domain.clientTool.TerminalCancel;
+import com.bypay.domain.clientTool.TerminalEnable;
+import com.bypay.domain.clientTool.TerminalValidate;
+import com.bypay.domain.clientTool.TransInfoReq;
+import com.bypay.service.InterfaceService;
+import com.bypay.service.impl.util.TmallYfDataPackage;
+import com.bypay.util.AuthenticationUtil;
+import com.bypay.util.DateUtil;
+import com.bypay.util.HFSendData;
+import com.bypay.util.Md5Util;
+import com.bypay.util.PageUtil;
+import com.bypay.util.PropertiesUtils;
+import com.bypay.util.RSACoder;
+import com.bypay.util.RefundUtil;
+import com.bypay.util.RemoteAccessor;
+import com.bypay.util.ValueTool;
+import com.bypay.util.XmlUtil;
+import com.bypay.util.XmlUtilnew;
+
+@Service("interfaceService")
+public class InterfaceServiceImpl implements InterfaceService {
+	@Inject
+	private MerInfoDao merInfoDao;
+	@Inject
+	private FactoryRiskDao factoryRiskDao;
+	@Inject
+	private SubMerCashoutDao subMerCashoutDao;
+	@Inject
+	private MerManagerDao merManagerDao;
+	@Inject
+	private MerSettleStatictisDao merSettleStatictisDao;
+	@Inject
+	private AccountManageDao accountManageDao;
+	@Inject
+	private ProcedureDao procedureDao;
+	@Inject
+	private SubMerTerminalInfoDao subMerTerminalInfoDao;
+	@Inject
+	private MerTerminalInfoDao merTerminalInfoDao;
+	@Inject
+	private SubMerAuthInfoDao subMerAuthInfoDao;
+	@Inject
+	private BankBehalfBranchDao bankBehalfBranchDao;
+	@Inject
+	private SubMerInfoDao subMerInfoDao;
+	@Inject
+	private MobileUserDao mobileUserDao;
+	@Inject
+	private SubMerTransDao subMerTransDao;
+	@Inject
+	private SubMerRateDao subMerRateDao;
+	@Inject
+	private MerTransDao merTransDao;
+	@Inject
+	private AgenctInfoDao agenctInfoDao;
+	@Inject
+	private SubMerTerminalDao subMerTerminalDao;
+	@Inject
+	private XmlUtilnew xmlUtilnew;
+	@Inject
+	private OrderInfoDao orderInfoDao;
+	@Inject
+	private PhoneVerifyCodeDao phoneVerifyCodeDao;
+	@Inject
+	private BlackInfoDao blackInfoDao;
+
+	private String checkCode;
+	static ResourceBundle rb = ResourceBundle.getBundle(
+			"com/bypay/config/bmtmUtil", Locale.getDefault());
+
+	public String getCheckCode() {
+		return checkCode;
+	}
+
+	public void setCheckCode(String checkCode) {
+		this.checkCode = checkCode;
+	}
+
+	/**
+	 * 注册时的数据查询验证、添加商户
+	 * 
+	 * @throws Exception
+	 */
+	public AccountRegist checkRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = "";// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		Integer terminalId = (Integer) map.get("o_id");
+		try {
+			// 手机验证码验证
+//			PhoneVerifyCode phoneVerifyCode = new PhoneVerifyCode();
+//			phoneVerifyCode.setTerminalId(regist.getTerminalId());
+//			phoneVerifyCode.setPhone(regist.getMobileNum());
+//			phoneVerifyCode.setCode(regist.getMsgExt());
+//			PhoneVerifyCode phoneVerifyCodes = phoneVerifyCodeDao.selectPhoneVerifyCode(phoneVerifyCode);
+
+//			if ((null == regist.getMsgExt() || "".equals(regist.getMsgExt()))
+//					|| (null != phoneVerifyCodes)) {
+//				long a = 0;
+//				long b = 0;
+//				if (null != phoneVerifyCodes) {
+//					a = Long.parseLong(DateUtil.getDate("yyyyMMddHHmmss"));
+//					b = Long.parseLong(phoneVerifyCodes.getCreateTime());
+//				}
+//				long c = a - b;
+//				if (c > 1500) {
+//					setCheckCode("3060");
+//				} else {
+					// 查询法人身份验证
+					List<SubMerInfo> subMerInfos = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+					if (null == subMerInfos || subMerInfos.size() <= 0) {
+						// 子商户终端登录名(手机号)
+						List<SubMerTerminal> terminals = subMerTerminalDao.selectSubMerTerminalByPhone(regist.getMobileNum());
+						if (null == terminals || terminals.size() <= 0) {
+							// 获取子商户设备信息
+							SubMerTerminal terminal = new SubMerTerminal();
+							terminal.setTsn(regist.getTerminalId());
+							SubMerTerminal subMerTerminal = subMerTerminalDao.selectSubMerTerminalByTerminalId(terminal);
+							setCheckCode("9001");
+							if (null != subMerTerminal) {
+								setCheckCode("9004");
+								if (subMerTerminal.getSubMerId() == null
+										|| "".equals(subMerTerminal.getSubMerId())
+										|| "-1".equals(subMerTerminal.getSubMerId())) {
+									String status = "0";// 子商户状态
+									// 代理 暂停进件验证 (代理商状态为3）
+									String isIntoPieces1 = "";
+									String isIntoPieces2 = "";
+									if (null != subMerTerminal.getAgentIdL1()
+											&& !"".equals(subMerTerminal.getAgentIdL1())
+											&& !"-1".equals(subMerTerminal.getAgentIdL1())) {
+										
+										status = "-2";
+
+										AgenctInfo agenctInfo = new AgenctInfo();
+										agenctInfo.setAgentId(subMerTerminal.getAgentIdL1());
+										agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+										isIntoPieces1 = agenctInfo.getIsIntoPieces();
+									}
+									if (null != subMerTerminal.getAgentIdL2()
+											&& !"".equals(subMerTerminal.getAgentIdL2())
+											&& !"-1".equals(subMerTerminal.getAgentIdL2())) {
+										status = "-3";
+
+										AgenctInfo agenctInfo = new AgenctInfo();
+										agenctInfo.setAgentId(subMerTerminal.getAgentIdL2());
+										agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+										isIntoPieces2 = agenctInfo.getIsIntoPieces();
+									}
+									MerInfo mi = new MerInfo();
+									mi.setMerSysId(subMerTerminal.getMerSysId());
+									mi = merInfoDao.selectMerInfoById(mi);
+									//机构 暂停进件
+									if(null != mi && !"1".equals(mi.getIsIntoPieces())) {
+										// 代理暂停进件验证
+										if (!"1".equals(isIntoPieces1) && !"1".equals(isIntoPieces2)) {
+											// 获取机构交易配置信息
+											MerTrans merTrans = merTransDao.getMerTransInfo(subMerTerminal.getMerSysId());
+											setCheckCode("3039");
+											if (null != merTrans) {
+												if (null != merTrans.getAutoApprove()
+														&& !"".equals(merTrans.getAutoApprove())
+														&& "1".equals(merTrans.getAutoApprove())) {
+													status = "2";
+												}
+												String authStatus = "";// 实名认证状态
+												String serialNo = "";// 实名认证流水号
+												// 自动审核
+												if ("1".equals(merTrans
+														.getAutoApprove())) {
+													if (null != regist.getSettleAccountType()
+															&& !"".equals(regist.getSettleAccountType())
+															&& "2".equals(regist.getSettleAccountType())) {// 对私注册
+														// 实名认证
+														String authResult = authentication(regist);
+														String authStr[] = authResult
+																.split("\\|");
+														authStatus = authStr[0];
+														serialNo = authStr[1];
+														if ("1".equals(authStatus)) {
+															Long subMerId = null;// 子商户号
+															// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+															// 组装子商户号
+															merchantId = merTrans
+																	.getMerSysId()
+																	.substring(merTrans.getMerSysId().length() - 3)
+																	+ merTrans.getBasicRegion()
+																	+ merTrans.getBasicMcc();// 缺少后4位数的编码
+															boolean res = false;
+															// 一次只能有一个线程进入，将子商户号组装完整
+															synchronized (merchantId) {
+																SubMerInfo merInfo = new SubMerInfo();
+																merInfo.setSubMerId(merchantId);
+																String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+																if (subId != null && !"".equals(subId)) {
+																	subMerId = Long.parseLong(subId) + 1;
+																} else {
+																	subMerId = Long.parseLong(merchantId + "0001");
+																}
+																res = insertSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+															}
+															// 添加子商户信息
+															setCheckCode("9009");
+															if (res == true) { // 判断子商户添加成功是否
+																merchantId = subMerId .toString();
+																// 添加修改商户相关信息
+																optSubMerInfo(merTrans, subMerTerminal, subMerId, regist, terminalId);
+															}
+															// 修改子商户交易配置-认证状态
+															SubMerTrans subMerTrans = new SubMerTrans();
+															subMerTrans.setSubMerId(subMerId.toString());
+															subMerTrans.setAuthStatus(authStatus);
+															subMerTrans.setAuthTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+															if (subMerTransDao.updateSubMerTransInfo(subMerTrans) != 1) {
+																setCheckCode("3047");
+															}
+														} else {
+															setCheckCode("2001");
+														}
+														// 添加实名数据到数据库
+														SubMerAuthInfo auth = new SubMerAuthInfo();
+														auth.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+														if ("".equals(merchantId)) {
+															merchantId = "-1";
+														}
+														auth.setSubMerId(merchantId);
+														auth.setRemitType("1");
+														auth.setRealName(regist.getLegalManName());
+														auth.setIdNum(regist.getLegalManIdcard());
+														if ("-1".equals(authStatus)) {
+															authStatus = "4";
+														}
+														auth.setAuthStatus(authStatus);
+														auth.setSerialNo(serialNo);
+														auth.setTerminalId(regist.getTerminalId());
+														// 添加认证信息到数据库
+														if (subMerAuthInfoDao
+																.addSubMerAuthInfo(auth) != 1) {
+															setCheckCode("3048");
+														}
+													} else {// 对公注册
+														Long subMerId = null;// 子商户号：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+														// 组装子商户号
+														merchantId = merTrans.getMerSysId().substring(merTrans.getMerSysId().length() - 3)
+																+ merTrans.getBasicRegion()
+																+ merTrans.getBasicMcc();// 缺少后4位数的编码
+														boolean res = false;
+														// 一次只能有一个线程进入，将子商户号组装完整
+														synchronized (merchantId) {
+															SubMerInfo merInfo = new SubMerInfo();
+															merInfo.setSubMerId(merchantId);
+															String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+															if (subId != null && !"".equals(subId)) {
+																subMerId = Long.parseLong(subId) + 1;
+															} else {
+																subMerId = Long.parseLong(merchantId + "0001");
+															}
+															res = insertSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+														}
+														// 添加子商户信息
+														setCheckCode("9009");
+														if (res == true) { // 判断子商户添加成功是否
+															merchantId = subMerId.toString();
+															// 添加修改商户相关信息
+															optSubMerInfo(merTrans, subMerTerminal, subMerId, regist, terminalId);
+														}
+													}
+													// 添加子商户超级管理员
+													insertSubMerManager(merchantId, regist);
+												} else {// 手动审核
+													Long subMerId = null;// 子商户号
+													// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+													// 组装子商户号
+													merchantId = merTrans.getMerSysId().substring(
+																	merTrans.getMerSysId().length() - 3)
+															+ merTrans.getBasicRegion()
+															+ merTrans.getBasicMcc();// 缺少后4位数的编码
+													boolean res = false;
+													// 一次只能有一个线程进入，将子商户号组装完整
+													synchronized (merchantId) {
+														SubMerInfo merInfo = new SubMerInfo();
+														merInfo.setSubMerId(merchantId);
+														String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+														if (subId != null && !"".equals(subId)) {
+															subMerId = Long.parseLong(subId) + 1;
+														} else {
+															subMerId = Long.parseLong(merchantId + "0001");
+														}
+														res = insertSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+													}
+													// 添加子商户信息
+													setCheckCode("9009");
+													if (res == true) { // 判断子商户添加成功是否
+														merchantId = subMerId.toString();
+														// 添加修改商户相关信息
+														optSubMerInfo(merTrans, subMerTerminal, subMerId, regist, terminalId);
+													}
+												}
+
+											}
+										} else {
+											setCheckCode("3063");
+										}
+									}else {
+										setCheckCode("3062");
+									}
+								}
+							}
+						} else {
+							setCheckCode("3057");
+						}
+					} else {
+						setCheckCode("3055");
+					}
+//				}
+//			} else {
+//				setCheckCode("3059");
+//			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+
+	/**
+	 * 注册第一步,手机密码验证码
+	 * 
+	 * @throws Exception
+	 */
+	public AccountRegist userRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		int rI = (int)(Math.random()*9);
+		String subMerId = sdf.format(new Date())+rI;// 子商户号
+		try {
+			// 子商户终端登录名(手机号)
+			List<SubMerTerminal> terminals = subMerTerminalDao.selectSubMerTerminalByPhone(regist.getMobileNum());
+			//判断手机号是否在黑名单内
+			BlackInfo blackInfo = new BlackInfo();
+			blackInfo.setPhone(regist.getMobileNum());
+			blackInfo = blackInfoDao.selectBlackInfo(blackInfo);
+			if(blackInfo==null){
+				if (null == terminals || terminals.size() <= 0) {
+					// 查询Mobile 信息
+					MobileUser mobileUser = new MobileUser();
+					mobileUser.setLoginName(regist.getMobileNum());
+	//				mobileUser.setLoginPwd(regist.getAccountPwd());
+					mobileUser = mobileUserDao.getMobileUser(mobileUser);
+					System.out.println("mobileUser="+mobileUser);
+					if(mobileUser==null){
+						String status = "0";// 子商户状态
+						// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+						boolean res = false;
+						// 一次只能有一个线程进入，将手机号号组装完整	
+						synchronized (regist.getMobileNum()) {
+							System.out.println("go to insert");
+							res = insertSubMerInfo(regist, status, subMerId);
+						}
+					}else{
+						setCheckCode("3057");
+					}
+				} else {
+					setCheckCode("3057");
+				}
+			}else{
+				setCheckCode("3057");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("UserRegist.Rsp");
+		regist.setMerchantId(subMerId);
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setAccountPwd("");
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+	
+	public AccountLogIn forgetPwd(AccountLogIn accountLogIn) throws Exception {
+		accountLogIn.copyBusBeanParent(accountLogIn);
+		setCheckCode("");
+		try {
+			if (accountLogIn != null) {
+				MobileUser mobileUser = new MobileUser();
+				mobileUser.setLoginName(accountLogIn.getAccountName());
+//				mobileUser.setLoginPwd(accountLogIn.getAccountPwd());
+				mobileUser = mobileUserDao.getMobileUser(mobileUser);
+				// 查询设备信息
+				SubMerTerminal subMerTerminal = new SubMerTerminal();
+				subMerTerminal.setLoginName(accountLogIn.getAccountName());
+				subMerTerminal.setLoginPwd(accountLogIn.getAccountPwd());
+				subMerTerminal = subMerTerminalDao
+						.getSubMerTerminal(subMerTerminal);
+				if (mobileUser != null) {
+						setCheckCode("9006");
+						mobileUser.setLoginPwd(accountLogIn.getAccountPwd());
+						mobileUserDao.updateMobileUser(mobileUser);
+						if(subMerTerminal!=null){
+						      SubMerTerminal resetTerminal = new SubMerTerminal();
+						      resetTerminal.setId(subMerTerminal.getId());
+						      resetTerminal.setLoginPwd(accountLogIn.getAccountPwd());
+						      subMerTerminalDao.reset(resetTerminal);
+					    }
+						setCheckCode("0000");
+				} else {
+					// 查询Mobile 信息
+					setCheckCode("9010");
+				}
+			} else {
+				setCheckCode("9998");
+			}
+		} catch (Exception e) {
+			setCheckCode("9998");
+			e.printStackTrace();
+		}
+		accountLogIn.setApplication("ForgetPwd.Rsp");
+		accountLogIn.setRespCode(checkCode);
+		accountLogIn.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return accountLogIn;
+	}
+	
+	/**
+	 * 注册第二步
+	 * 
+	 * @throws Exception
+	 */
+	public AccountRegist subMerRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = "";// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		try {
+			// 查询法人身份验证
+//			List<SubMerInfo> subMerInfosList = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+//			if (null == subMerInfosList || subMerInfosList.size() <= 0) {
+			Boolean idFlag = true;
+			//判定 黑名单
+			//卡号黑名单
+			BlackInfo cardBlackInfo = new BlackInfo();
+			cardBlackInfo.setCardNo(regist.getSettleAccountNo());
+			cardBlackInfo = blackInfoDao.selectBlackInfo(cardBlackInfo);
+			BlackInfo idBlackInfo = new BlackInfo();
+			//身份证黑名单
+			idBlackInfo.setIdNum(regist.getLegalManIdcard());
+			idBlackInfo = blackInfoDao.selectBlackInfo(idBlackInfo);
+			if(cardBlackInfo==null && idBlackInfo==null){
+			SubMerInfo subMerInfos  = subMerInfoDao.getSubMerInfoById(regist.getMerchantId());
+				if(subMerInfos==null){
+					List<SubMerInfo> subMerInfosList = subMerInfoDao.selectSubInfoByIdCard(regist.getLegalManIdcard());
+					if (null != subMerInfosList && subMerInfosList.size() > 0) {
+						idFlag=false;
+					}
+				}
+					setCheckCode("9004");
+					String status = "0";// 子商户状态
+					if(idFlag) {
+							setCheckCode("3039");
+								String authStatus = "";// 实名认证状态
+								String serialNo = "";// 实名认证流水号
+									Long subMerId = null;// 子商户号
+									// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+									// 组装子商户号
+									MobileUser mobileUser = new MobileUser();
+									mobileUser.setLoginName(regist.getAccountName());
+									mobileUser = mobileUserDao.getMobileUser(mobileUser);
+									merchantId = mobileUser.getSubMerId();
+									boolean res = false;
+									// 一次只能有一个线程进入，将子商户号组装完整
+									synchronized (merchantId) {
+										SubMerInfo merInfo = new SubMerInfo();
+										merInfo.setSubMerId(merchantId);
+										if(subMerInfos==null){
+											res = insertSubMer(regist,status, merchantId);
+											mobileUser.setStatus("1");
+										}else{
+											res = updateSubMer(regist,status, merchantId);
+											mobileUser.setStatus("2");
+										}
+										//更新用户信息
+										mobileUserDao.updateMobileUser(mobileUser);
+									}
+							
+						
+					}else {
+						setCheckCode("3055");
+					}
+			} else {
+				setCheckCode("3055");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("SubMerRegist.Rsp");
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+	
+	public AccountRegist terminalRegist(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = "";// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		Integer terminalId = (Integer) map.get("o_id");
+		MobileUser mobileUser = new MobileUser();
+		mobileUser.setLoginName(regist.getMobileNum());
+		mobileUser = mobileUserDao.getMobileUser(mobileUser);
+		if(StringUtils.isNotEmpty(mobileUser.getTerminalId())){
+			if(mobileUser.getTerminalId().equals(regist.getTerminalId())){
+				setCheckCode("3066");	
+			}else{
+				setCheckCode("3064");
+			}
+			regist.setApplication("TerminalRegist.Rsp");
+			regist.setRespCode(checkCode);
+			regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+			return regist;
+		}
+		try {
+		// 子商户终端登录名(手机号)
+		List<SubMerTerminal> terminals = subMerTerminalDao.selectSubMerTerminalByPhone(regist.getMobileNum());
+		if (null == terminals || terminals.size() <= 0) {
+			// 获取子商户设备信息
+			SubMerTerminal terminal = new SubMerTerminal();
+			terminal.setTsn(regist.getTerminalId());
+			SubMerTerminal subMerTerminal = subMerTerminalDao.selectSubMerTerminalByTerminalId(terminal);
+			setCheckCode("9001");
+			if (null != subMerTerminal) {
+				setCheckCode("9004");
+				if (subMerTerminal.getSubMerId() == null
+						|| "".equals(subMerTerminal.getSubMerId())
+						|| "-1".equals(subMerTerminal.getSubMerId())) {
+					String status = "0";// 子商户状态
+					// 代理 暂停进件验证 (代理商状态为3）
+					String isIntoPieces1 = "";
+					String isIntoPieces2 = "";
+					if (null != subMerTerminal.getAgentIdL1()
+							&& !"".equals(subMerTerminal.getAgentIdL1())
+							&& !"-1".equals(subMerTerminal.getAgentIdL1())) {
+						
+						status = "-2";
+
+						AgenctInfo agenctInfo = new AgenctInfo();
+						agenctInfo.setAgentId(subMerTerminal.getAgentIdL1());
+						agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+						isIntoPieces1 = agenctInfo.getIsIntoPieces();
+					}
+					if (null != subMerTerminal.getAgentIdL2()
+							&& !"".equals(subMerTerminal.getAgentIdL2())
+							&& !"-1".equals(subMerTerminal.getAgentIdL2())) {
+						status = "-3";
+
+						AgenctInfo agenctInfo = new AgenctInfo();
+						agenctInfo.setAgentId(subMerTerminal.getAgentIdL2());
+						agenctInfo = agenctInfoDao.selectAgenctInfoById(agenctInfo);
+						isIntoPieces2 = agenctInfo.getIsIntoPieces();
+					}
+					MerInfo mi = new MerInfo();
+					mi.setMerSysId(subMerTerminal.getMerSysId());
+					mi = merInfoDao.selectMerInfoById(mi);
+					//机构 暂停进件
+					if(null != mi && !"1".equals(mi.getIsIntoPieces())) {
+						// 代理暂停进件验证
+						if (!"1".equals(isIntoPieces1) && !"1".equals(isIntoPieces2)) {
+							// 获取机构交易配置信息
+							MerTrans merTrans = merTransDao.getMerTransInfo(subMerTerminal.getMerSysId());
+							setCheckCode("3039");
+							if (null != merTrans) {
+								if (null != merTrans.getAutoApprove()
+										&& !"".equals(merTrans.getAutoApprove())
+										&& "1".equals(merTrans.getAutoApprove())) {
+									status = "2";
+								}
+								String authStatus = "";// 实名认证状态
+								String serialNo = "";// 实名认证流水号
+								// 自动审核
+								if ("1".equals(merTrans
+										.getAutoApprove())) {
+									if (null != regist.getSettleAccountType()
+											&& !"".equals(regist.getSettleAccountType())
+											&& "2".equals(regist.getSettleAccountType())) {// 对私注册
+										// 实名认证
+										String authResult = authentication(regist);
+										String authStr[] = authResult
+												.split("\\|");
+										authStatus = authStr[0];
+										serialNo = authStr[1];
+										if ("1".equals(authStatus)) {
+											Long subMerId = null;// 子商户号
+											// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+											// 组装子商户号
+											merchantId = merTrans
+													.getMerSysId()
+													.substring(merTrans.getMerSysId().length() - 3)
+													+ merTrans.getBasicRegion()
+													+ merTrans.getBasicMcc();// 缺少后4位数的编码
+											boolean res = false;
+											// 一次只能有一个线程进入，将子商户号组装完整
+											synchronized (merchantId) {
+												SubMerInfo merInfo = new SubMerInfo();
+												merInfo.setSubMerId(merchantId);
+												String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+												if (subId != null && !"".equals(subId)) {
+													if(regist.getMerchantId().trim().length()>15){
+														subMerId = Long.parseLong(subId) + 1;
+													}else{
+														subMerId = Long.parseLong(regist.getMerchantId());
+													}
+												} else {
+													subMerId = Long.parseLong(merchantId + "0001");
+												}
+												res = updateSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+											}
+											// 添加子商户信息
+											setCheckCode("9009");
+											if (res == true) { // 判断子商户添加成功是否
+												merchantId = subMerId .toString();
+												// 添加修改商户相关信息
+												optSubMerInfoAndTerminal(merTrans, subMerTerminal, subMerId, regist, terminalId);
+											}
+											// 修改子商户交易配置-认证状态
+											SubMerTrans subMerTrans = new SubMerTrans();
+											subMerTrans.setSubMerId(subMerId.toString());
+											subMerTrans.setAuthStatus(authStatus);
+											subMerTrans.setAuthTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+											if (subMerTransDao.updateSubMerTransInfo(subMerTrans) != 1) {
+												setCheckCode("3047");
+											}
+										} else {
+											setCheckCode("2001");
+										}
+										// 添加实名数据到数据库
+										SubMerAuthInfo auth = new SubMerAuthInfo();
+										auth.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+										if ("".equals(merchantId)) {
+											merchantId = "-1";
+										}
+										auth.setSubMerId(merchantId);
+										auth.setRemitType("1");
+										auth.setRealName(regist.getLegalManName());
+										auth.setIdNum(regist.getLegalManIdcard());
+										if ("-1".equals(authStatus)) {
+											authStatus = "4";
+										}
+										auth.setAuthStatus(authStatus);
+										auth.setSerialNo(serialNo);
+										auth.setTerminalId(regist.getTerminalId());
+										// 添加认证信息到数据库
+										if (subMerAuthInfoDao
+												.addSubMerAuthInfo(auth) != 1) {
+											setCheckCode("3048");
+										}
+									} else {// 对公注册
+										Long subMerId = null;// 子商户号：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+										// 组装子商户号
+										merchantId = merTrans.getMerSysId().substring(merTrans.getMerSysId().length() - 3)
+												+ merTrans.getBasicRegion()
+												+ merTrans.getBasicMcc();// 缺少后4位数的编码
+										boolean res = false;
+										// 一次只能有一个线程进入，将子商户号组装完整
+										synchronized (merchantId) {
+											SubMerInfo merInfo = new SubMerInfo();
+											merInfo.setSubMerId(merchantId);
+											String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+											if (subId != null && !"".equals(subId)) {
+												if(regist.getMerchantId().trim().length()>15){
+													subMerId = Long.parseLong(subId) + 1;
+												}else{
+													subMerId = Long.parseLong(regist.getMerchantId());
+												}
+											} else {
+												subMerId = Long.parseLong(merchantId + "0001");
+											}
+											res = updateSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+										}
+										// 添加子商户信息
+										setCheckCode("9009");
+										if (res == true) { // 判断子商户添加成功是否
+											merchantId = subMerId.toString();
+											// 添加修改商户相关信息
+											optSubMerInfoAndTerminal(merTrans, subMerTerminal, subMerId, regist, terminalId);
+										}
+									}
+									// 添加子商户超级管理员
+									insertSubMerManager(merchantId, regist);
+								} else {// 手动审核
+									Long subMerId = null;// 子商户号
+									// ：机构号后三位+机构号默认地区码+机构号默认MCC码+4位数的编码
+									// 组装子商户号
+									merchantId = merTrans.getMerSysId().substring(
+													merTrans.getMerSysId().length() - 3)
+											+ merTrans.getBasicRegion()
+											+ merTrans.getBasicMcc();// 缺少后4位数的编码
+									boolean res = false;
+									// 一次只能有一个线程进入，将子商户号组装完整
+									synchronized (merchantId) {
+										SubMerInfo merInfo = new SubMerInfo();
+										merInfo.setSubMerId(merchantId);
+										String subId = subMerInfoDao.setMaxSubMerId(merInfo);// 获取子商户表当中的相关数据
+										if (subId != null && !"".equals(subId)) {
+											if(regist.getMerchantId().trim().length()>15){
+												subMerId = Long.parseLong(subId) + 1;
+											}else{
+												subMerId = Long.parseLong(regist.getMerchantId());
+											}
+										} else {
+											subMerId = Long.parseLong(merchantId + "0001");
+										}
+										res = updateSubMerInfo(regist, subMerTerminal, status, subMerId, merTrans);
+									}
+									// 添加子商户信息
+									setCheckCode("9009");
+									if (res == true) { // 判断子商户添加成功是否
+										merchantId = subMerId.toString();
+										// 添加修改商户相关信息
+										optSubMerInfoAndTerminal(merTrans, subMerTerminal, subMerId, regist, terminalId);
+									}
+								}
+
+							}
+						} else {
+							setCheckCode("3063");
+						}
+					}else {
+						setCheckCode("3062");
+					}
+				}
+			}
+		} else {
+			setCheckCode("3057");
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("TerminalRegist.Rsp");
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	
+	}
+	
+	
+	public AccountRegist changeCard(AccountRegist regist) throws Exception {
+		setCheckCode("");
+		regist.copyBusBeanParent(regist);
+		String merchantId = regist.getMerchantId();// 商户号
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		procedureDao.getSequence(map);
+		SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(merchantId);
+		try {
+			if(subMerInfo!=null && subMerInfo.getStatus().equals("2")){
+				setCheckCode("9004");
+				String status = "0";// 子商户状态
+						setCheckCode("3039");
+						boolean res = false;
+						// 一次只能有一个线程进入，将子商户号组装完整
+						synchronized (merchantId) {
+							SubMerInfo merInfo = new SubMerInfo();
+							merInfo.setSubMerId(merchantId);
+							res = changeCard(regist,status, merchantId);
+						}
+			}else{
+				setCheckCode("9008");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		regist.setApplication("ChangeCard.Rsp");
+		regist.setTerminalId(regist.getTerminalId());
+		regist.setFactoryId(regist.getFactoryId());
+		regist.setMerchantName(regist.getMerchantName());
+		regist.setLegalManName(regist.getLegalManName());
+		regist.setLegalManIdcard(regist.getLegalManIdcard());
+		regist.setMobileNum(regist.getMobileNum());
+		regist.setPersonalMerRegNo(regist.getPersonalMerRegNo());
+		regist.setTaxNo(regist.getTaxNo());
+		regist.setOccNo("");
+		regist.setSettleAccountType(regist.getSettleAccountType());
+		regist.setSettleAccount(regist.getSettleAccount());
+		regist.setSettleAccountNo(regist.getSettleAccountNo());
+		regist.setSettleAgency(regist.getSettleAgency());
+		regist.setAccountPwd("");
+		regist.setTerminalInFo("");
+		regist.setMerchantId(merchantId);
+		regist.setMsgExt(regist.getMsgExt());
+		regist.setMisc(regist.getMisc());
+		if ("".equals(checkCode)) {
+			setCheckCode("3001");
+		}
+		regist.setAccountName(regist.getMobileNum());// 返回手机号
+		regist.setRespCode(checkCode);
+		regist.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return regist;
+	}
+	
+	
+	/**
+	 * 添加修改商户相关信息
+	 * 
+	 * @param merTrans
+	 * @param subMerTerminal
+	 * @param subMerId
+	 * @param regist
+	 * @throws Exception
+	 * @throws Exception
+	 */
+	private void optSubMerInfo(MerTrans merTrans,
+			SubMerTerminal subMerTerminal, Long subMerId, AccountRegist regist,
+			Integer terminalId) throws Exception {
+		String subMerIds = subMerId.toString();
+		// 添加子商户交易费率信息
+		insertSubMerRateInfo(merTrans, subMerIds, subMerTerminal);
+		// 添加子商户交易配置信息
+		insertSubMerTransInfo(merTrans, subMerIds, regist);
+		// 修改子商户设备信息
+		updateSubMerTerminal(regist, subMerIds);
+		// 添加子商户终端信息
+		if (insertSubMerTerminalInfo(subMerIds, regist, merTrans, terminalId)) {
+			setCheckCode("0000");
+		}
+	}
+	
+	private void optSubMerInfoAndTerminal(MerTrans merTrans,
+			SubMerTerminal subMerTerminal, Long subMerId, AccountRegist regist,
+			Integer terminalId) throws Exception {
+		String subMerIds = subMerId.toString();
+		// 添加子商户交易费率信息
+		insertSubMerRateInfo(merTrans, subMerIds, subMerTerminal);
+		// 添加子商户交易配置信息
+		insertSubMerTransInfo(merTrans, subMerIds, regist);
+		// 修改子商户设备信息
+		updateSubMerTerminal(regist, subMerIds);
+		// 修改mobileUser信息
+		updateMoblieUser(regist, subMerIds);
+		// 添加子商户终端信息
+		if (insertSubMerTerminalInfo(subMerIds, regist, merTrans, terminalId)) {
+			setCheckCode("0000");
+		}
+	}
+	
+	/**
+	 * 添加子商户管理员
+	 * 
+	 * @param subMerIds
+	 * @return
+	 */
+	private boolean insertSubMerManager(String subMerId, AccountRegist regist)
+			throws Exception {
+		boolean result = false;
+
+		MerManager merManager = new MerManager();
+		merManager.setMid(subMerId);
+		merManager.setMerType("1");
+		merManager.setLoginName("admin");
+		merManager.setLoginPwd(MD5.getHashString("admin"));
+		merManager.setRealName(regist.getLegalManName());
+		merManager.setPhone(regist.getMobileNum());
+		merManager.setEmail("");
+		merManager.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+		merManager.setStatus("1");
+		merManager.setRemark("1");
+
+		if (merManagerDao.insertMerManager(merManager) > 0) {
+			result = true;
+		} else {
+			setCheckCode("3049");
+		}
+		return result;
+	}
+
+	/**
+	 * 添加子商户终端信息
+	 * 
+	 * @param string
+	 * @param regist
+	 * @return
+	 */
+	private boolean insertSubMerTerminalInfo(String subMerId,
+			AccountRegist regist, MerTrans merTrans, Integer terminalId)
+			throws Exception {
+		boolean result = false;
+		SubMerTerminalInfo subMerTerminalInfo = new SubMerTerminalInfo();
+		setCheckCode("3045");
+		subMerTerminalInfo.setTerminalId(terminalId.toString());// subMerId.substring(subMerId.length()-8,
+		// subMerId.length())
+		subMerTerminalInfo.setSubMerId(subMerId);
+		subMerTerminalInfo.setTsn(regist.getTerminalId());
+		// subMerTerminalInfo.setFactoryId(regist.getFactoryId());
+		// 自动审核
+		if (null != merTrans.getAutoApprove()
+				&& "1".equals(merTrans.getAutoApprove())) {
+			subMerTerminalInfo.setTerminalType(merTrans.getRateType());
+		}
+		// 手动审核
+		if (null != merTrans.getAutoApprove()
+				&& "0".equals(merTrans.getAutoApprove())) {
+			subMerTerminalInfo.setTerminalType("01");
+		}
+
+		setCheckCode("3046");
+		int re = subMerTerminalInfoDao
+				.insertSubMerTerminalInfo(subMerTerminalInfo);
+		if (re > 0) {
+			result = true;
+		}
+		return result;
+	}
+
+	/**
+	 * 修改子商户设备信息
+	 * 
+	 * @param results
+	 * @param string
+	 * @return
+	 */
+	private Boolean updateSubMerTerminal(AccountRegist regist, String subMerId)
+			throws Exception {
+		Boolean result = false;
+		SubMerTerminal smt = new SubMerTerminal();
+		smt.setTsn(regist.getTerminalId());
+		// smt.setFactory(regist.getFactoryId());
+		smt.setSubMerId(subMerId);
+		smt.setLoginName(regist.getMobileNum());
+		smt.setLoginPwd(regist.getAccountPwd());
+		// 修改子商户设备信息
+		setCheckCode("3021");
+		if (subMerTerminalDao.updateSubMerTerminal(smt)) {
+			result = true;
+		}
+		return result;
+	}
+
+	private Boolean updateMoblieUser(AccountRegist regist, String subMerId)
+			throws Exception {
+		Boolean result = false;
+		MobileUser smt = new MobileUser();
+		smt.setSubMerId(subMerId.trim());
+		smt.setOldSubMerId(regist.getMerchantId());
+		smt.setTerminalId(regist.getTerminalId());
+		smt.setStatus("2");
+		// 修改子商户设备信息
+		setCheckCode("3021");
+		if (mobileUserDao.updateTerminal(smt)) {
+			result = true;
+		}
+		return result;
+	}
+	
+	/**
+	 * 添加子商户交易配置信息
+	 * 
+	 * @param merTrans
+	 * @param subMerId
+	 */
+	private Boolean insertSubMerTransInfo(MerTrans merTrans, String subMerId,
+			AccountRegist regist) throws Exception {
+		SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(subMerId);
+		Boolean result = false;
+		SubMerTrans subMerTrans = new SubMerTrans();
+		subMerTrans.setSubMerId(subMerId);
+		subMerTrans.setDispMerId(merTrans.getMerSysId());
+		String dispName = "";
+		if (null != regist.getMerchantName()
+				&& !"".equals(regist.getMerchantName())) {
+			dispName = subMerInfo.getSubMerName();
+		} else {
+			dispName = subMerInfo.getSubMerName();
+		}
+		subMerTrans.setDisMerName(dispName);
+		subMerTrans.setTerminalType(merTrans.getTerminalType());
+		subMerTrans.setBusType(merTrans.getBusType());
+		// subMerTrans.setClearTime("01");
+		subMerTrans.setAuthStatus("0");// 认证状态
+		// subMerTrans.setAuthTime(new
+		// SimpleDateFormat("yyyy-MM-dd mm:hh:ss").format(new Date()));
+		subMerTrans.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+		setCheckCode("3023");
+		if (subMerTransDao.insertSubMerTransInfo(subMerTrans) > 0) {
+			result = true;
+		}
+		return result;
+	}
+
+	/**
+	 * 添加子商户交易费率
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public boolean insertSubMerRateInfo(MerTrans merTrans, String subMerId,
+			SubMerTerminal subMerTerminal) throws Exception {
+		setCheckCode("3022");
+		boolean result = false;
+
+		Map<Object, Object> map = new HashMap<Object, Object>();
+		String agentL1Rate = "-1";// 一级代理费率（单位%）扣率
+		String agentL1Rate2 = "-1";//封顶
+		String agentL1HighestFee = "-1";// 封顶值
+		String agentL1ProfitRate = "-1";// 分润占比（单位%）
+		String agentL1NoTop = "-1"; //积分费率
+
+		String agentL2Rate = "-1";// 二级代理费率（单位%）
+		String agentL2Rate2 = "-1";// 封顶
+		String agentL2HighestFee = "-1";// 封顶值
+		String agentL2ProfitRate = "-1";// 分润占比（单位%）
+		String agentL2NoTop = "-1"; //积分费率
+		
+		String agentL3Rate = "-1";// 三级代理费率（单位%）
+		String agentL3Rate2 = "-1";// 封顶
+		String agentL3HighestFee = "-1";// 封顶值
+		String agentL3ProfitRate = "-1";// 分润占比（单位%）
+		String agentL3NoTop = "-1"; //积分费率
+		
+		String agentL4Rate = "-1";// 四级代理费率（单位%）
+		String agentL4Rate2 = "-1";// 封顶
+		String agentL4HighestFee = "-1";// 封顶值
+		String agentL4ProfitRate = "-1";// 分润占比（单位%）
+		String agentL4NoTop = "-1"; //积分费率
+
+		// 一级代理商
+		if (null != subMerTerminal.getAgentIdL1() && !"".equals(subMerTerminal.getAgentIdL1())
+				&& !"-1".equals(subMerTerminal.getAgentIdL1())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL1());
+			if(null != agenctInfo) {
+				agentL1Rate = agenctInfo.getAgentRate1();
+				agentL1Rate2 = agenctInfo.getAgentRate2();
+				agentL1HighestFee = agenctInfo.getAgentHighestFee();
+				agentL1ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL1NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL1Rate || "".equals(agentL1Rate) || "-1".equals(agentL1Rate)){
+					agentL1Rate = "-1";
+				}
+				if(null == agentL1Rate2 || "".equals(agentL1Rate2) || "-1".equals(agentL1Rate2)){
+					agentL1Rate2 = "-1";
+				}
+				if(null == agentL1HighestFee || "".equals(agentL1HighestFee) || "-1".equals(agentL1HighestFee)){
+					agentL1HighestFee = "-1";
+				}
+				if(null == agentL1ProfitRate || "".equals(agentL1ProfitRate) || "-1".equals(agentL1ProfitRate)){
+					agentL1ProfitRate = "-1";
+				}
+				if(null == agentL1NoTop || "".equals(agentL1NoTop) || "-1".equals(agentL1NoTop)){
+					agentL1NoTop = "-1";
+				}
+			}
+		}
+		// 二级代理商
+		if (null != subMerTerminal.getAgentIdL2() && !"".equals(subMerTerminal.getAgentIdL2())
+				&& !"-1".equals(subMerTerminal.getAgentIdL2())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL2());
+			if(null != agenctInfo) {
+				agentL2Rate = agenctInfo.getAgentRate1();
+				agentL2Rate2 = agenctInfo.getAgentRate2();
+				agentL2HighestFee = agenctInfo.getAgentHighestFee();
+				agentL2ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL2NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL2Rate || "".equals(agentL2Rate) || "-1".equals(agentL2Rate)){
+					agentL2Rate = "-1";
+				}
+				if(null == agentL2Rate2 || "".equals(agentL2Rate2) || "-1".equals(agentL2Rate2)){
+					agentL2Rate2 = "-1";
+				}
+				if(null == agentL2HighestFee || "".equals(agentL2HighestFee) || "-1".equals(agentL2HighestFee)){
+					agentL2HighestFee = "-1";
+				}
+				if(null == agentL2ProfitRate || "".equals(agentL2ProfitRate) || "-1".equals(agentL2ProfitRate)){
+					agentL2ProfitRate = "-1";
+				}
+				if(null == agentL2NoTop || "".equals(agentL2NoTop) || "-1".equals(agentL2NoTop)){
+					agentL2NoTop = "-1";
+				}
+			}
+			
+		}
+		
+		// 三级代理商
+		if (null != subMerTerminal.getAgentIdL3() && !"".equals(subMerTerminal.getAgentIdL3())
+				&& !"-1".equals(subMerTerminal.getAgentIdL3())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL3());
+			if(null != agenctInfo) {
+				agentL3Rate = agenctInfo.getAgentRate1();
+				agentL3Rate2 = agenctInfo.getAgentRate2();
+				agentL3HighestFee = agenctInfo.getAgentHighestFee();
+				agentL3ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL3NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL3Rate || "".equals(agentL3Rate) || "-1".equals(agentL3Rate)){
+					agentL3Rate = "-1";
+				}
+				if(null == agentL3Rate2 || "".equals(agentL3Rate2) || "-1".equals(agentL3Rate2)){
+					agentL3Rate2 = "-1";
+				}
+				if(null == agentL3HighestFee || "".equals(agentL3HighestFee) || "-1".equals(agentL3HighestFee)){
+					agentL3HighestFee = "-1";
+				}
+				if(null == agentL3ProfitRate || "".equals(agentL3ProfitRate) || "-1".equals(agentL3ProfitRate)){
+					agentL3ProfitRate = "-1";
+				}
+				if(null == agentL3NoTop || "".equals(agentL3NoTop) || "-1".equals(agentL3NoTop)){
+					agentL3NoTop = "-1";
+				}
+			}
+			
+		}
+			
+		// 四级代理商
+		if (null != subMerTerminal.getAgentIdL4() && !"".equals(subMerTerminal.getAgentIdL4())
+				&& !"-1".equals(subMerTerminal.getAgentIdL4())) {
+			// 获取代理商信息
+			AgenctInfo agenctInfo = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL4());
+			if(null != agenctInfo) {
+				agentL4Rate = agenctInfo.getAgentRate1();
+				agentL4Rate2 = agenctInfo.getAgentRate2();
+				agentL4HighestFee = agenctInfo.getAgentHighestFee();
+				agentL4ProfitRate = agenctInfo.getAgentProfitRate();
+				agentL4NoTop = agenctInfo.getAgentRateNoTop();
+				
+				if(null == agentL4Rate || "".equals(agentL4Rate) || "-1".equals(agentL4Rate)){
+					agentL4Rate = "-1";
+				}
+				if(null == agentL4Rate2 || "".equals(agentL4Rate2) || "-1".equals(agentL4Rate2)){
+					agentL4Rate2 = "-1";
+				}
+				if(null == agentL4HighestFee || "".equals(agentL4HighestFee) || "-1".equals(agentL4HighestFee)){
+					agentL4HighestFee = "-1";
+				}
+				if(null == agentL4ProfitRate || "".equals(agentL4ProfitRate) || "-1".equals(agentL4ProfitRate)){
+					agentL4ProfitRate = "-1";
+				}
+				if(null == agentL4NoTop || "".equals(agentL4NoTop) || "-1".equals(agentL4NoTop)){
+					agentL4NoTop = "-1";
+				}
+			}
+			
+		}
+				
+		map.put("subMerId", subMerId);
+		map.put("rateType", "03");
+		map.put("transRate", "-1");
+		map.put("transRateH", "-1");
+		map.put("transHighestFee", "-1");
+		map.put("lowestFee", "-1");
+		
+		map.put("agentL1Rate", agentL1Rate);
+		map.put("agentL1RateH", agentL1Rate2);
+		map.put("agentL1HighestFee", agentL1HighestFee);
+		map.put("agentL1NoTop", agentL1NoTop);
+		map.put("agentL1ProfitRate", agentL1ProfitRate);
+		map.put("agentL2Rate", agentL2Rate);
+		map.put("agentL2RateH", agentL2Rate2);
+		map.put("agentL2HighestFee", agentL2HighestFee);
+		map.put("agentL2NoTop", agentL2NoTop);
+		map.put("agentL2ProfitRate", agentL2ProfitRate);
+		
+		map.put("agentL3Rate", agentL3Rate);
+		map.put("agentL3RateH", agentL3Rate2);
+		map.put("agentL3HighestFee", agentL3HighestFee);
+		map.put("agentL3NoTop", agentL3NoTop);
+		map.put("agentL3ProfitRate", agentL3ProfitRate);
+		
+		map.put("agentL4Rate", agentL4Rate);
+		map.put("agentL4RateH", agentL4Rate2);
+		map.put("agentL4HighestFee", agentL4HighestFee);
+		map.put("agentL4NoTop", agentL4NoTop);
+		map.put("agentL4ProfitRate", agentL4ProfitRate);
+		
+		map.put("createTime", DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+		map.put("status", "1");
+		
+		if (subMerRateDao.insertSubMerRateInfo(map) > 0) {
+			result = true;
+		}
+		return result;
+	}
+
+	// 实人认证YJH
+	public String realPeopleAuthentication(SubMerInfo subMerInfo)
+			throws Exception {
+		String serialNo = "-1";// 流水号
+		String authStatus = "-1";// 认证状态
+
+		try {
+			// 获取人脸数据
+			byte datas[] = null;
+			BASE64Encoder encoder = new BASE64Encoder();
+			String path = rb.getString("ImagesUrl");
+			path += "/SubMerImages/" + subMerInfo.getMerSysId() + "/"
+					+ subMerInfo.getSubMerId() + "/" + "person.jpg";
+			FileInputStream is = null;
+			File file = new File(path);
+			if (file.exists()) {
+				is = new FileInputStream(path);
+				int i = is.available(); // 得到文件大小
+				datas = new byte[i];
+				is.read(datas); // 读数据
+				is.close();
+			}
+			String orderId = ValueTool.createByTime();
+			String userName = subMerInfo.getLegalPerson();
+			String idCard = subMerInfo.getLegalIdcard();
+			String imgInfo = "";
+			if (null != datas) {
+				imgInfo = encoder.encode(datas);
+			}
+			String merchentId = ValueTool.AUTH_MER_ID;
+			String orderTime = DateUtil.getDate("yyyyMMddHHmmss");
+			// 报文第一段
+			String first = merchentId;
+			// 报文第二段
+			String Second = "201|" + orderId + "|" + orderTime + "|" + userName
+					+ "|" + idCard + "|" + imgInfo;
+			// 报文第三段
+			String Third = merchentId + "201" + orderId + "" + orderTime + ""
+					+ idCard + "" + ValueTool.AUTH_MER_SIGN_KEY + "";
+
+			// 发送请求
+			AuthenticationUtil authenticationUtil = new AuthenticationUtil();
+			System.out.println("Second:" + Second);
+			String data = authenticationUtil.encrypt(first, Second, Third);// 加密并组合
+			RemoteAccessor remoteAccessor = new RemoteAccessor();
+			String paths = rb.getString("shimingUrl");
+			String decryptXml = remoteAccessor.getResponseByStream(paths,
+					"utf-8", data);
+			String[] ss = decryptXml.split("\\|");
+			if (ss[0].equals("0")) {// 解析成功
+				String respXml = new AuthenticationUtil().decrypt(ss[1]);
+				String[] result = respXml.split("\\|");
+				String respCode = result[5];// 返回码
+				serialNo = result[4];// 流水号
+				System.out.println("respCode:" + respCode + " miaoshu:"
+						+ result[6]);
+				if (!"".equals(respCode) && "0000".equals(respCode)) {// 认证成功
+					authStatus = "2";
+				} else {
+					authStatus = "4";
+				}
+			}
+			if (ss[0].equals("1")) {// 解析失败
+				BASE64Decoder decoder = new BASE64Decoder();
+				System.out.println(">>>>>>>" + ss[1]
+						+ new String(decoder.decodeBuffer(ss[2]), "utf-8"));
+				authStatus = "4";
+			}
+		} catch (Exception e) {
+			authStatus = "4";
+		}
+		// authStatus = "2";
+		// serialNo = "00";
+		return authStatus + "|" + serialNo;
+	}
+
+	/**
+	 * 添加子商户信息
+	 * 
+	 * @param regist
+	 * @return
+	 */
+	public boolean insertSubMerInfo(AccountRegist regist,
+			SubMerTerminal subMerTerminal, String status, Long subMerId,
+			MerTrans merTrans) throws Exception {
+
+		status = "0";
+
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(String.valueOf(subMerId));
+		subMerInfo.setLineNum(regist.getLineNum());
+		subMerInfo.setOpenBank(regist.getOpenBank());
+		if (null != regist) {
+			String subMerName = "";
+			String shortName = "";
+			if (null != regist.getMerchantName()
+					&& !"".equals(regist.getMerchantName())) {
+				subMerName = regist.getMerchantName();
+				shortName = regist.getMerchantName();
+			} else {
+				subMerName = regist.getLegalManName();
+				shortName = regist.getLegalManName();
+			}
+			subMerInfo.setSubMerName(subMerName);
+			subMerInfo.setShortName(shortName);
+			subMerInfo.setLegalPerson(regist.getLegalManName());
+			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+			String settAccType = "-1";
+			if (!"".equals(regist.getSettleAccountType())
+					&& null != regist.getSettleAccountType()) {
+				settAccType = regist.getSettleAccountType();
+			}
+			subMerInfo.setSettAccType(settAccType);
+			String settAccName = "-1";
+			if (!"".equals(regist.getSettleAccount())
+					&& null != regist.getSettleAccount()) {
+				settAccName = regist.getSettleAccount();
+			}
+			subMerInfo.setSettAccountName(regist.getLegalManName());
+			String settAccNo = "-1";
+			if (!"".equals(regist.getSettleAccountNo())
+					&& null != regist.getSettleAccountNo()) {
+				settAccNo = regist.getSettleAccountNo();
+			}
+			subMerInfo.setSettAccountNo(settAccNo);
+			String settAgency = "ICBC";
+			if (!"".equals(regist.getSettleAgency())
+					&& null != regist.getSettleAgency()
+					&& regist.getSettleAgency().indexOf("null") == -1) {
+				settAgency = regist.getSettleAgency();
+			}
+			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+			String merSysId = "";
+			String agentIdL1 = "";
+			String agentIdL2 = "";
+			String agentIdL3 = "";
+			String agentIdL4 = "";
+			if (null != subMerTerminal) {
+				merSysId = subMerTerminal.getMerSysId();
+				agentIdL1 = subMerTerminal.getAgentIdL1();
+				agentIdL2 = subMerTerminal.getAgentIdL2();
+				agentIdL3 = subMerTerminal.getAgentIdL3();
+				agentIdL4 = subMerTerminal.getAgentIdL4();
+			}
+			subMerInfo.setMerSysId(merSysId);
+			subMerInfo.setMcc(merTrans.getBasicMcc());
+			subMerInfo.setRegion(merTrans.getBasicRegion());
+			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+			subMerInfo.setAgentIdL1(agentIdL1);
+			subMerInfo.setAgentIdL2(agentIdL2);
+			subMerInfo.setAgentIdL3(agentIdL3);
+			subMerInfo.setAgentIdL4(agentIdL4);
+			if ("1".equals(merTrans.getAutoApprove())) {
+				subMerInfo.setBillCycle("01");
+			} else {
+				subMerInfo.setBillCycle("01");
+			}
+			subMerInfo.setBillStatus("1");
+			subMerInfo.setMerKind("个体户");// 默认公司性质
+			subMerInfo.setContactor(regist.getLegalManName());
+			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.insertSubMerInfo(subMerInfo);
+		if (result > 0) {
+			boo = true;
+		}
+		return boo;
+	}
+	
+	/**
+	 * 更换绑定机具
+	 * @Title:        updateSubMerInfo 
+	 * @Description:  
+	 * @param:        @param regist
+	 * @param:        @param subMerTerminal
+	 * @param:        @param status
+	 * @param:        @param subMerId
+	 * @param:        @param merTrans
+	 * @param:        @return
+	 * @param:        @throws Exception    
+	 * @return:       boolean    
+	 * @throws 
+	 * @author        Eason Jiang
+	 * @Date          2015-9-8 下午3:59:32
+	 */
+	public boolean updateSubMerInfo(AccountRegist regist,
+			SubMerTerminal subMerTerminal, String status, Long subMerId,
+			MerTrans merTrans) throws Exception {
+		status = "0";
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(String.valueOf(subMerId));
+		subMerInfo.setOldSubMerId(regist.getMerchantId());
+//		subMerInfo.setLineNum(regist.getLineNum());
+//		subMerInfo.setOpenBank(regist.getOpenBank());
+		String merSysId = "";
+		if (null != regist) {
+//			String subMerName = "";
+//			String shortName = "";
+//			if (null != regist.getMerchantName()
+//					&& !"".equals(regist.getMerchantName())) {
+//				subMerName = regist.getMerchantName();
+//				shortName = regist.getMerchantName();
+//			} else {
+//				subMerName = regist.getLegalManName();
+//				shortName = regist.getLegalManName();
+//			}
+//			subMerInfo.setSubMerName(subMerName);
+//			subMerInfo.setShortName(shortName);
+//			subMerInfo.setLegalPerson(regist.getLegalManName());
+//			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+//			String settAccType = "-1";
+//			if (!"".equals(regist.getSettleAccountType())
+//					&& null != regist.getSettleAccountType()) {
+//				settAccType = regist.getSettleAccountType();
+//			}
+//			subMerInfo.setSettAccType(settAccType);
+//			String settAccName = "-1";
+//			if (!"".equals(regist.getSettleAccount())
+//					&& null != regist.getSettleAccount()) {
+//				settAccName = regist.getSettleAccount();
+//			}
+//			subMerInfo.setSettAccountName(regist.getLegalManName());
+//			String settAccNo = "-1";
+//			if (!"".equals(regist.getSettleAccountNo())
+//					&& null != regist.getSettleAccountNo()) {
+//				settAccNo = regist.getSettleAccountNo();
+//			}
+//			subMerInfo.setSettAccountNo(settAccNo);
+//			String settAgency = "ICBC";
+//			if (!"".equals(regist.getSettleAgency())
+//					&& null != regist.getSettleAgency()
+//					&& regist.getSettleAgency().indexOf("null") == -1) {
+//				settAgency = regist.getSettleAgency();
+//			}
+//			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+			String agentIdL1 = "";
+			String agentIdL2 = "";
+			String agentIdL3 = "";
+			String agentIdL4 = "";
+			if (null != subMerTerminal) {
+				merSysId = subMerTerminal.getMerSysId();
+				agentIdL1 = subMerTerminal.getAgentIdL1();
+				agentIdL2 = subMerTerminal.getAgentIdL2();
+				agentIdL3 = subMerTerminal.getAgentIdL3();
+				agentIdL4 = subMerTerminal.getAgentIdL4();
+			}
+			subMerInfo.setMerSysId(merSysId);
+			subMerInfo.setMcc(merTrans.getBasicMcc());
+			subMerInfo.setRegion(merTrans.getBasicRegion());
+//			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+			subMerInfo.setAgentIdL1(agentIdL1);
+			subMerInfo.setAgentIdL2(agentIdL2);
+			subMerInfo.setAgentIdL3(agentIdL3);
+			subMerInfo.setAgentIdL4(agentIdL4);
+			if ("1".equals(merTrans.getAutoApprove())) {
+				subMerInfo.setBillCycle("01");
+			} else {
+				subMerInfo.setBillCycle("01");
+			}
+//			subMerInfo.setBillStatus("1");
+//			subMerInfo.setMerKind("个体户");// 默认公司性质
+//			subMerInfo.setContactor(regist.getLegalManName());
+//			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.updateSubMerInfoReg(subMerInfo);
+		if (result > 0) {
+			//切换图片
+			String oldPath = rb.getString("ImagesUrl");
+			oldPath += "/SubMerImages/-1/"
+					+ regist.getMerchantId();
+			String newPath = rb.getString("ImagesUrl");
+			newPath += "/SubMerImages/"+merSysId+"/"
+					+ String.valueOf(subMerId);
+			File oldFile = new File(oldPath);
+			oldFile.renameTo(new File(newPath));
+			boo = true;
+		}
+		return boo;
+	}
+	
+	/**
+	 * 注册第一步
+	 * @Title:        insertSubMerInfo 
+	 * @Description:  
+	 * @param:        @param regist
+	 * @param:        @param subMerTerminal
+	 * @param:        @param status
+	 * @param:        @param subMerId
+	 * @param:        @param merTrans
+	 * @param:        @return
+	 * @param:        @throws Exception    
+	 * @return:       boolean    
+	 * @throws 
+	 * @author        Eason Jiang
+	 * @Date          2015-8-27 上午10:36:06
+	 */
+	public boolean insertSubMerInfo(AccountRegist regist, String status, String subMerId) throws Exception {
+
+		status = "0";
+
+		boolean boo = false;
+		MobileUser mobileUser = new MobileUser();
+		mobileUser.setSubMerId(subMerId);
+		mobileUser.setLoginName(regist.getMobileNum());
+		mobileUser.setLoginPwd(regist.getAccountPwd());
+		mobileUser.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+		mobileUser.setStatus("0"); //初始用户
+		int result=mobileUserDao.insertMobileUser(mobileUser);
+		setCheckCode("9009");
+		if(result > 0){
+			boo = true;
+			setCheckCode("0000");
+		}
+	
+		return boo;
+	}
+	
+	/**
+	 * 注册第二部
+	 * @Title:        insertSubMer 
+	 * @Description:  
+	 * @param:        @param regist
+	 * @param:        @param subMerTerminal
+	 * @param:        @param status
+	 * @param:        @param subMerId
+	 * @param:        @param merTrans
+	 * @param:        @return
+	 * @param:        @throws Exception    
+	 * @return:       boolean    
+	 * @throws 
+	 * @author        Eason Jiang
+	 * @Date          2015-8-31 下午6:04:06
+	 */
+	public boolean insertSubMer(AccountRegist regist,String status, String subMerId) throws Exception {
+
+		status = "0";
+
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(subMerId);
+		subMerInfo.setLineNum(regist.getLineNum());
+		subMerInfo.setOpenBank(regist.getOpenBank());
+		if (null != regist) {
+			String subMerName = "";
+			String shortName = "";
+			if (null != regist.getMerchantName()
+					&& !"".equals(regist.getMerchantName())) {
+				subMerName = regist.getMerchantName();
+				shortName = regist.getMerchantName();
+			} else {
+				subMerName = regist.getLegalManName();
+				shortName = regist.getLegalManName();
+			}
+			subMerInfo.setSubMerName(subMerName);
+			subMerInfo.setShortName(shortName);
+			subMerInfo.setLegalPerson(regist.getLegalManName());
+			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+			String settAccType = "-1";
+			if (!"".equals(regist.getSettleAccountType())
+					&& null != regist.getSettleAccountType()) {
+				settAccType = regist.getSettleAccountType();
+			}
+			subMerInfo.setSettAccType(settAccType);
+			String settAccName = "-1";
+			if (!"".equals(regist.getSettleAccount())
+					&& null != regist.getSettleAccount()) {
+				settAccName = regist.getSettleAccount();
+			}
+			subMerInfo.setSettAccountName(settAccName);
+			String settAccNo = "-1";
+			if (!"".equals(regist.getSettleAccountNo())
+					&& null != regist.getSettleAccountNo()) {
+				settAccNo = regist.getSettleAccountNo();
+			}
+			subMerInfo.setSettAccountNo(settAccNo);
+			String settAgency = "ICBC";
+			if (!"".equals(regist.getSettleAgency())
+					&& null != regist.getSettleAgency()
+					&& regist.getSettleAgency().indexOf("null") == -1) {
+				settAgency = regist.getSettleAgency();
+			}
+			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+			String merSysId = "-1";
+			String agentIdL1 = "-1";
+			String agentIdL2 = "-1";
+			String agentIdL3 = "-1";
+			String agentIdL4 = "-1";
+			subMerInfo.setMerSysId(merSysId);
+//			subMerInfo.setMcc(merTrans.getBasicMcc());
+//			subMerInfo.setRegion(merTrans.getBasicRegion());
+			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+			subMerInfo.setAgentIdL1(agentIdL1);
+			subMerInfo.setAgentIdL2(agentIdL2);
+			subMerInfo.setAgentIdL3(agentIdL3);
+			subMerInfo.setAgentIdL4(agentIdL4);
+//			if ("1".equals(merTrans.getAutoApprove())) {
+//				subMerInfo.setBillCycle("01");
+//			} else {
+//				subMerInfo.setBillCycle("01");
+//			}
+			subMerInfo.setBillStatus("1");
+			subMerInfo.setMerKind("个体户");// 默认公司性质
+			subMerInfo.setContactor(regist.getLegalManName());
+			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.insertSubMerInfo(subMerInfo);
+		if (result > 0) {
+			boo = true;
+			setCheckCode("0000");
+		}
+		return boo;
+	}
+	
+	public boolean updateSubMer(AccountRegist regist,String status, String subMerId) throws Exception {
+		
+		status = "0";
+		
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(subMerId);
+		subMerInfo.setOldSubMerId(subMerId);
+		subMerInfo.setLineNum(regist.getLineNum());
+		subMerInfo.setOpenBank(regist.getOpenBank());
+		if (null != regist) {
+			String subMerName = "";
+			String shortName = "";
+			if (null != regist.getMerchantName()
+					&& !"".equals(regist.getMerchantName())) {
+				subMerName = regist.getMerchantName();
+				shortName = regist.getMerchantName();
+			} else {
+				subMerName = regist.getLegalManName();
+				shortName = regist.getLegalManName();
+			}
+			subMerInfo.setSubMerName(subMerName);
+			subMerInfo.setShortName(shortName);
+			subMerInfo.setLegalPerson(regist.getLegalManName());
+			subMerInfo.setLegalIdcard(regist.getLegalManIdcard());
+			subMerInfo.setRegNo(regist.getPersonalMerRegNo());
+			subMerInfo.setTaxNo(regist.getTaxNo());
+			subMerInfo.setOrganizationCode(regist.getOccNo());
+			String settAccType = "-1";
+			if (!"".equals(regist.getSettleAccountType())
+					&& null != regist.getSettleAccountType()) {
+				settAccType = regist.getSettleAccountType();
+			}
+			subMerInfo.setSettAccType(settAccType);
+			String settAccName = "-1";
+			if (!"".equals(regist.getSettleAccount())
+					&& null != regist.getSettleAccount()) {
+				settAccName = regist.getSettleAccount();
+			}
+			subMerInfo.setSettAccountName(settAccName);
+			String settAccNo = "-1";
+			if (!"".equals(regist.getSettleAccountNo())
+					&& null != regist.getSettleAccountNo()) {
+				settAccNo = regist.getSettleAccountNo();
+			}
+			subMerInfo.setSettAccountNo(settAccNo);
+			String settAgency = "ICBC";
+			if (!"".equals(regist.getSettleAgency())
+					&& null != regist.getSettleAgency()
+					&& regist.getSettleAgency().indexOf("null") == -1) {
+				settAgency = regist.getSettleAgency();
+			}
+			subMerInfo.setSettAgency(settAgency);
+			subMerInfo.setStatus(status);
+//			subMerInfo.setMerSysId(merSysId);
+//			subMerInfo.setMcc(merTrans.getBasicMcc());
+//			subMerInfo.setRegion(merTrans.getBasicRegion());
+			subMerInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+//			subMerInfo.setAgentIdL1(agentIdL1);
+//			subMerInfo.setAgentIdL2(agentIdL2);
+//			subMerInfo.setAgentIdL3(agentIdL3);
+//			subMerInfo.setAgentIdL4(agentIdL4);
+//			if ("1".equals(merTrans.getAutoApprove())) {
+//				subMerInfo.setBillCycle("01");
+//			} else {
+//				subMerInfo.setBillCycle("01");
+//			}
+			subMerInfo.setBillStatus("1");
+			subMerInfo.setMerKind("个体户");// 默认公司性质
+			subMerInfo.setContactor(regist.getLegalManName());
+			subMerInfo.setContactorPhone(regist.getMobileNum());
+			//公司地址
+			subMerInfo.setRegAddr(regist.getSubMerAddress());
+		}
+		setCheckCode("9009");
+		int result = subMerInfoDao.updateSubMerInfoReg(subMerInfo);
+		if (result > 0) {
+			boo = true;
+			setCheckCode("0000");
+		}
+		return boo;
+	}
+	
+	
+	public boolean changeCard(AccountRegist regist,String status, String subMerId) throws Exception {
+		status = "0";
+		boolean boo = false;
+		SubMerInfo subMerInfo = new SubMerInfo();
+		subMerInfo.setSubMerId(subMerId);
+//		subMerInfo.setLineNum(regist.getLineNum());
+//		subMerInfo.setOpenBank(regist.getOpenBank());
+		String settAccType = "-1";
+		if (!"".equals(regist.getSettleAccountType())
+				&& null != regist.getSettleAccountType()) {
+			settAccType = regist.getSettleAccountType();
+		}
+		subMerInfo.setSettAccType(settAccType);
+//		String settAccName = "-1";
+//		if (!"".equals(regist.getSettleAccount())
+//				&& null != regist.getSettleAccount()) {
+//			settAccName = regist.getSettleAccount();
+//		}
+//		subMerInfo.setSettAccountName(settAccName);
+		String settAccNo = "-1";
+		if (!"".equals(regist.getSettleAccountNo())
+				&& null != regist.getSettleAccountNo()) {
+			settAccNo = regist.getSettleAccountNo();
+		}
+		subMerInfo.setSettAccountNo(settAccNo);
+		String settAgency = "ICBC";
+		if (!"".equals(regist.getSettleAgency())
+				&& null != regist.getSettleAgency()
+				&& regist.getSettleAgency().indexOf("null") == -1) {
+			settAgency = regist.getSettleAgency();
+		}
+		subMerInfo.setSettAgency(settAgency);
+		setCheckCode("9009");
+		boolean result = subMerInfoDao.update(subMerInfo);
+		if (result) {
+			boo = true;
+			setCheckCode("0000");
+		}
+		return boo;
+	}
+	
+	
+	@SuppressWarnings("unused")
+	@Override
+	public Object regMer(AccountLogIn accountLogIn) {
+		accountLogIn.copyBusBeanParent(accountLogIn);
+		setCheckCode("");
+
+		String transRate = "";// 刷卡费率
+		try {
+			if (accountLogIn != null) {
+				// 查询设备信息
+				SubMerTerminal subMerTerminal = new SubMerTerminal();
+				subMerTerminal.setTsn(accountLogIn.getTerminalId());
+				subMerTerminal.setLoginName(accountLogIn.getAccountName());
+				subMerTerminal.setLoginPwd(accountLogIn.getAccountPwd());
+				subMerTerminal = subMerTerminalDao
+						.getSubMerTerminal(subMerTerminal);
+				if (subMerTerminal != null) {
+					// 查询子商户信息
+					SubMerInfo subMerInfo = new SubMerInfo();
+					subMerInfo = subMerInfoDao.getSubMerInfoById(subMerTerminal
+							.getSubMerId());
+					setCheckCode("9006");
+					if (null != subMerInfo) {
+						// 组装返回内容
+						accountLogIn.setTerminalId(subMerTerminal.getTsn());
+						accountLogIn.setFactoryId(subMerTerminal.getFactory());
+						accountLogIn
+								.setMerchantId(subMerTerminal.getSubMerId());
+						accountLogIn
+								.setMerchantName(subMerInfo.getSubMerName());
+						accountLogIn.setAccountName(subMerTerminal
+								.getLoginName());
+						accountLogIn.setPersonalMerRegNo(subMerInfo.getRegNo());
+						accountLogIn.setTaxNo(subMerInfo.getTaxNo());
+						accountLogIn.setLegalManIdcard(subMerInfo
+								.getLegalIdcard());
+						if ("-1".equals(subMerInfo.getSettAccountName()))
+							subMerInfo.setSettAccountName("");
+						if ("-1".equals(subMerInfo.getSettAccountNo()))
+							subMerInfo.setSettAccountNo("");
+						if ("-1".equals(subMerInfo.getSettAgency()))
+							subMerInfo.setSettAgency("");
+						accountLogIn.setSettleAccount(subMerInfo
+								.getSettAccountName());
+						accountLogIn.setSettleAccountNo(subMerInfo
+								.getSettAccountNo());
+						accountLogIn
+								.setSettleAgency(subMerInfo.getSettAgency());
+						String merStatus = "";
+						merStatus = subMerInfo.getStatus();
+						if ("2".equals(merStatus)) {
+							merStatus = "1";
+						} else if ("5".equals(merStatus)) {
+							merStatus = "2";
+						} else {
+							merStatus = "0";
+						}
+						accountLogIn.setAccountStatus(merStatus);
+						String authStatus = "";
+						if (null != subMerInfo.getSettAccType()
+								&& !"".equals(subMerInfo.getSettAccType())
+								&& "1".equals(subMerInfo.getSettAccType())) {
+							authStatus = "null";
+						} else {
+							authStatus = subMerInfo.getAuthStatus();
+						}
+						accountLogIn.setAuthStatus(authStatus);
+						accountLogIn.setSettleAccountType(subMerInfo
+								.getSettAccType());
+						accountLogIn.setApplication("AccountLogIn.Rsp");
+						setCheckCode("0000");
+
+						// 子商户交易费率
+						SubMerRate subMerRate = new SubMerRate();
+						subMerRate.setSubMerId(subMerTerminal.getSubMerId());
+						subMerRate = subMerRateDao
+								.getSubMerRateBySubMerId(subMerRate);
+						if (null != subMerRate) {
+							transRate = subMerRate.getTeransRate();
+							if ("-1".equals(transRate)) {
+								transRate = "0";
+							}
+						}
+						accountLogIn.setTransRate(transRate);
+					}
+				} else {
+					setCheckCode("9017");
+				}
+
+				// 修改设备最近登录时间
+				SubMerTerminal terminal = new SubMerTerminal();
+				terminal.setTsn(accountLogIn.getTerminalId());
+				terminal.setLastLoginTime(DateUtil
+						.getDate("yyyy-MM-dd HH:mm:ss"));
+				subMerTerminalDao.updateSubMerByLastLoginTime(terminal);
+			} else {
+				setCheckCode("9017");
+			}
+		} catch (Exception e) {
+			setCheckCode("9017");
+			e.printStackTrace();
+		}
+		accountLogIn.setRespCode(checkCode);
+		accountLogIn.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return accountLogIn;
+	}
+
+	@SuppressWarnings("unused")
+	@Override
+	public Object userMer(AccountLogIn accountLogIn) {
+		accountLogIn.copyBusBeanParent(accountLogIn);
+		setCheckCode("");
+
+		String transRate = "";// 刷卡费率
+		try {
+			if (accountLogIn != null) {
+				MobileUser mobileUser = new MobileUser();
+				mobileUser.setLoginName(accountLogIn.getAccountName());
+//				mobileUser.setLoginPwd(accountLogIn.getAccountPwd());
+				mobileUser = mobileUserDao.getMobileUser(mobileUser);
+				// 查询设备信息
+				SubMerTerminal subMerTerminal = new SubMerTerminal();
+				subMerTerminal.setLoginName(accountLogIn.getAccountName());
+				subMerTerminal.setLoginPwd(accountLogIn.getAccountPwd());
+				subMerTerminal = subMerTerminalDao
+						.getSubMerTerminal(subMerTerminal);
+				if(subMerTerminal!=null&&mobileUser==null &&accountLogIn.getAccountPwd().equals(subMerTerminal.getLoginPwd())){
+					mobileUser = new MobileUser();
+					mobileUser.setLoginName(subMerTerminal.getLoginName());
+					mobileUser.setTerminalId(subMerTerminal.getTsn());
+					mobileUser.setSubMerId(subMerTerminal.getSubMerId());
+					mobileUser.setLoginPwd(subMerTerminal.getLoginPwd());
+					mobileUser.setCreateTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+					mobileUser.setStatus("2"); //初始用户
+					mobileUserDao.insertMobileUser(mobileUser);
+				}
+				if (mobileUser != null) {
+						setCheckCode("9006");
+						if(!accountLogIn.getAccountPwd().equals(mobileUser.getLoginPwd())){
+							setCheckCode("9017");//密码错
+						}else{
+							// 组装返回内容
+							accountLogIn
+									.setMerchantId(mobileUser.getSubMerId());
+							accountLogIn.setAccountName(mobileUser
+									.getLoginName());
+							accountLogIn.setUserStatus(mobileUser.getStatus());
+							accountLogIn.setMerchantId(mobileUser.getSubMerId());
+							SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(mobileUser.getSubMerId());
+							if(subMerInfo!=null){
+								accountLogIn.setMerchantName(subMerInfo.getSubMerName());
+								accountLogIn.setAccountStatus(subMerInfo.getStatus());
+								accountLogIn.setAuthStatus(subMerInfo.getAuthStatus());
+								accountLogIn.setReMack(subMerInfo.getRemark());
+							}
+							// 修改设备最近登录时间
+							MobileUser user = new MobileUser();
+							user.setId(mobileUser.getId());
+							user.setLastLoginTime(DateUtil
+									.getDate("yyyy-MM-dd HH:mm:ss"));
+							mobileUserDao.updateUserByLastLoginTime(user);
+							setCheckCode("0000");
+						}
+				} else {
+					// 查询Mobile 信息
+					setCheckCode("9010");
+				}
+			} else {
+				setCheckCode("9998");
+			}
+		} catch (Exception e) {
+			setCheckCode("9998");
+			e.printStackTrace();
+		}
+		accountLogIn.setApplication("UserLogIn.Rsp");
+		accountLogIn.setMsgExt("9:00-21:00");
+		accountLogIn.setRespCode(checkCode);
+		accountLogIn.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return accountLogIn;
+	}
+	
+	@Override
+	public Object regBank(SettBank settBank) {
+		settBank.copyBusBeanParent(settBank);
+		setCheckCode("");
+		try {
+			if (settBank != null) {
+				List<BankBehalfBranch> bankBehalfBranchList = bankBehalfBranchDao
+						.selectBankBehalfBranchList();
+				SettBankList settBankList = null;
+				List<SettBankList> settBankLists = new ArrayList<SettBankList>();
+				Iterator<BankBehalfBranch> bankBehalfBranchIt = bankBehalfBranchList
+						.iterator();
+				while (bankBehalfBranchIt.hasNext()) {
+					settBankList = new SettBankList();
+					BankBehalfBranch bankBehalfBranch = (BankBehalfBranch) bankBehalfBranchIt
+							.next();
+					settBankList.setBankNo(bankBehalfBranch.getCode());
+					settBankList.setBankName(bankBehalfBranch.getBankName());
+					settBankLists.add(settBankList);
+				}
+				settBank.setBankList(settBankLists);
+				settBank.setApplication("SettBankList.Rsp");
+				setCheckCode("0000");
+			} else {
+				setCheckCode("9014");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		if ("".equals(checkCode)) {
+			checkCode = "3001";
+		}
+		settBank.setRespCode(checkCode);
+		settBank.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return settBank;
+	}
+
+	/**
+	 * 收款开通
+	 */
+	@Override
+	public Object openReceivablesBus(OpenPurchase openPurchase) {
+		openPurchase.copyBusBeanParent(openPurchase);
+		setCheckCode("");
+		try {
+			// 获取子商户设备信息
+			SubMerTerminal terminal = new SubMerTerminal();
+			terminal.setSubMerId(openPurchase.getMerchantId());
+			terminal.setTsn(openPurchase.getTerminalId());
+			// terminal.setFactory(openPurchase.getFactoryId());
+			setCheckCode("3034");
+			SubMerTerminal subMerTerminal = subMerTerminalDao
+					.getSubMerTerInfo(terminal);
+			if (null != subMerTerminal && !"".equals(subMerTerminal)) {
+				// 查询商户收款功能是否已开通
+				SubMerInfo info = subMerInfoDao.getSubMerInfoById(openPurchase
+						.getMerchantId());
+				setCheckCode("9006");
+				if (null != info) {
+					setCheckCode("3035");
+					if (info.getSettAgency() == null
+							|| "".equals(info.getSettAgency())
+							|| "null".equals(info.getSettAgency())
+							|| "-1".equals(info.getSettAgency())) {
+						// 收款功能开通
+						SubMerInfo subMerInfo = new SubMerInfo();
+						subMerInfo.setSubMerId(openPurchase.getMerchantId());
+						subMerInfo
+								.setSubMerName(openPurchase.getMerchantName());
+						subMerInfo.setSettAccountName(openPurchase
+								.getSettleAccountName());
+						subMerInfo.setSettAccountNo(openPurchase
+								.getSettleAccountNo());
+						subMerInfo.setSettAgency(openPurchase.getBankNo());
+						setCheckCode("3028");
+						if (subMerInfoDao.updateSubMerInfoByOpenCur(subMerInfo)) {
+							// 修改子商户交易配置中AUTH_STATUS字段
+							SubMerTrans subMerTrans = new SubMerTrans();
+							subMerTrans.setSubMerId(openPurchase
+									.getMerchantId());
+							subMerTrans.setAuthStatus("3");// 3已开通收款
+							setCheckCode("3036");
+							subMerTransDao.updateSubMerTransInfo(subMerTrans);
+
+							// 修改实人认证AUTH_STATUS字段
+							SubMerAuthInfo subMerAuthInfo = new SubMerAuthInfo();
+							subMerAuthInfo.setSubMerId(openPurchase
+									.getMerchantId());
+							subMerAuthInfo.setAuthStatus("3");
+							setCheckCode("3032");
+							subMerAuthInfoDao
+									.updateSubMerAuthInfoByStatus(subMerAuthInfo);
+
+							openPurchase.setAccountStatus("1");
+							setCheckCode("0000");
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			// TODO: handle exception
+			TransactionAspectSupport.currentTransactionStatus()
+					.setRollbackOnly();
+		}
+		openPurchase.setTerminalId(openPurchase.getTerminalId());
+		openPurchase.setMerchantId(openPurchase.getMerchantId());
+		openPurchase.setMerchantName("");
+		openPurchase.setSettleAccountName("");
+		openPurchase.setSettleAccountNo("");
+		openPurchase.setBankNo("");
+		String accStatus = "2";
+		if (!"".equals(openPurchase.getAccountStatus())
+				&& null != openPurchase.getAccountStatus()) {
+			accStatus = openPurchase.getAccountStatus();
+		}
+		openPurchase.setAccountStatus(accStatus);
+		openPurchase.setTerminalInFo("");
+		openPurchase.setMsgExt(openPurchase.getMsgExt());
+		openPurchase.setMisc(openPurchase.getMisc());
+		if ("".equals(checkCode)) {
+			checkCode = "3001";
+		}
+		openPurchase.setRespCode(checkCode);
+		openPurchase.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return openPurchase;
+	}
+
+	@Override
+	public Object regEnquiry(Enquiry enquiry) {
+		enquiry.copyBusBeanParent(enquiry);
+		setCheckCode("");
+		try {
+			// 组查询条件
+			int curPage = 1;
+			int pageCount = 10;
+			if (enquiry.getCurPage() != null
+					&& !"".equals(enquiry.getCurPage()))
+				curPage = Integer.parseInt(enquiry.getCurPage());
+			if (enquiry.getPageCount() != null
+					&& !"".equals(enquiry.getPageCount()))
+				pageCount = Integer.parseInt(enquiry.getPageCount());
+			Map map = PageUtil.getPageMap(curPage, pageCount);
+			OrderInfo orderInfo = new OrderInfo();
+			orderInfo.setTerminalId(enquiry.getTerminalId());
+			if ("100000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("01");
+			else if ("200000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("04");
+			else if ("100002".equals(enquiry.getTransType()))
+				orderInfo.setTransType("07");
+			else if ("100003".equals(enquiry.getTransType()))
+				orderInfo.setTransType("06");
+			else if ("100004".equals(enquiry.getTransType()))
+				orderInfo.setTransType("09");
+			// 查询
+			int count = 0;
+			SubMerTerminal merTerminal = new SubMerTerminal();
+			merTerminal.setTsn(enquiry.getTerminalId());
+			// merTerminal.setFactory(enquiry.getFactoryId());
+			SubMerInfo subMerInfo = subMerInfoDao
+					.getSubMerInfoByTerminalId(merTerminal);
+			if (subMerInfo != null && subMerInfo.getSubMerId() != null) {
+
+				if (null == enquiry.getMerchantId()
+						|| "".equals(enquiry.getMerchantId())) {
+					orderInfo.setSubMerId(subMerInfo.getSubMerId());
+				} else {
+					orderInfo.setSubMerId(enquiry.getMerchantId());
+				}
+//				map.put("tsn", enquiry.getTerminalId());
+				// map.put("factoryId", enquiry.getFactoryId());
+				map.put("orderInfo", orderInfo);
+				map.put("beginTime", enquiry.getBeginTime());
+				map.put("endTime", enquiry.getEndTime());
+
+				count = orderInfoDao.selectEnquiryListCount(map);
+				List<OrderInfo> orderInfoList = orderInfoDao
+						.selectEnquiryList(map);
+				// 拼返回内容
+				List<EnquiryList> enquiryLists = new ArrayList<EnquiryList>();
+				Iterator<OrderInfo> orderInfoIt = orderInfoList.iterator();
+				while (orderInfoIt.hasNext()) {
+					OrderInfo orderInfo1 = (OrderInfo) orderInfoIt.next();
+					EnquiryList enquiryList = new EnquiryList();
+					if ("01".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100000");
+					else if ("04".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("200000");
+					else if ("07".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100002");
+					else if ("06".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100003");
+					else if ("09".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100004");
+					enquiryList.setTransId(orderInfo1.getMerOrderId());
+					enquiryList.setMerchantOrderId(orderInfo1.getMerOrderId());
+					enquiryList.setTransAmt(orderInfo1.getMerAmt());
+					enquiryList.setTransTime(orderInfo1.getTransTime());
+					enquiryList.setCurrency(orderInfo1.getCurrency());
+					enquiryList.setOrderRateType(orderInfo1.getOrderRateType());
+					enquiryLists.add(enquiryList);
+				}
+				enquiry.setEnquiryList(enquiryLists);
+				enquiry.setApplication("EnquiryList.Rsp");
+				enquiry.setVersion("1.0.0");
+				enquiry.setMerchantId(subMerInfo.getSubMerId());
+				enquiry.setMerchantName(subMerInfo.getSubMerName());
+				setCheckCode("0000");
+			} else {
+				setCheckCode("2002");
+			}
+			enquiry.setTotalCount(count + "");
+			enquiry.setCurPage(curPage + "");
+			enquiry.setPageCount(pageCount + "");
+		} catch (Exception e) {
+			setCheckCode("2002");
+			e.printStackTrace();
+		} finally {
+			enquiry.setRespCode(checkCode);
+			enquiry.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		}
+		return enquiry;
+	}
+
+	
+	@Override
+	public Object regNewEnquiry(Enquiry enquiry) {
+		enquiry.copyBusBeanParent(enquiry);
+		setCheckCode("");
+		try {
+			// 组查询条件
+			int curPage = 1;
+			int pageCount = 10;
+			if (enquiry.getCurPage() != null
+					&& !"".equals(enquiry.getCurPage()))
+				curPage = Integer.parseInt(enquiry.getCurPage());
+			if (enquiry.getPageCount() != null
+					&& !"".equals(enquiry.getPageCount()))
+				pageCount = Integer.parseInt(enquiry.getPageCount());
+			Map map = PageUtil.getPageMap(curPage, pageCount);
+			OrderInfo orderInfo = new OrderInfo();
+			orderInfo.setTerminalId(enquiry.getTerminalId());
+			if ("100000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("01");
+			else if ("200000".equals(enquiry.getTransType()))
+				orderInfo.setTransType("04");
+			else if ("100002".equals(enquiry.getTransType()))
+				orderInfo.setTransType("07");
+			else if ("100003".equals(enquiry.getTransType()))
+				orderInfo.setTransType("06");
+			else if ("100004".equals(enquiry.getTransType()))
+				orderInfo.setTransType("09");
+			// 查询
+			int count = 0;
+			SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(enquiry.getMerchantId());
+			if (subMerInfo != null && subMerInfo.getSubMerId() != null) {
+
+				if (null == enquiry.getMerchantId()
+						|| "".equals(enquiry.getMerchantId())) {
+					orderInfo.setSubMerId(subMerInfo.getSubMerId());
+				} else {
+					orderInfo.setSubMerId(enquiry.getMerchantId());
+				}
+				// map.put("factoryId", enquiry.getFactoryId());
+				map.put("orderInfo", orderInfo);
+				map.put("beginTime", enquiry.getBeginTime());
+				map.put("endTime", enquiry.getEndTime());
+
+				count = orderInfoDao.selectNewEnquiryListCount(map);
+				List<OrderInfo> orderInfoList = orderInfoDao
+						.selectNewEnquiryList(map);
+				// 拼返回内容
+				List<EnquiryList> enquiryLists = new ArrayList<EnquiryList>();
+				Iterator<OrderInfo> orderInfoIt = orderInfoList.iterator();
+				while (orderInfoIt.hasNext()) {
+					OrderInfo orderInfo1 = (OrderInfo) orderInfoIt.next();
+					EnquiryList enquiryList = new EnquiryList();
+					if ("01".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100000");
+					else if ("04".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("200000");
+					else if ("07".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100002");
+					else if ("06".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100003");
+					else if ("09".equals(orderInfo1.getTransType()))
+						enquiryList.setTransType("100004");
+					enquiryList.setTransId(orderInfo1.getMerOrderId());
+					enquiryList.setMerchantOrderId(orderInfo1.getMerOrderId());
+					enquiryList.setTransAmt(orderInfo1.getMerAmt());
+					enquiryList.setTransTime(orderInfo1.getTransTime());
+					enquiryList.setCurrency(orderInfo1.getCurrency());
+					enquiryList.setOrderRateType(orderInfo1.getOrderRateType());
+					enquiryLists.add(enquiryList);
+				}
+				enquiry.setEnquiryList(enquiryLists);
+				enquiry.setApplication("NewEnquiryList.Rsp");
+				enquiry.setVersion("1.0.0");
+				enquiry.setMerchantId(subMerInfo.getSubMerId());
+				enquiry.setMerchantName(subMerInfo.getSubMerName());
+				setCheckCode("0000");
+			} else {
+				setCheckCode("2002");
+			}
+			enquiry.setTotalCount(count + "");
+			enquiry.setCurPage(curPage + "");
+			enquiry.setPageCount(pageCount + "");
+		} catch (Exception e) {
+			setCheckCode("2002");
+			e.printStackTrace();
+		} finally {
+			enquiry.setRespCode(checkCode);
+			enquiry.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		}
+		return enquiry;
+	}
+	
+	
+	@Override
+	public Object terminalValidate(TerminalValidate terminalValidate) {
+		terminalValidate.copyBusBeanParent(terminalValidate);
+		setCheckCode("");
+		String merSysId = ""; // 机构商号
+		String subMerId = ""; // 子商户号
+		String terminalStatus = ""; // 终端状态
+		String version = ""; // 版本号
+		String versionDesc = ""; // 版本信息描述
+		String updateType = ""; // 更新状态
+		String updatePath = ""; // 更新地址
+		String t0Status = "";// T+0状态 0 未开通 1 已开通
+
+		String lowsetMentionAmt = "";// 最低提现金额
+		String t0MerRate = "";// T0费率
+		String d1MerRate = "";// D1费率
+
+		String agreementStatus = "";// 电子协议阅读状态 0：未阅读 1：已阅读
+
+		try {
+			SubMerTerminal subMerTerminal = new SubMerTerminal();
+			subMerTerminal.setTsn(terminalValidate.getTerminalId());
+			// 根据终端ID获取终端信息
+			subMerTerminal = subMerTerminalDao
+					.selectSubMerTerminalByTerminalId(subMerTerminal);
+			if (subMerTerminal == null) {
+				setCheckCode("9001");
+			} else {
+				subMerId = subMerTerminal.getSubMerId();
+				if ("-1".equals(subMerId)) {
+					subMerId = "";
+				}
+
+				terminalStatus = subMerTerminal.getStatus();// 终端状态
+				merSysId = subMerTerminal.getMerSysId();// 终端机构号
+
+				// 厂商风控
+				if (null != subMerTerminal.getFactory()
+						&& !"".equals(subMerTerminal.getFactory())) {
+					FactoryRisk factoryRisk = new FactoryRisk();
+					factoryRisk.setFactoryNo(subMerTerminal.getFactory());
+					factoryRisk = factoryRiskDao
+							.selectFactoryRiskById(factoryRisk);
+
+					if (null != factoryRisk
+							&& null != factoryRisk.getLowsetMentionAmt()
+							&& !"".equals(factoryRisk.getLowsetMentionAmt())) {
+						lowsetMentionAmt = factoryRisk.getLowsetMentionAmt();// 起结金额
+					}
+
+				}
+
+				// 机构交易配置
+				if (null != merSysId && !"".equals(merSysId)) {
+					MerTrans merTrans = merTransDao
+							.selectMerTransByMerSysId(merSysId);
+					if (null != merTrans) {
+						t0MerRate = merTrans.getT0MerRate();
+						d1MerRate = merTrans.getD1MerRate();
+					}
+				}
+
+				if (null != subMerId && !"".equals(subMerId)) {
+					// 根据子商户号获取子商户交易配置信息
+					SubMerTrans subMerTrans = new SubMerTrans();
+					subMerTrans.setSubMerId(subMerId);
+					subMerTrans = subMerTransDao
+							.selectSubMerTransById(subMerTrans);
+					if (null != subMerTrans) {
+						t0Status = subMerTrans.getT0Status();
+					}
+
+					// 子商户表
+					SubMerInfo subMerInfo = subMerInfoDao
+							.getSubMerInfoById(subMerId);
+					if (null != subMerInfo) {
+						if (null == subMerInfo.getAgreementStatus()
+								|| "".equals(subMerInfo.getAgreementStatus())) {
+							agreementStatus = "0";
+						} else {
+							agreementStatus = subMerInfo.getAgreementStatus();
+						}
+					}
+
+				}
+
+				// 获取机构终端信息
+				MerTerminalInfo merTerminalInfo = new MerTerminalInfo();
+				merTerminalInfo.setMerSysId(subMerTerminal.getMerSysId()); //104
+				merTerminalInfo.setTerminalSysterm(terminalValidate
+						.getTerminalSysterm());  //01
+				merTerminalInfo.setVersion(terminalValidate.getVersionCode());
+				merTerminalInfo.setStatus("1");
+				MerTerminalInfo info = merTerminalInfoDao
+						.selectMerTerminalInfo(merTerminalInfo);// 当前设备版本
+				setCheckCode("3051");
+				if (null != info) {
+					if ("0".equals(info.getStatus())) {// 设备版本未启用
+						setCheckCode("3056");
+					} else {
+						// 获取机构终端版本管理表id最大并且为启用的版本号
+						MerTerminalInfo terminalInfo = new MerTerminalInfo();
+						// terminalInfo.setMerSysId(subMerTerminal.getMerSysId());
+						terminalInfo.setTerminalSysterm(terminalValidate
+								.getTerminalSysterm());
+
+						MerTerminalInfo infos = merTerminalInfoDao
+								.selectMaxIdMerTerminalInfo(terminalInfo);
+						// 机构设置的最新版本与当前设备版本不一致
+						if (!"".equals(infos.getVersion())
+								&& !terminalValidate.getVersionCode().equals(
+										infos.getVersion())) {
+							version = infos.getVersion();
+							versionDesc = infos.getVersionDesc();
+							updateType = infos.getUpdateType();
+							if ("01".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = "," + infos.getUpdatePath();
+							} else if ("02".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = infos.getUpdatePath() + "" + ",";
+							}
+							updatePath = infos.getUpdatePath();
+							// 修改子商户设备的版本信息
+							SubMerTerminal terminal = new SubMerTerminal();
+							terminal.setTsn(terminalValidate.getTerminalId());
+							terminal.setVersion(infos.getVersion());
+							setCheckCode("3021");
+							if (subMerTerminalDao
+									.updateSubMerTerminalVersion(terminal)) {
+								setCheckCode("0000");
+							}
+						} else {
+							// 最新信息
+							version = info.getVersion();
+							versionDesc = info.getVersionDesc();
+							updateType = "00";
+							if ("01".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = "," + info.getUpdatePath();
+							} else if ("02".equals(terminalValidate
+									.getTerminalSysterm())) {
+								updatePath = info.getUpdatePath() + "" + ",";
+							}
+							setCheckCode("0000");
+						}
+
+					}
+				}
+			}
+		} catch (Exception e) {
+			setCheckCode("9020");
+			e.printStackTrace();
+		}
+		terminalValidate.setTerminalId(terminalValidate.getTerminalId());
+		terminalValidate.setVersionCode(version);
+		terminalValidate.setTerminalStatus(terminalStatus);
+		terminalValidate.setVersionDesc(versionDesc);
+		terminalValidate.setUpdateType(updateType);
+		terminalValidate.setMerchantId(subMerId);
+		terminalValidate.setUpdatePath(updatePath);
+		terminalValidate.setMerSysId(merSysId);
+		terminalValidate.setT0Status(t0Status);
+
+		terminalValidate.setD1MerRate(d1MerRate);
+		terminalValidate.setT0MerRate(t0MerRate);
+		terminalValidate.setLowsetMentionAmt(lowsetMentionAmt);
+		terminalValidate.setAgreementStatus(agreementStatus);
+
+		terminalValidate.setRespCode(checkCode);
+		terminalValidate.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return terminalValidate;
+	}
+
+	// 修改终端状态
+	@Override
+	public Object updateStatus(TerminalEnable terminalId) {
+		terminalId.copyBusBeanParent(terminalId);
+		SubMerTerminal subMerTerminal = new SubMerTerminal();
+		subMerTerminal.setTsn(terminalId.getTerminalId());
+		// subMerTerminal.setFactory(terminalId.getFactoryId());
+		setCheckCode("9001");
+		subMerTerminal = subMerTerminalDao
+				.selectSubMerTerminalByTerminalId(subMerTerminal);
+		if (subMerTerminal != null) {
+			setCheckCode("3025");
+			if (subMerTerminal.getStatus().equals("0")) {
+				int update = 0;
+				setCheckCode("3038");
+				update = subMerTerminalDao.updateStatus(terminalId);
+				if (update > 0) {
+					System.out.println("更新终端成功！");
+					setCheckCode("0000");
+				}
+			}
+
+		}
+		terminalId.setRespCode(checkCode);
+		terminalId.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return terminalId;
+	}
+
+	/**
+	 * 账户信息查询
+	 */
+	@Override
+	public Object accountEnquiry(AccountEnquiry accountEnquiry) {
+		accountEnquiry.copyBusBeanParent(accountEnquiry);
+		SubMerTerminal subMerTerminal = new SubMerTerminal();
+		subMerTerminal.setTsn(accountEnquiry.getTerminalId());
+		subMerTerminal.setSubMerId(accountEnquiry.getMerchantId());
+		SubMerInfo subMerInfo = subMerInfoDao.accountEnquiry(subMerTerminal);
+		setCheckCode("3001");
+		String merchantName = "";
+		String legalManName = "";
+		String legalManIdcard = "";
+		String mobileNum = "";
+		String settleAccount = "";
+		String settleAccountNo = "";
+		String settleAgency = "";
+		String merStatus = "";
+		String settleAccountType = "";
+		String grade = "";
+		String gradeStatus = "";
+
+		String subAuthStatus = "";
+		if (null != subMerInfo) {
+			String autoApprove = "";
+			MerTrans merTrans = merTransDao.getMerTransInfo(subMerInfo
+					.getMerSysId());
+			if (null != merTrans) {
+				autoApprove = merTrans.getAutoApprove();// 机构是否开通自动审核 1开通
+			}
+			String settAccType = subMerInfo.getSettAccType();// 子商户结算账户类型 是2对私
+			// 还是1对公
+			subAuthStatus = subMerInfo.getAuthStatus();// 子商户认证类型
+
+			String realPeopleStatus = "";
+			String serialNo = "";
+			String opt = "-1";
+			// 实人认证
+			if ("1".equals(autoApprove) && "2".equals(settAccType)
+					&& "1".equals(subAuthStatus)) {// 实名成功
+				try {
+					String strResult = realPeopleAuthentication(subMerInfo);
+					String str[] = strResult.split("\\|");
+					realPeopleStatus = str[0];
+					serialNo = str[1];
+					opt = "00";
+				} catch (Exception e) {
+					opt = "-1";
+					e.printStackTrace();
+				}
+			} else if ("1".equals(autoApprove) && "2".equals(settAccType)
+					&& "4".equals(subAuthStatus)) {// 实人失败
+				try {
+					String strResult = realPeopleAuthentication(subMerInfo);
+					String str[] = strResult.split("\\|");
+					realPeopleStatus = str[0];
+					serialNo = str[1];
+					opt = "00";
+				} catch (Exception e) {
+					opt = "-1";
+					e.printStackTrace();
+				}
+			}
+			// 当操作了实人认证 需要修改相关数据库数据
+			if ("00".equals(opt)) {
+				// 修改子商户交易配置-认证状态
+				SubMerTrans subMerTrans = new SubMerTrans();
+				subMerTrans.setSubMerId(subMerInfo.getSubMerId());
+				subMerTrans.setAuthStatus(realPeopleStatus);
+				subMerTrans
+						.setAuthTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+				if (subMerTransDao.updateSubMerTransInfo(subMerTrans) != 1) {
+					setCheckCode("3047");
+				}
+
+				// 添加实人数据到数据库
+				SubMerAuthInfo auth = new SubMerAuthInfo();
+				auth.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss"));
+				auth.setSubMerId(subMerInfo.getSubMerId());
+				auth.setRemitType("2");
+				auth.setRealName(subMerInfo.getLegalPerson());
+				auth.setIdNum(subMerInfo.getLegalIdcard());
+				if ("-1".equals(realPeopleStatus)) {
+					realPeopleStatus = "4";
+				}
+				auth.setAuthStatus(realPeopleStatus);
+				auth.setSerialNo(serialNo);
+				auth.setTerminalId(accountEnquiry.getTerminalId());
+				// 添加认证信息到数据库
+				if (subMerAuthInfoDao.addSubMerAuthInfo(auth) != 1) {
+					setCheckCode("3048");
+				}
+				subAuthStatus = realPeopleStatus;
+			}
+			merchantName = subMerInfo.getSubMerName();
+			legalManName = subMerInfo.getLegalPerson();
+			legalManIdcard = subMerInfo.getLegalIdcard();
+			mobileNum = subMerInfo.getContactorPhone();
+			settleAccount = subMerInfo.getSettAccountName();
+			settleAccountNo = subMerInfo.getSettAccountNo();
+			settleAgency = subMerInfo.getSettAgency();
+			merStatus = subMerInfo.getStatus();
+			settleAccountType = subMerInfo.getSettAccType();
+			grade = subMerInfo.getGrade();
+			gradeStatus = subMerInfo.getGradeStatus();
+			setCheckCode("0000");
+		}
+		accountEnquiry.setTerminalId(accountEnquiry.getTerminalId());
+		accountEnquiry.setMerchantId(accountEnquiry.getMerchantId());
+		accountEnquiry.setMerchantName(merchantName);
+		accountEnquiry.setLegalManName(legalManName);
+		accountEnquiry.setLegalManIdcard(legalManIdcard);
+		accountEnquiry.setMobileNum(mobileNum);
+		accountEnquiry
+				.setPersonalMerRegNo(accountEnquiry.getPersonalMerRegNo());
+		accountEnquiry.setTaxNo(accountEnquiry.getTaxNo());
+		accountEnquiry.setOccNo(accountEnquiry.getOccNo());
+		if ("-1".equals(settleAccount)) {
+			settleAccount = "";
+		}
+		accountEnquiry.setSettleAccount(settleAccount);
+		if ("-1".equals(settleAccountNo)) {
+			settleAccountNo = "";
+		}
+		accountEnquiry.setSettleAccountNo(settleAccountNo);
+		accountEnquiry.setSettleAgency(settleAgency);
+
+		if ("2".equals(merStatus)) {
+			merStatus = "1";
+		} else if ("5".equals(merStatus)) {
+			merStatus = "2";
+		} else {
+			merStatus = "0";
+		}
+		accountEnquiry.setMerStatus(merStatus);
+
+		if (null != settleAccountType && !"".equals(settleAccountType)
+				&& "1".equals(settleAccountType)) {
+			accountEnquiry.setAuthStatus("null");
+		} else {
+			accountEnquiry.setAuthStatus(subAuthStatus);
+		}
+		accountEnquiry.setSettleAccountType(settleAccountType);
+		accountEnquiry.setRespCode(checkCode);
+		accountEnquiry.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		accountEnquiry.setGrade(grade); //认证等级
+		accountEnquiry.setGradeStatus(gradeStatus); //认证状态
+		return accountEnquiry;
+	}
+
+	// 找回密码
+	@Override
+	public Object updatePwd(SelectPassWord selectPassWord) {
+		selectPassWord.copyBusBeanParent(selectPassWord);
+		SubMerTerminal subMerTerminal = new SubMerTerminal();
+		subMerTerminal.setTsn(selectPassWord.getTerminalId());
+		// subMerTerminal.setFactory(selectPassWord.getFactoryId());
+		subMerTerminal.setSubMerId(selectPassWord.getMerchantId());
+		subMerTerminal.setLoginName(selectPassWord.getPhoneNum());
+		setCheckCode("9006");
+		// 修改终端前查询终端是否存在
+		subMerTerminal = subMerTerminalDao
+				.selectSubMerTerminalByUpdatePwd(subMerTerminal);
+		if (subMerTerminal != null) {
+			subMerTerminal.setLoginPwd(selectPassWord.getPwd());
+			setCheckCode("3042");
+			int update = 0;
+			try {
+				update = subMerTerminalDao.updatePwd(subMerTerminal);
+			} catch (Exception e) {
+				e.printStackTrace();
+				setCheckCode("9999");// 更新失败，返回错误报文
+			}
+			if (update > 0) {
+				System.out.println("更新密码！");
+				setCheckCode("0000");
+			}
+		}
+		selectPassWord.setRespCode(checkCode);
+		selectPassWord.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return selectPassWord;
+	}
+
+	/**
+	 * 终端注销
+	 */
+	@Override
+	public String terminalCancel(SubMerTerminal terminal) {
+		String returns = "";
+
+		TerminalCancel terminalCancel = new TerminalCancel();
+		terminalCancel.setApplication("TerminalCancel.Req");
+		terminalCancel.setVersion("1.0.0");
+		terminalCancel.setSendTime(new SimpleDateFormat("yyyyMMddmmhhss")
+				.format(new Date()));
+		terminalCancel.setTerminalId(terminal.getTsn());
+		terminalCancel.setFactoryId(terminal.getFactory());
+
+		String data = "";// 3段内容
+		try {
+			data = xmlUtilnew.ObjToXml(terminalCancel);
+			System.out.println(data);
+			RefundUtil refundUtil = new RefundUtil();
+			data = refundUtil.encrypt(data, terminal.getTsn());
+			System.out.println("3段内容>>>>>>>:" + data);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		RemoteAccessor remoteAccessor = new RemoteAccessor();
+		String decryptXml = "";
+		try {
+			String url = rb.getString("posp-url");
+			System.out.println("url:" + url);
+			decryptXml = remoteAccessor.getResponseByStream(url, "utf-8", data);
+			System.out.println("返回XML>>>>" + decryptXml);
+			String[] ss = decryptXml.split("\\|");
+			if (ss[0].equals("0")) {
+				returns = "0";
+			}
+			if (ss[0].equals("1")) {
+				String str = new RefundUtil().decrypt(ss[1]);
+				String[] result = str.split("\\|");
+				if ("0000".equals(result[1])) {// 获取正确返回的code
+					returns = "1";
+				} else {
+					returns = "0";
+				}
+			}
+		} catch (Exception e) {
+			returns = "0";
+			e.printStackTrace();
+		}
+		return returns;
+	}
+
+	/**
+	 * 上账
+	 * 
+	 * @throws Exception
+	 * @throws UnsupportedEncodingException
+	 */
+	@Override
+	public String upAccount(AccountManage accountManages) throws Exception {
+		Random random = new Random();
+		String res = "";
+		for (int i = 0; i < 7; i++) {
+			res += random.nextInt(10);
+		}
+		System.out.print(res);
+		// 组装数据结构
+		String[] reqMsg = BankUtils.toBusinessBalanceReCharge(
+				accountManages.getMerSysId(), RSACoder.KEY_FTB_PUBLICKEY,
+				accountManages.getMerAmt(), accountManages.getFeeAmt(), res
+						+ accountManages.getId());
+		System.out.println("reqMsg[1]:" + reqMsg[1]);
+		String respMsg = "";
+		String status = "0";
+		String result = "";
+		try {
+			respMsg = new RemoteAccessor().getResponseByPost(
+					PropertiesUtils.getPropertiesValueInPath("busUrl"),
+					"UTF-8", new String[] { "msg", reqMsg[1] });
+		} catch (Exception e) {
+			status = "3";
+			return "上账失败，系统错误";
+		}
+
+		if (respMsg == null || "".equals(respMsg)) {
+			status = "2";
+			return "上账失败，系统错误";
+		}
+		String[] msgs = respMsg.split("\\|");
+
+		if ("0".equals(msgs[0])) {
+			status = "2";
+			// 错误
+			// 错误响应格式：0|错误码|BASE64(错误描述)
+			result = "上账失败,"
+					+ new String(Base64.decodeBase64(msgs[2]), "UTF-8");
+		} else {
+			// 正常响应格式：1|BASE64(3DES(报文))|BASE64(MD5(报文))
+			String xml = new String(RSACoder.decryptDesc(
+					Base64.decodeBase64(msgs[1]), reqMsg[0].getBytes()),
+					"UTF-8");
+			System.out.println("上账返回的xml:" + xml);
+			TransInfoReq transInfo = (TransInfoReq) XmlUtil.XmlToObj(xml,
+					TransInfoReq.class);
+			if ("0000".equals(transInfo.getRespCode())) {
+				status = "1";
+				result = "上账成功!";
+			} else {
+				status = "2";
+				result = "上账失败!";
+			}
+		}
+		if ("1".equals(status) && "1".equals(accountManages.getAccountType())) {// 上账成功、上账类型为1
+			// 清算款上账
+			// 修改商户日清分统计表的 ---清分状态为1待清分
+			MerSettleStatictis merSettleStatictis = new MerSettleStatictis();
+			merSettleStatictis.setClearStatus("1");
+			merSettleStatictis.setMid(accountManages.getMerSysId());
+			merSettleStatictis.setMerType("0");
+			merSettleStatictis.setSettleDate(accountManages.getSettleDate());
+			merSettleStatictisDao.updateClearStatus(merSettleStatictis);
+
+		}
+		AccountManage manage = new AccountManage();
+		manage.setId(accountManages.getId());
+		manage.setMerSysId(accountManages.getMerSysId());
+		manage.setSettleDate(accountManages.getSettleDate());
+		manage.setStatus(status);
+		// 修改预存款状态
+		accountManageDao.updateAccountManageByStatus(manage);
+		return result;
+	}
+
+	/**
+	 * 实名认证
+	 */
+	@Override
+	public String authentication(AccountRegist accountRegist) throws Exception {
+		String authStatus = "-1";// 认证状态 4：认证失败
+		String serialNo = "-1";// 流水号
+		try {
+			String orderId = ValueTool.createByTime();
+			String orderTime = DateUtil.getDate("yyyyMMddHHmmss");
+			String userName = accountRegist.getLegalManName();
+			String idCard = accountRegist.getLegalManIdcard();
+
+			String merchantId = ValueTool.AUTH_MER_ID;
+			String first = merchantId;
+			String Second = "101|" + orderId + "|" + orderTime + "|" + userName
+					+ "|" + idCard;
+			String Third = merchantId + "101" + orderId + "" + orderTime
+					+ idCard + "" + ValueTool.AUTH_MER_SIGN_KEY + "";
+
+			AuthenticationUtil authenticationUtil = new AuthenticationUtil();
+			String data = authenticationUtil.encrypt(first, Second, Third);// 加密并组合
+			RemoteAccessor remoteAccessor = new RemoteAccessor();
+
+			String path = rb.getString("shimingUrl");
+
+			// 发送请求
+			String decryptXml = remoteAccessor.getResponseByStream(path,
+					"utf-8", data);
+			String[] ss = decryptXml.split("\\|");
+			if (ss[0].equals("0")) {// 解析成功
+				String respXml = new AuthenticationUtil().decrypt(ss[1]);// 得到正确的报文内容
+				System.out.println(respXml);
+				String[] result = respXml.split("\\|");
+				String respCode = result[5];// 返回码
+				serialNo = result[4];// 流水号
+				if (!"".equals(respCode) && "1".equals(respCode)) {// 认证成功
+					authStatus = "1";
+				} else {
+					authStatus = "4";
+				}
+			}
+			if (ss[0].equals("1")) {// 解析失败
+				authStatus = "4";
+			}
+		} catch (Exception e) {
+			return authStatus + "|" + serialNo;
+		}
+		return authStatus + "|" + serialNo;
+	}
+
+	/**
+	 * 商户提现申请记录
+	 */
+	@Override
+	public Object drawMoneyRecord(DrawMoneyRecord drawMoneyRecord)
+			throws Exception {
+		drawMoneyRecord.copyBusBeanParent(drawMoneyRecord);
+		setCheckCode("");
+		try {
+			// 组查询条件
+			int curPage = 1;
+			int pageCount = 10;
+			if (drawMoneyRecord.getCurPage() != null
+					&& !"".equals(drawMoneyRecord.getCurPage())) {
+				curPage = Integer.parseInt(drawMoneyRecord.getCurPage());
+			}
+			if (drawMoneyRecord.getPageCount() != null
+					&& !"".equals(drawMoneyRecord.getPageCount())) {
+				pageCount = Integer.parseInt(drawMoneyRecord.getPageCount());
+			}
+			Map map = PageUtil.getPageMap(curPage, pageCount);
+
+			// 查询
+			Integer count = null;
+			map.put("subMerId", drawMoneyRecord.getMerchantId());
+			map.put("beginTime", drawMoneyRecord.getBeginTime());
+			map.put("endTime", drawMoneyRecord.getEndTime());
+			count = subMerCashoutDao.getSubMerCashoutBySubIdCount(map); // 总条数
+			if (null == count) {
+				count = 0;
+			}
+			if (count > 0) {
+				List<SubMerCashout> list = subMerCashoutDao
+						.getSubMerCashoutBySubId(map); // 总数据
+				// 拼返回内容
+				List<DrawMoneyRecordList> drawMoneyRecordLists = new ArrayList<DrawMoneyRecordList>();
+
+				Iterator<SubMerCashout> subMerCashoutList = list.iterator();
+				while (subMerCashoutList.hasNext()) {
+					SubMerCashout info = (SubMerCashout) subMerCashoutList
+							.next();
+					DrawMoneyRecordList drawMoneyRecordList = new DrawMoneyRecordList();
+					drawMoneyRecordList.setOrderAmt(info.getOrderAmt());
+					drawMoneyRecordList.setCurrency("156");
+					drawMoneyRecordList.setMerchantOrderId(info.getTransId());
+					drawMoneyRecordList.setMerchantOrderTime(info
+							.getCreateTime());
+					drawMoneyRecordList.setOrderStatus(info.getOrderStatus());
+					drawMoneyRecordLists.add(drawMoneyRecordList);
+				}
+
+				SubMerInfo subMerInfo = subMerInfoDao
+						.getSubMerInfoById(drawMoneyRecord.getMerchantId());
+				String subMerName = "";
+				if (null != subMerInfo) {
+					subMerName = subMerInfo.getSubMerName();
+				}
+				drawMoneyRecord.setDrawMoneyRecordLists(drawMoneyRecordLists);
+				drawMoneyRecord.setMerchantId(drawMoneyRecord.getMerchantId());
+				drawMoneyRecord.setMerchantName(subMerName);
+				drawMoneyRecord.setTerminalId(drawMoneyRecord.getTerminalId());
+				drawMoneyRecord.setBeginTime(drawMoneyRecord.getBeginTime());
+				drawMoneyRecord.setEndTime(drawMoneyRecord.getEndTime());
+				setCheckCode("0000");
+				drawMoneyRecord.setTotalCount(count + "");
+				drawMoneyRecord.setCurPage(curPage + "");
+				drawMoneyRecord.setPageCount(pageCount + "");
+			} else {
+				setCheckCode("2002");
+			}
+		} catch (Exception e) {
+			setCheckCode("2002");
+			e.printStackTrace();
+		} finally {
+			drawMoneyRecord.setRespCode(checkCode);
+			drawMoneyRecord.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		}
+		return drawMoneyRecord;
+	}
+
+	/**
+	 * 查询余额
+	 */
+	@Override
+	public Object queryBalance(QueryBalance queryBalance) {
+		queryBalance.copyBusBeanParent(queryBalance);
+		setCheckCode("");
+		SubMerInfo subMerInfo = subMerInfoDao.getSubMerInfoById(queryBalance
+				.getMerchantId());
+		queryBalance.setMerchantId(queryBalance.getMerchantId());
+		queryBalance.setTerminalId(queryBalance.getTerminalId());
+		setCheckCode("3054");
+		if (null != subMerInfo) {
+			queryBalance.setMerchantName(subMerInfo.getSubMerName());
+			queryBalance.setAccountBalance(subMerInfo.getgAccStatus());
+			setCheckCode("0000");
+		}
+		queryBalance.setBalanceCurrency("156");
+		queryBalance.setRespCode(checkCode);
+		queryBalance.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return queryBalance;
+	}
+
+	/**
+	 * 短信下发
+	 */
+	@Override
+	public Object phoneNumber(PhoneNumber phoneNumber) {
+		phoneNumber.copyBusBeanParent(phoneNumber);
+		setCheckCode("3061");
+
+		String phoneNo = phoneNumber.getPhoneNum();
+		String code = getSixRandom(100000, 999999).toString();
+
+		String result = HFSendData.sendData(phoneNo, code);
+		if (!"error".equals(result)) {
+			if ("00".equals(result.split("[|]")[0])) {
+				setCheckCode("0000");
+				PhoneVerifyCode phoneVerifyCode = new PhoneVerifyCode();
+				phoneVerifyCode.setTerminalId(phoneNumber.getTerminalId());
+				phoneVerifyCode.setPhone(phoneNumber.getPhoneNum());
+				phoneVerifyCode.setCode(Md5Util.getMD5(code));
+				phoneVerifyCode.setCreateTime(DateUtil
+						.getDate("yyyyMMddHHmmss"));
+				phoneVerifyCodeDao.insertPhoneVerifyCode(phoneVerifyCode);
+			}
+		} else {
+			setCheckCode("9999");
+		}
+		phoneNumber.setRespCode(checkCode);
+		phoneNumber.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		phoneNumber.setMsgExt1(Md5Util.getMD5(code));
+
+		/*
+		 * try { URL url = new
+		 * URL("http://www.chinapnr.com/hfsubms/clientAction!sendInfos.ac");
+		 * String phoneNo = phoneNumber.getPhoneNum(); String code =
+		 * getSixRandom(100000, 999999).toString(); URLConnection connection =
+		 * url.openConnection(); connection.setDoOutput(true);
+		 * OutputStreamWriter out = new
+		 * OutputStreamWriter(connection.getOutputStream(), "8859_1");
+		 * out.write("phoneNo=" + phoneNo + "&checkCode=" + code + ""); //
+		 * 向页面传递数据。post的关键所在！ out.flush(); out.close(); //
+		 * 一旦发送成功，用以下方法就可以得到服务器的回应： String sCurrentLine; String sTotalString;
+		 * sCurrentLine = ""; sTotalString = ""; InputStream l_urlStream;
+		 * l_urlStream = connection.getInputStream(); // 传说中的三层包装阿！
+		 * BufferedReader l_reader = new BufferedReader(new
+		 * InputStreamReader(l_urlStream)); while ((sCurrentLine =
+		 * l_reader.readLine()) != null) { sTotalString += sCurrentLine +
+		 * "\r\n";
+		 * 
+		 * } System.out.println("==================" + sTotalString);
+		 * phoneNumber.setRespCode("00".equals(sTotalString.split("[|]")[0]) ?
+		 * "0000" : sTotalString .split("[|]")[0]);
+		 * phoneNumber.setRespDesc("00".equals(sTotalString.split("[|]")[0]) ?
+		 * "成功" : "失败"); phoneNumber.setMsgExt1(Md5Util.getMD5(code));
+		 * 
+		 * if ("00".equals(sTotalString.split("[|]")[0])) { PhoneVerifyCode
+		 * phoneVerifyCode = new PhoneVerifyCode();
+		 * phoneVerifyCode.setTerminalId(phoneNumber.getTerminalId());
+		 * phoneVerifyCode.setPhone(phoneNumber.getPhoneNum());
+		 * phoneVerifyCode.setCode(Md5Util.getMD5(code));
+		 * phoneVerifyCode.setCreateTime(DateUtil.getDate("yyyyMMddHHmmss"));
+		 * phoneVerifyCodeDao.insertPhoneVerifyCode(phoneVerifyCode); } } catch
+		 * (Exception e) { setCheckCode("9999"); e.printStackTrace(); }
+		 */
+
+		return phoneNumber;
+	}
+	
+	public RegisterMerInfo registerMerSY(RegisterMerInfo registerMerInfo) throws Exception {
+		registerMerInfo.copyBusBeanParent(registerMerInfo);
+		setCheckCode("");
+		DefaultHttpClient httpClient = new DefaultHttpClient();  
+		HttpPost request = new HttpPost(rb.getString("SYurl")+"IN0001.json");  
+		try {
+			if (registerMerInfo != null) {
+				Map<String,String> map = new LinkedHashMap<String, String>();  
+				map.put("custMobile", registerMerInfo.getCustMobile());
+				map.put("cardHandheld", registerMerInfo.getCardHandheld());
+				map.put("cardFront", registerMerInfo.getCardFront());
+				map.put("cardBack", registerMerInfo.getCardBack());
+				map.put("custName", registerMerInfo.getCustName());
+				map.put("certificateType", registerMerInfo.getCertificateType());
+				map.put("certificateNo ", registerMerInfo.getCertificateNo ());
+				map.put("userEmail", registerMerInfo.getUserEmail());
+				map.put("provinceId", registerMerInfo.getProvinceId());
+				map.put("userEmail", registerMerInfo.getUserEmail());
+				map.put("cityId", registerMerInfo.getCityId());
+				map.put("regionId", registerMerInfo.getRegionId());
+				map.put("identifyBackUrl", "127.0.0.1");
+				StringBuffer sb = new StringBuffer();
+		        Set<Map.Entry<String, String>> set = map.entrySet();
+		        for (Iterator<Map.Entry<String, String>> it = set.iterator(); it.hasNext();) {
+		            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
+		            System.out.println(entry.getKey() + "--->" + entry.getValue());
+		            sb.append(entry.getValue());
+		        }
+		        String checkSignMsg=Md5Util.generateMD5String(sb.append(rb.getString("SYsign")).toString());
+//		        map.put("SIGN", checkSignMsg);
+//		        String jsonString = "{\"REQ_HEAD\":"+TmallYfDataPackage.convertObjectToJson(map)+"}"; 
+		        String jsonString = "REQ_MESSAGE={\"REQ_HEAD\":{\"SIGN\":"+checkSignMsg+"},\"REQ_BODY\":"+TmallYfDataPackage.convertObjectToJson(map)+"}";
+		        StringEntity params =new StringEntity(jsonString,"UTF-8");  
+		        request.addHeader("content-type", "application/json");  
+		        request.setEntity(params);  
+		        HttpResponse response = httpClient.execute(request);  
+		        HttpEntity entity = response.getEntity();  
+		        InputStream instream = entity.getContent();  
+		        BufferedReader in = new BufferedReader(new InputStreamReader(instream,"UTF-8"));  
+		        sb = new StringBuffer();  
+		        String data = null;  
+		        while((data = in.readLine())!=null){  
+		            sb.append(data);  
+		        }  
+		        if(in != null)  
+		            in.close(); 
+		        System.out.println(sb);
+		        JSONObject json=JSONObject.fromObject(sb.toString());
+				Iterator keys=json.keys();
+				String key = null;
+				String value = null;
+				while(keys.hasNext()){
+					key=(String) keys.next();
+					value=json.get(key).toString();
+					System.out.println("return  key:"+key+"-value:"+value);
+				}
+			}
+		} catch (Exception e) {
+			setCheckCode("9998");
+			e.printStackTrace();
+		}
+		registerMerInfo.setApplication("registerMerSY.Rsp");
+		registerMerInfo.setRespCode(checkCode);
+		registerMerInfo.setRespDesc(ValueTool.SYS_CODE.get(checkCode));
+		return registerMerInfo;
+	}
+	
+	public static RegisterMerInfo testregisterMerSY(RegisterMerInfo registerMerInfo) throws Exception {
+		DefaultHttpClient httpClient = new DefaultHttpClient();  
+		HttpPost request = new HttpPost(rb.getString("SYurl")+"IN0001.json");  
+		try {
+			if (registerMerInfo != null) {
+				Map<String,String> map = new LinkedHashMap<String, String>();  
+				map.put("custMobile", registerMerInfo.getCustMobile());
+				map.put("cardHandheld", registerMerInfo.getCardHandheld());
+				map.put("cardFront", registerMerInfo.getCardFront());
+				map.put("cardBack", registerMerInfo.getCardBack());
+				map.put("custName", registerMerInfo.getCustName());
+				map.put("certificateType", registerMerInfo.getCertificateType());
+				map.put("certificateNo ", registerMerInfo.getCertificateNo ());
+				map.put("userEmail", registerMerInfo.getUserEmail());
+				map.put("provinceId", registerMerInfo.getProvinceId());
+				map.put("userEmail", registerMerInfo.getUserEmail());
+				map.put("cityId", registerMerInfo.getCityId());
+				map.put("regionId", registerMerInfo.getRegionId());
+				map.put("identifyBackUrl", "127.0.0.1");
+				map.put("txnDate", registerMerInfo.getTxnDate());
+				map.put("txnTime", registerMerInfo.getTxnTime());
+				map.put("agentId", registerMerInfo.getAgentId());
+				StringBuffer sb = new StringBuffer();
+		        Set<Map.Entry<String, String>> set = map.entrySet();
+		        for (Iterator<Map.Entry<String, String>> it = set.iterator(); it.hasNext();) {
+		            Map.Entry<String, String> entry = (Map.Entry<String, String>) it.next();
+		            System.out.println(entry.getKey() + "--->" + entry.getValue());
+		            sb.append(entry.getValue());
+		        }
+		        String checkSignMsg=Md5Util.generateMD5String(sb.append(rb.getString("SYsign")).toString());
+//		        map.put("SIGN", checkSignMsg);
+//		        String jsonString = "{\"REQ_HEAD\":"+TmallYfDataPackage.convertObjectToJson(map)+"}"; 
+		        String jsonString = "REQ_MESSAGE={\"REQ_HEAD\":{\"SIGN\":"+checkSignMsg+"},\"REQ_BODY\":"+TmallYfDataPackage.convertObjectToJson(map)+"}";
+		        System.out.println("jsonString="+jsonString);
+		        StringEntity params =new StringEntity(jsonString,"UTF-8");  
+		        request.addHeader("content-type", "application/json");  
+		        request.setEntity(params);  
+		        HttpResponse response = httpClient.execute(request);  
+		        HttpEntity entity = response.getEntity();  
+		        InputStream instream = entity.getContent();  
+		        BufferedReader in = new BufferedReader(new InputStreamReader(instream,"UTF-8"));  
+		        sb = new StringBuffer();  
+		        String data = null;  
+		        while((data = in.readLine())!=null){  
+		            sb.append(data);  
+		        }  
+		        if(in != null)  
+		            in.close(); 
+		        System.out.println(sb);
+		        JSONObject json=JSONObject.fromObject(sb.toString());
+				Iterator keys=json.keys();
+				String key = null;
+				String value = null;
+				while(keys.hasNext()){
+					key=(String) keys.next();
+					value=json.get(key).toString();
+					System.out.println("return  key:"+key+"-value:"+value);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		registerMerInfo.setApplication("registerMerSY.Rsp");
+		return registerMerInfo;
+	}
+	
+	public static void main(String[] args) {
+		RegisterMerInfo registerMerInfo = new RegisterMerInfo();
+		registerMerInfo.setCustMobile("13816398916");
+		registerMerInfo.setCardHandheld("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");
+		registerMerInfo.setCardFront("/9j/4AAQSkZJRgABAQAAAQABAAD/4QBYRXhpZgAATU0AKgAAAAgAAgESAAMAAAABAAEAAIdpAAQAAAABAAAAJgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAABQKADAAQAAAABAAABqwAAAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAGrAUADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD5xtTiZD7119qu4CuNhPzr9a7nT13RIfas5mljQto+ma04FwKq26VfiWs0DJAKjYZNT4phXmqbFYhK00pVnbmk21A7FUx1G0XNXtlNKUrAUTFTDDzV8x0nl0gM8w+1NMORWh5dJ5dA7lDyfam+TWh5dHl0AUPJpfJ9qveV7UojpAUPJqve2pe3YIMsTgCtjy6juUK2kjJwy8g+9NPURxptpLYmOdCjjsaVQe9SzTy3UrSTPuc96RRWuvUhjkFWrcc9KgWrUGMUxXNKFsKOK9W+GGleFXihvNe1RFut2VgbhR9a8kRuKtwSEYoJZ9f2XiXwvaQhLfVbNUHAHmDivMfjprmk6pDpi6ffRXMqSZZYznA9a8Z88gdarrKZLtRntViR9O23jjw/Y6TB5d3vl8oArjvivO/E3jPUNduFttHjkP8ADkDOa4bSzFJcwrctiEn5ue1drc+L9N0S2MGgWiebjmUjnNZtW2JUV1K1j4ASNft3iu+S2iPzGPOXNYvi3xTptjatp/hS0WJCNrTuMlqwtc1q91SYyXk7yE9s8Vz1w2etTyveRfN2Ma5BaRnkJZyck+9VHLntWs6881GUHpViuZJV/egI5PcVpMophAoHcrRxH61MkVTKvyk0L1oE2dN4c0GzvWiNzqMFur9Qx5Fej6R4P0KAb4vENsZCcAMuRivJtJWOSdRLII07sa9Cs/EOi6TCosrBbi4A5kl5Galp9CPVnzogwa7zRPns4ieeK4RK7nwuQ9inscVU9jrOggXiriDpUMI4FWkWs0AuKNtSbeKUL0piGBeaXbUoWnbaQyvtpCntVnbSFaAKxSkKcVZ2UhWgCrspClWttJspAVtlGz2qzso2UCKwSl8v2qwEpQlAFfZTbiPNnKMdqt7KGTMEn0oA83Vfmcf7Rp6rV7UY4Eu3Fu2R1Psarha0vcz2ERTViIEdKaq1PGvFAD1zirMZIqFBU6jimSPZzt6mksjm7H0prjjFPshi8X/douJGuG+WmScinjbt6jNNbBHUVdyWU5hxVKROtaMoHqKijiEkiqWC57mpYGY0VItu8hARSSewFdvbaZoFpAst/fNPIefKiH9aJfE9tZIU0bTYIT08yQbmrPm7F27nISaHfC3aZrd1jXu3FZDRmug1XVL3UGJuZ3cH+HoPyrKKVS8xOw1owIOnaoFWtGUKYMKfSqyoM00xCwAirSEgVEgqQY7mmSzgI4lNiZR94Piut8GtutXXuGrmbFd+m3ak8qQwFb3gl/3kyfjSlszsR20I6VaQVBCOKtJWaAcBTgvNKBTwKYABS7acBTsUgI8UbakxRigRFto21LijFICErzSbam20m2gCLbRtqXFG2gRFtpQtSbaXFAEYWkZf3Ug9qmxTX+4/0oA86df9MuB/tU9Vz2p0q/8AEwuQP71SBT71oZMai1YROlIiHuKsRrx0oFcESpAtSpGfSpBGc9KBFYpzTrVf9NX/AHTU5jNNhXF6n0NAI6qx0OOeNWAJZhnArRXwrEAGndYl9zzUmlzvDbJsbBI7VNJIznLMSfeglsyLzRLRXxCSw9TVJ9JiHatyRqryGmK5iSabGOMVXk0+Mdq2pKrSCkBjPYxjtULWUfPy1rSLULCmBiLbKJWGOKnWyjz0qYLm4NWQvNSNlVbOP+7ThZx/3auAdKAKYjyXRXAadGG4NGa1PB8u3Uyo4DCudtpGjkypwSMVq+GpfL1eHJ6nFU0daPUIelWkqpAcgVbQ1khkoFPFNFPFADgKfiminCgAoxS0oFAhMUY4pRS4pANxSEU8iigQzFGKfijFADcUYp2KMUgG4qOXhW+lS9q57xNr9vpS7GbdKR90U0rsRiLHv1S6+tXUts1xieJJY7yWYIDv7GtSy8XAuomhAXuRWvKzNnUJa+1Tpa+1WtMkhvbdJYWDKR2q+sIA6UWIZnpagDnAFTLZkgEDIrP1uR0mEasQMdq2hepYaIlxIpYADNJuwFU2bf3apXEJivIiRjINRv4ytz923apprxb5LWdV27weKWvUaOmtHxAn0qcv6VRtm/cr9Kl30yGSO1QuaGaoy1AhrmoGqRjmomNAyF+tQuOKnaoZOhoAoL/rzVkCq0YzMatZoQ2KaQmjPFNJ96BWPFlOCOKuaa/l6hE3o4NUjU0bbZlb6GtGdZ6/atuRT6ir0fSsrSpPMtIW9VFakfQViUTrT1qMVItBI8U6m0oNADqUU3NOFIBwFFApRQAGkpaKQhKKWigApKWikBna3fDT9Pln7qOB714vqt7Le3bzTNudjXqnj3/kAysOoIrx2Vua3pLqRIaWzSqfSoiaUHmtST0X4XXmbqe2djkruUZr0xVGDXivgKdYPEVuzvsU5GfWvasjZ1rOW5LOW13/AI+wfarOrnd4WI9hVTXj/pQ+lWL3954e2+wrNvURwmMV1VhIPsligPIUmsM2mQeea17RdkNmSedpFNsaOvt2/dL9Kk3VjxakioBtbinHUwRxG1BNjUL0xnrMOot2iNMN/J/zzoFY0i2aaTWZ9umzwgpDeTn+EUBY0GNQSHg1Re5uD6VXmuLjaeRSHYsRH981WCeax7eSVsnPJ61Nvmz96khmlmkY4rOLTHo5qJzN/wA9DTuI8rqRT901FmnqfkHsa2OlHqPheXzNKgPoMVvx1yHgiXfpxX+61dbEelZNalFlalWokqUUWEKTQDVW/vYbOEyXEgRR61gT+L7OP/VBnpWbC51YNOHSuY0/xZY3LqkhMTn+90rpInDqGUgg9xSaa3FcmWn01KfVJCuIaSlNNzUNDuLRSUUgFoNJQTSEY/iuET6Ddp1IQkV49HBFcwdkdBz717lcxiaF426MCDXl3iLw8+m7WjO5ZDjirjK2hUdzk/sjs+EGR61ft9KJwZHx9K0YrV0jVRhcdzUqwAcsxJpSqvoUoIZpumCG+hkRty7h+HNewRyDyV+YdPWvKYsJjFX01GZVAErY+tT7R9RSpqWxv6+wNyvPanai5/4RxtpOcDpXOm+ZjlmJPvTzqLGEwuxaM9qXOR7HzMrLnqzfnXR2bf6JZf7prltVuWt9rRKCjfpUKeIblY4kCL+7BA/GtviV0ZuLT1PSYkXYKfhRXny+LL4KAESg+KNQY/wD8KfKybHoOBRgVxVn4sniH+kRLJu4znGK6JNYsygLToDj1pWaFY0sCmnFZR1yxXrOv4VBJ4isFz+9z9KNQNhyBmszUdRgtVbzXUMO1Ztx4mtdpEZYtjjiuLvrmS5uHkkJyTmmo33BI7vSNSguWZUf5uuDWrkV5XBM0MgeNiGHPFdk2tbdJS5Ay3QihxtsDR0OeaY5rjf+EnmJ4jFMfxJcEcKopcjDlObzxTk+6aYadH1xWpujtfAc3+vj/GtZda1CSS5+zWYeOBtrNnpXMeCZdmpFP7y12/hJYjrOsWsrlN4WQY6VthqcalZRlswk9DT8Naf4l1+za50+yhMSttJZsc1v/wDCFeMTbtKYbRFUFjl69D+DS2yW99axyLKAwYgdq7rV1SLRtQKx7SI2Az34rrxNCnSm4xRF20fDXiLUbq8vXjuWH7tiuF6ZFYrNz1q5qfF9cg9RI2fzrPJ5rhYFgE8EGu8+G6X2v6pFpMepLa5HylxnPtXn6Nk4rovA1xJZ+JbG4jbDpICPzoVr6gj38/CbWVTnX03f9c6gu/hlewZD65MzAfwx8V7DBKJbGGWRcnaG/GpFniccqcV1SgktIhFpP3j5p0kT295qFlcytK9vLtDMMEitPNN8RgQfEXXIwMK+2QD8KaDXn1laRUXoSZozTSeKqNfQrnnODg1ja472L67dvPWoJZNlVBqMZb5cnHWud8S66VX7PASr/wARqrWJTu7GvqmuW1mhG4NJj7orjNR1aW9fLt8ueB6Vj3MxZyWJJJ71EsgzWbRstC6ZjSeYxHpUXmKoy1J5vtge9TYu5MGPvQW4qAye9IGNArllWpzNxnNQbuKN3v8AhQBBqWWtsjsc1j7q2bgf6PIp9MisMmuik9DGe5IGqRXquDTg1akE8rZT8a1LPTYmmQOzbWHrWKzZH411dkgk8rI6gVlUk42sXBJ3uStpFjF/ET9TUM1naKPkjBq7eBFm2rzioVGSPlrF1GaqCeqITDBDbb/JQfhXL3UolnZgABnoK7HWUC6WSvda4cVrRd9SKulkSNt3fJnFWBc/6A8Oe4IFVKVACwz0rYyGA0u44rpIfDouIVki3YYZrMutGuoZ2jWNiB0NJTTCxlHFSw7CfmYg1BT403g4IB9KqwXNTSZ/7P1COVuVHpXZeCtUkvPFc3kICZ4GQivPAXQFW6Vs+DrxrPX7SZeDv29cda2w+lWLHc+ivg/emDxDewFGj3xjkfxEV7LdbH06bzn3JtOSa+YtM8c23hvWGnCG4lTcpUHjn3rP8TfF/XtTtpYIJEtoHyCsY5x9a9TMqkHUvF30Ii7HFeOmtj4n1D7CMQeacVzRfr61LcTGRmdiSxOSTVc4zXjsZKrYroPCd5bW+tWkt3u8pJAWx6Zrm85WprclWBoW40z7Z0fxz4c1DTkW21KBSqgbXbBq3p+u2N3L5VtdQSMeysDXxcs74BzVyz1G5spVmtZ5IpV5DK2DXWq1iT0X9oCSfT/Gcc9vI0ZmgGSvfBrI+H2oz3lvcpcyNIUIILda4zxFruoa40TajcPcPENqluuKu+DZ7q1upRHFJhxz8priryUrsqJ6oW964fUNRFrqs6vwN1SXur3C5RiVYdjXOanM99nzMbh0PesIIps3o9Rvbu4kNhArxoOTmuXvbl5J3d/vE811PwsuFGoT20w3CSM9RnpXI6sFXULhU+6JGA+ma3nBKCkgiV5H5yajEmPmJ4qNjmoHcs+0fdrCxdy+k2F3tye1IXeQ5Y4FQR8nnoOlPe4ii4cnPoKm3Yd+5YVsDj9alDHuaoC8iJ6n8qkF1CRy5/Kk4sOZGgrZ70joWHGaprdwg/6zH4VJ9tgx/rj+VTytdA5kDM2Cjduh9qyW+8a0DcWwfd5jN+FVGa3ySoc1rC6Ik7kNKM+lSCRf4Ifz5prXMmNuFUegFaXIG54rv9N0u4kgt2TaSyjAB5rgFyxAHU12egald2rQSDbmP7oNRUV7DUrJmymlF3ZnkUNnBzUv9lxDrOPwFUZjc3MrMlwqFjk8VD9ivmBLXZ2+wrnlHqy4SdrI1LvTrWeDypJjjFZX/CPaTH953P40DT5T9+6lP0pTpgIwZJT+NCmlsymnLciOnaLGfusT7mkT+xoWysKk+5rI1GxaC8McfmNkZqtLYzgoBE59cA1vFXV7mbdtDtrXUUaPFtEm0ehqndawiOQypmqXh2yuo4rtvIk5QheK567trmGYpOrI3XDcUlBXDmMyG3eVSVB46e9PktJYUDNgV1ejxoNCxJHmSNtwx3FZGruJUzHHtxxWvO7jjFWMhXZ1IPJrR02yaeaFIGxJ1JPRas+GLQTLI0mzBOMtVvT4RDrOwNwSelEpuCbXQULN2LjeGXclv7QhJPJzVS68OvEVDXkJz6Gt64j8tiKzdS/1Kv6GuKOKqSerLcEjGm0MKHIu4zt7YqLT9GF4shNwqhParFxIApIycim6NKUEoXv2Ndak7ENK5HqGmW1nalxOzvnA44qpJFFFAjq5Zj19Ksa5OzoqlQOc8VQkfNso9+1aQvbUlluylVriNGGVJ5qzrlzCt1stUCIo5Gc5NZ2mfNdr7c1DeuXuZDnvVX1EdDbXa/Z7GZIIw8bjJx97613wu5RAHBC7vQYry21kIsFGej16HbSGTTUJPYV5WPWzNqZS8ThjHBMT8xypNc4yk87uK6fXyv8AYvmMf9WwOa4yS8jP3Wya2wUuan6ETWpqaBqI0nW4LrJCDIb6EYrGvpd9zK45DMTn8alluYdyrvDZHP1qjI3zHFdcm2rBEbI2FNRJkjCjnuaSdsDFRqcjrSS0G3qW1bHU4qnOd0x+tTKQKrHmX8aIoTZsRWERjXg5I9akGmRY75q1DgIPpUwNcUqkr7gURpkRPenrpcXofzrQBwKcDmodWfcCkumQjHy/rUyaamcpEOKtCnt8oBB61HtJdwM26jWCFmCgVgKjTOxX681s65NthCD+KsqztzcSLHGfnbsK7aGkeZkpXdhETaw3NjHpW3HeQhoFR+FXmiPwxduuQrA9siq97oN5aRh3jbb6gVpGvTclZ6lToy5XdHQ6XeIZJCMFTxz2rcgk3wLtI5bsa83tpmXhiRW3o+o/ZiArF2ZsBKVaHPqhUrQ0O2wPSlOKitxdy4Js5Rn2q21ncKATEwrjcGjoUkznbvWBa6kYhCrYwN2Oa0jrEihR5Q9+BXM6tBMuuHfG4Bcc4qHXJZo2YwswOexrpjHRGT3O1j8RMQFKKg+lNupdL1Dm6iVm6bs81zGj/aLjR5HB3TE/LmmrHqYwHtlYdyKfKxGn4Fsxc2GoxzEKoQlSx6cVzF9DshfnODXTRWF7Ha3MUBCrNg89q5jU0vLMsLyM+X03DoaFLmehpH3NWQaTOIs72KgEke9TWd2r65EynjofrVA3MQiJHJ9Kr6Y5GoQHP8VbSV4sx+1c9IvBuQMO4rIuxutZF9Oa1d262H0rNPzK49Qa8SDszpaObmJGabpbEmT1pZxgkdxTNL/10or2IvQ53uM1hy20GqTH9wP6Vb1niRPpVLOYD/StY7EstaSP3rt6LVKRsux96t6c+yKZv9mqGcmmtxGlan/Qv+BV6BpbE2GD6A157ac2jD/aFd/o5zZj/drzcf8ACjWmW3CSWMySoHTbkqe9YUmj2l2PNW18lByfmxkVu2wEgeMnAYEVjPotohIn1SRvVQaywUrXRVRHPz6ZAs8zo/7pfu4Oc1mOcE+ldDrcVpbWgjtHLNnriuZkavSWpBFM2aRSBTXp2QVAxgjvWlib6jg1Rp/rB9aceAfamx/fX60kDOkjPAqYHH1qpG2FFSq2a8+SGWA2akU1ApqVWA61m0BYHK1ZW0d0DZAFVIm5q357BDg1m0wOZ8RArdqmQcDtXTeF/DqxXtreXEimILu2981x2pSGW/cnnnFdNHqLxRIjTMNqgYFehZqCSCO56Z9oslXhf0qKe9tDGVKDHviuCeeRbaOZ5H2v0GadFmVQSTzzyax5FF3NeaT0uad9oujzOXI8vPPDVHaaZo9ncJKp3MhyMnPNZrs2/kkmpEPrya2Sb6mZ1x8RRqvyyDHsKZ/wkHmNtVm59q5ppdwGVX8BSibbjbxU8g7mhd64k9ybcxFmzjcRXL6zlZJfxrTIQvvAAfrnvTXUSE7gGJ9RVRjYGx/hM/8AEsUejGt9KwYMxLtj+UDsKmE0vTccVT1EZtvd6nJCN0rKT2ApktncXgMd1KSjHnJrOTW5CnzKuc9jUUmryMf4aOR3K5kZWrwR2d/LBC+9EOA3rUNi2LuI/wC0Kkvs3EplGNx61FBEyyKxKgA561uvh1Mup6TbtmCqKN8zj3qlDr1tHHtOenqKqrrNsJXO7g15EcNUu9Doc0Vb7CXEq++agseJ329xVi41DT55y0m/6huD+lMGoaZC2YoXZsdST/8AWr0YRko2Zi2rlHVCTMN3XFV1/wCPdufyqzeahBPJu+zj07/41WN2ACEiVQetbK9iR8Z2WLn+8cVTXk1K1wxXbgBfSmeY3tTQi+j+QrR7c89+1aEPiG7gj2ReWBjHK5rADMepp2T61MqcZ/ErjTa2Nn/hIdQU5SUKfZRVOXUbqRizTNk8nHFUST60maI0oR2QNtk0k8j/AH3Y/U1ET700Uh61Yh+fekyPWm0YoAmdgyZHpimJ98fWnD/U475pEHzCpGa6MQopwuFX7zAVVuSywDFRpGiwiSTJz2rn5E9WBf8At8Y70n9op/dJqksq/wAEINSq838MA/Kk6cUFy2NTA/garEWoLPE+zIZRyDWfa3DySsjouADnim2OFiuJPXgVMqcewyi77pyx65zWvhp2LZAXGcVikjdmtfR4JLpyxOI14+tdEtECNq5k2WdvJMCVHAA6DFTWN7BIvDjPoatrp8YhQOSwA4BPSoJNHt3PC7T7VzOUXuaqLQTsrSZRgR7URnjmozYLZx5QsQx5zQGx16VpBprQiS1LAYEGkLenWqjSuGIVdw+tNWdhIAykVRJdBpw9qopdHaTt5BxUgujnG04osMlErZ4x1x0qaOU7sMOD0ql9qHB2nk4NTLcLv24OfWgZwG9vWlDEnkmos0ZroMyX8TRUe5qMtQBJnmg1HzRg0APJ4pCRTdtGKAFzSZoxRigAzSg0AVs+GdFbWbt03+XFGMu2Mn2ApN2V2Bkil5r0NfA9n3ubg/gKd/whFj/z3uP0/wAKj2iHynnQBpcV6L/whNh/z2uPzH+FL/when95bg/8CH+FHtYhynnQFJtr0YeDdOA+/Of+BD/CgeDtO7mf/vr/AOtS9tEOU85xSYr0f/hENMHXzv8Avv8A+tTP+EW0rH/Lb/vul7eI+Vnnwpyg5r0T/hE9MPO2T/vunf8ACLaYD/q5P++zUvERDlZxbp5lpx6VDGu+ycd1Oa7qHR7BdyeWRGvHLHOaVND0xDhVOX4xuPNY+1SHynH6YAYRwMg1o44z0rdstJsklkRLcgA92NW20m0KkeWcfU1nUmnK4JHn0XDXUnsQKWMbNOJ9ea6rWdDtotNne2Uo6Df1znFchLcKLYRdx3reL51oJqxSFdj4ehC2cZI6/Ma45elalnrM0ESxfwrxxW1SLkrIcXZnfjBUZNO8tT71zFrqtrcALK8ik991WZLwW/NvdeYPQ1yuizT2iNm9h32rgdhkVz7HjGasxeIFClZ14PcVRnkG0spyDyKunGUdGTNp6ohM5jbjBx61Ot3E4xLGVP8AeT/Cstjubk8Ucjoa1sQa3l+YM28qv7ZwfyqCRnjOHDA+9UPMI9jVmO+mUbSwdf7rjNFmA4yE9DS+a5PU1bsmsJz/AKUrRN6Icg1aCaSnQ3Mn5ClcZ59SimZozXQQSZpO1MzRmgB4PFGaZmigB+aCaZRQA7NGabSigBQa7n4Zn97fj/ZT+tcMK7f4Zn/Sb4f7C/zNTP4Rrc67XNVi0q1EjjfIxwiA9T/hXMjxNqDOkhjSNW+4Cvyv6jPrVvx5bSMlrcou6OPKt6DOOtUNU16C70mC3itUEwIyCMqmPT61rRppxTte5Mm7nVjU0GkG/eKRUC7ihHzelUpNeMck4ltHCw7MkMCfm6VPbpJN4dC6mpdnT51Hy8E8D27VnNZWXnSmRLhzIVUDfuU7enPft1rlkkm0Whb3xG1vdTRC2BWN/L3Fupp/9vn7Clw0Ay0piK7vTvUE2n2141xPvmUPKrMp4UMeM0h0+0+yJblbgrGxkyuOpwKn3Q1Gw+IWvHeIW5BUMwIOc4qD+2JFUviPAiEmCSM5PQVLaWdtbPJJGtxzkc4Oc0w2NmFw1vcEKuB89JqPYpXJrnX2tWdY4Nw8sSAscdaUeIXFrNJJCAy42Y6HPrUd9bROYmnjmZfL2HB5wDSafaQYaN7aQxXHByeV96n3bbDsD6tK7x+bEFEh+6QckVsWESb9+x94yAW7ChtLtpLhJhyYyMDPHFaOKyk10DUZjv3ppp+Kae/FZAZ+tD/iVXn/AFyb+VeWFXb+Fj+Feq6wSNMuyOoiY5/CvLGnlP8Ay0b8668LsyZD1hk2j5D+IpphcHnA+pqEux6sT+NNrqsQT+Xjkuo/GnByvHnce1VaKLATllPV3NW11LbCsW3IUYzms2iiwXNGO9Ut8wKj1q4p3ZYHisKtGzcGAA+tTKNhplwn1pNvvimtgsFqXy/3QlB4zgj0qCh0J+dQetWsmqcBzJ+FWsEikwOQpaSlrcgKKMUYoAKKMUtACUtFFABS0CloAUCu0+Gpxf3g/wCmQ/nXGAV2Xw4ONTuR6w/+zCpn8I1uehFVdCrqGU8EHkGuRv7/AE+wv3Fjp0UksZw0mMAH2rr683Y8zg7s+Y2fzrJNrYu1zX/4S64PS0jwf9o1u6Lq0OqQviMpLH96Pr+VcfKwULjHPoK0vCIB1W4XnBi5/MVO6G1Y6I38TW8kmxgFbaQR1qJ9QCzxQgEGTgNjpV9baJUZFQBWOSO1Me0hLBvLXeMYP0qXoIzLnURbyBXQt2yOO+KRdRSaaWMxsvl559fwq3PBC7AyICR6iqssCeaxhT536461OjKsNS6WS2Vn+VCMnuRS/b7cnahYkei1N9ldlKthcdMini1WOBAAN+eT61DsMbHcxxA/LhTzhV6nvUxu0CA7X7jpTbb/AI+SoAO1cE1cx7VLsSykt4rMFEb5OO1NkvAuP3bkn0FXSPamEe1ToBn3rCfTbnKsMowIP0rzW4ssE+WfwNeoagP9Dn4/gb+VefzDBz2rag7XsRMwnQocMCDTmhYKGxlT3Fas0asoyAalsrcNEyr1B4FdDqWRFzBxSVsz2cecMuD7VVk09sZibd7GqVVMLooUlSSRtGcOpB96ZitNxhWjYAiLPbNZ9aVsw+yqAMHJyfWplsNFlyojUqcsRyPQ0wE45pnoAad369KgontuWJq2v3az1GTH/v1oD7oqWByNFFFbkBRRRQAUUUUAFFLS0AJTgKAKcBQAqiuu+HfGsTD1hP8AMVyiiur+Ho/4nT/9cW/mKUthrc9GxXPan4bE9w01rL5Zc5dT0z7Vv3Mnk20su0tsQttHfArCGpTT2AcTLBcK65DAbWyAcA+mD9axSKuZ48KT8f6TGPwNbejaTHpiMQTJK/3nx+lOEs013fwef5axBGVgoyoIyabPNcw6XaMXYvI4DvjBAOT/AIChp7A2aVKxwMniufs7+8muoBLlQwAYY7GPO786QXMstjp7SXJSR2+bPRhnnNS4sLmzJGr8nnPenJGiD5QBVHUY5Bcw+RLICT9wH5cAEnP6CsgXWoG3wWfbjJbuG8snH/fVSojOkMm0ncOPWqdxMPmKA89/Ss22nvHvikoPRtynoPu4/rUEqzHz2hkkdfMUMpB4HOTmp5NSk0bmmoQjPjgnAq3XPpJdyMZYIyHEPEQyNh2np2PNXk899FuAysJArBCM5bjg/XNS4CvqaDUw1lushubNo45jKsXPXaTt6GptHjuVhn+0oQ5mYjcc8VLptK4Et+P9Dn/3G/lXBuBjmvQblQIn3jKkHP0rPSHTmTH2aM/hShLk3RpGg6uxwrg9AOlFjIUuQpPDD9a7eWw00qWNuo+hNQtoWmSsHVXRgcjDVftl1Q3gprqc9cx713qPrVVflIrsDotufuzSDP0qnP4aVh+5u8HtuWoVSPUzeEqIwHto7hSrrkdfpWLqFibZyVO6P19K6S70TV7fJt3SUY/gOD+Rrnrt7uNilyGVu4YV0UnroyHSlDdFACr9sP3SAVV3t7flQJH/ALxroepKNQKhjZifmB6e1Rg5JrP3P3Y0mSe5pco7mrGQGTJAwSTVoTRgDLj86wRn1NLilyhcp0UUVoSFFLRQAUYpwpcmgBuKcFPpTxmnDPrQA1Y29KkWM0qipUWgBEiPqPzrqfAKbdbPI5ib+lc6icV0vgddutp7xt/KhrQFueh4qI2kBABhjIHIG0UkczNqDQkYRY93uTkc/Sq8t7c7GKWbnnAHfGetZWKuXNkYLHCZPBPrSkIVIO0qOo7VUt9PcRWxcqXjXDAj72R396I9LCfadz7lm6rjgck/1osBZYxhsZTd096SQKkbMFU7RkCoLfThHPGxYsIww+bqcn+lXTCD6ioaGZUcy3EhjcBc992D+FK0VqqjD53dPn61Zu9OW42EsVKnPT/PpUH9kDai+YdinOMfy/OjlC5BbwRg+ag3E8jntT0YLEWYHJbp7VbjtktbdIkyQO560sVvv+d8+wrNxZVyGGLL7l4Gecd6zNZa5e5YQOwRBjCnGSMZ/nW+qBAB2FcXq11IPPdXYAsSMH1pqJ04bdy7GPIdTkkY7rjGf7x4rYtNF1C4fH2oqg6ksetZ2nzLJtSaSRpSxwMnpx/9eust7rygi9u9XVm4aRMKdL2ruyVrSSDSPI3mWREI3dya5kTMi4PBHWutnLMA8RyuKx7y2guMgnDn+IVy3d7s76UVDYyJbz7q56mrcV2cdaxL6GW1uQso47MOhpBOQOtVyJ7F+01OjW84+9T/ALaMda5f7SwPWnJd7mxmp9mJVDrLe5Lck1JcQ296my4iSQe4rFtrnGADV+G4z1NZuNjRK+5mX/g+KXLWMpQnnY3IrmtQ0W8sCfPhbb/eHIr0aGfoQauKVlUiQAr3BFXHETjvqYVMNB7Hju2lAr0jVPDNleZaAeTKe69PyrGtfA99cTmNJrdfQu2M11QxEJeRxzoSicmF46U4JXo8Hwo1eQAm4tQPZiavxfCS8wPMvoh9EJrT2ke5jys8Xoopa1IEpaKUUAKBTgKRaeooAAtSKtAFdlo/gHV9QsoruMQrBIodWZ+xoE2lucoiVYSP2rv7f4Y6htVpby1QHnjcf6VqWXwueVgr6ioyM8RH+tVYXMeZxx1v+EiItahLHAYMv6V6JafCy125kvblz0wkQH9a27D4WaSVLPJfFlPqo/pT6BcxFUFg2BnGM1Jiu6tfAGmo6JuvZB0+ac/lW6vgPSYg4jtGkYD5fMmfB/WsZKxa1PKNooZc168vhC0jI8qwsx1++Sf5mrEHhiNX5js1XJ4WEdO1IZ4ysZzyKd5Zz0P5V73a6PbRht8ML88YiAwKsNpluyFVhVD6qgyKQ7Hz35Z/un8qXyJCOI3P4GvepdDhaUtHDEFYdCo60q+H02kFQAaq0e5LueBm2l7xP/3yacljctwlvKfohr3oeG7fOWUE+9Wk0aNCCAAR0IFDUe4e8fPv9l3x4FnOfbyzXOXttYK7xSxJvBIZT1BFfVH9lpnJJzXzX8UtCl8O+LbsEE29yxnhcjqGOSPwORUNLoa073s2cneQ2ESboIkVx0I61CXZSO69jSz3amFlYDkdaqWlzviMbdRxWTTerOqCUDTW8do/KBIQdqaZMdBVDzQhojuHZsJ09axcTTnLzxpdRmOZMg+vUVz2qabNZlpEy8I7jqK6GFycEmrqqki4YCpUnBg1zHnnmg96VWwePWtvXtCaJjParmI8so/hrAaN4znFdMZKSujF80XqalrcYxk1oQ3HqeK56OT8DVlJyKiULmsaljpo7wKM5q9aySSkM5IXsK5mxk3vuflV/Wt+zlLLkd+lYSjY3jLmNT7UFwqDmrKNwC7c+gqjbW5L75Dj0ArRUBR8grFpA2XrHUrq2INvLIo9CeK6Sw8U9Fv4yR/fT/CuPBal3Y601JoylBM8Loopa9k8oKWilHWgBRT1FNWpFoAljHIr6j+HltZN4M0JLh5S1xACAo7j3FfL0Q5r2TwZ481DTvDllZQQ25WBSqswJPU1dOlKq7RJnOMFeR7nDpVjEUiETEAcZOcVJZQ28t3NF9lCLHwGLcnn0/WvJD8Qdbk+7JCn+7H/AI00+M9dk/5fmH+6ij+ldCwFR7sweLprZHuCWsUaNshyQwGB6d6ljiJTPlRq3v8AT/GvCT4i1uYfNf3R+jEfypBc6xcH/W30n/AmNNZe+sgeMXSJ7y5dHBU2yKDzubnGB/XNJJewI+XvbVFBPBcdMn+mPyrw2PStZuMYtLx8+qsatw+Etel+7ps/4jFV9RpreZP1qfSJ7A2uabFxJq9oAvowJqF/Fehxkk6srY/ujNeaQ+BPEEh/48wn+84FXofhxrj/AHvIT6yU/q2HW8xe3rPaJ2cvjbQUGBeTsPRUNV5vH+hgNsW7YnuFrCi+F+pEfvby2QfUmrUXwucAGbVYgP8AZX/69P2eEW7DnxD2Rcf4jaYoHl2Fw2DkZYDn86jl+KQ/5Zacf+BSf/WqxbfCq2dQzajI49VUf41M/wAONFtlU3F1ckN06D+lH+xrpf7w/wBp6sxpfiheH/V2MK/VyapTfEvV2zsitk/An+tdXbeCvDRaMBLiTedoJY4/lWsngXQIyMWAf1y5NHtcLHaActd7yPLrn4i66VJEsSfSOuW8SeIb3xDbCHVZFmjQ7lygBU+xr0r4o+HbO28MyzaXpwga3lDSSAdU6flkivD5pSARmuXEVFP+HGyO3C0+XWo7so3dvAuQqAiuevE+y3O6PhG7elblzL2rH1EhgBXEk0zunJNaApD857VYiIACr0rMhcqcGrkLHI54qJwM4yNSD3q2jHtVCNsjircBPeuaSOhMtKzHjtUcunWtx/rYlOe44qdBxkU4cd6zvbY0Wph3fhaFwTbTFD6NzXPX2l3lg+JYyV7MvINd9nvmpA+eGAI9DVRrSW+opU0zi9Js5pwFClV6kkV1NtaC3iVQTwPxq+qoPugD2ApcAVMqnMxx91WI4gw+6Me5qZckcmmE4o34rPcNybHuaQ8VGJM0F85xTQWPE6Wkpa9o8gBThSCnCgBRUi9aYKlQc0AWIRk19CfCTwpo2o+DYb6+t3lmDSbsMecE9q+f4ByK+mfgUzv4DZYtvmrPKE3dM8Hn86fM46picU9zoLbw9occhWHQHkAONzdDxnPX8K6XTtB0gQRv/ZdvE5GSjICV9qakWoGKPdcQI4+/hOPwzWxpiSLaRiV1mkHWQAYbmm5ya1YlFLoENhYxY8u1gX6IKvRRxr92MD6LTkDegqZAfUVncZFsl89CpAi2ncm3knsc0Pa3Mj74pAqYxtI7561O6IZomcZkGdpAPHHNXYP9WtHNYdrmQdJnkQiS6lzngqcY5zV2C1MabfMJ75JyavAVWGn2qSeaV5xjJPHX/GjnbHyobJHDjbNImMg4JxSLplqEEYgUqpyPrTXfTiSWAYjrwTWioDcr0NK7CyI4YFiQJGm1RyAKV7dXPzoG+tTBP85pdg9RRcdiAQIo4VBT1jXaDtFLMGCgxgE/SpMcUXYFLULGC+sp7W5jDwzIY3X1BFfPvib4P6vaTTSafLBcWi5YMz7GCj1zX0cRxWL4vtJL7wtq1tAWEsltIq7epO08fjUptFI+LrmymLPtCnBIzmsy4sJsEkiunnJQsCMVn3Ddap3NlytanKSqyHDCnwzlDzytW7xAXPFZ8kZHShq5nezNq1cMAQeK0YjwK5zTZyknlv0bp9a3IGbjiuarCx00pXRqRNipSwqnExHWpd1cskbJkpIoH1qPP405WzxUWLRYXinZwKiR84pxORmkA7dnqKZ36U4Z65pDz9aQC9Kb35NKelNI65poDxqlpKWvaPHFpwpop4oAcKlTqKiWpo+tAF23HIr6T/Z6Bm8KXkQPS5b8iq1822/UV9H/ALNsn/En1OP+7Op/Nf8A61KWw46s9Sj0C2LBpGcnjq3pWrZWsFlAsMTqiLyAT6mq08cBuC005Q4Hy9vaopE0xX/eySFsA9+mf8azUmy+VG7EiuMq+4eoqykK+9UtMMHkkW2dgYg59a0EpXYWQqxr6VJDwn0pAaajEZA9apaiLAps7rHCzSKWUdgM00MTVO71CW3lCR2kswyMsnbOf8KEhDjfxLu8u0lYj/YxV1pD5ZZVOduQvrVGW7vQo8qzJbIzl+B/nirlq8rwKZ0CSd1ByBVAQQXF25TdbBAcbsnp61dBbzRyNmPxzSrn0NO59KQDsj1oJFUtRhaWNcXLW4BwSvfNZkVnFLHj+1Z5BjqH/CiwG8WFMYg1V023hhjKwyvJjClnYk1bK+9S0NHknxA+FMOq3Et9obpb3Dks8DcIx9R6V4f4o8KaroD41KzlhUnCsR8rfQ9K+x2X61na3ptpqlhLbX9sl1CwP7t+59vQ+9NSsM+Gp4jk5qlLHXs/xF+GN3pMc2o6ZBI+nryyE5eIe/qPevJbiEgkEVpuBlR5inRwMlTnHrXTQpLIAeEzzisTZtkUnsQa6Attc1hWWhtRJFiYdWzUoQ+tMRs96lU88muOSOpDcUgU59qnIzimMPyrNloapp4fkUzuf0pR71JRMrZpxqDOD6VIp3DmpAdk9BTcZ6CndOtNY8UwPGaBSUor2jxhw604UwU8UAPFTR9aiXrUsfWgC/bdRX0D+zdLiPV4/wDajb9Gr5+t+or3P9nWXbf6qnqkZ/U/40pfCOO57peTWscuZ4mdyueKDdwD/V2PmADPC5/ClmnmR1EMO/I+8exp5mvijeXEobHy5/8A11ijU09PmMiN+5MQB4GMZ96vq1Zdi1xhvtO3JI27avK1MRaVulMYkbtoyc9KarZPWnIfnamhMl58ttmN/bNRBbo5zLGPTC1MCKcDTuIiWKY4zcH/AL5qaKFlZWaV2x2NOBpQaAJVPWnZqIHinA0AEsayrtkAZc5xTEtYE+5Ei/QU/dRuoAVQF6AD6UjGkLU1jSAGqIilJqNjQMZIodWVgGUjBBGc14b8WfhjGsUmreHoMKoLT2ydv9pR/SvcWNRsQetJaDR8NXMJRiCK0pRyhz1QH9K9b+Mvw/W3Mut6PFiBjm4hUfcJ/iA9P5V5LMM2kDdwNp/Cql7yKjowVsCpFkqmGPHNOD1ySidUWX45PrUoORWcsnNTpLWLRqiwxGcUwtzim7hSFhmpsUhxNOVqjJpVPPSkMsKxxzQSc1GDmn8EVIHjQpRSUte0eMOpwplPFAEi1YQdKrr1qyvb6UAXIOor2X9n2Tbr1+v963B/Jh/jXjUHavWfgPJt8Vyr/etm/wDQloew1ufSMTcVZRqoxGrCtWCNi4r1Or8iqatUivTJLyPTkf5zVVWpyviSmhF4NTg1VQ1PD0AWg1OD1V304PQBa3Uoaqu+nB6ALG+k3j8qg30b6YE5emlqiL03fQBKWqNmpjNTC2e9ADmaoyaCaYTSAZMqyxskiqyMMFWGQRXzl8WfDUGgapssFK2s6+ci/wB3Jwyj26fnX0Yxrz74waR/aPhz7XGuZbNt590PDf0P4ULcpHzS74YihZKL5DHKwI71U31E4msJWL6vzmpllrNSU1KsmTXPJHTGRoiSnZqkjHPTNTqcnNZNFlkGlU9qhB561IDzUtASoSKeDxUQ60/PFSy0eQClFJSivZPFFp4ptKKAJFqyh6e1VlqxH2oAuwdq9N+CUmzxpEM/egkH6Z/pXmMBr0L4QSeX43sMHG4Ov/jpoew1ufUMTcVYU1RhbirKtWCNS0p4qVWqqrcVIrVQi0rU4N84qsHpd/zCmhF0PTw/FVA9Zuv6k+nWfnJ0GS3HoKTLjFyaSN7fSh68y0/xzJf3bQ4aLEfmbjg8VfHiEyFf9IkOTjgUrmzw0luegeZ70eaPUVxJupT96Vz+NWNMnb7dDuYkZ7n2pKQPD2V7nX+aPWjzR61gD7cEYyToo3dc4wKUSeWczXgwDn73bINaWOc3TMB603zc9Oa5yW6gEshN4Tls4wTirD38FpKxPmMZF3bVXjinYDb8w+n603efaqEt8FKhYpG3DIwKhGoStIES0lxz8x4FKwGqWPqKYSfWstry9KPttRuB+XLdRUl1Jd5AgWPG3nce9AFxs/3jWdrVv9r0q8tuSZYXT81IpD9uZh88SjuMVXeG8KENdANnOVXtUlI+UtWjJGSPnU7H+orFfIPeu9+IumnSvF17b/8ALKY+YDjj5uf55rh7gbHIOcimxkAYjqalWUVEVU85H403IU8YrCSNYuxfil9qso3fPFZaSMegNW4y3U/lWMkbxkXQRUqHFVlPHNSBuazsXcshs96cW9KgBp+feoZSPKaUUlKK9g8YdTlpop4oAcKnSoRUyUAW4DzXb/DGXy/GmlH1lx+YIrh4jXVeA5PK8VaS3pcp/PFAI+r7eT5R9KtK/vWXbv8AIPpVpHrE2Lyv608PVMPT1emIuB6C/wAwqsHpWfpTAuh6yfEqC4sPKJOHJX8xVwP71Q1iQfZVb0cGk9i6btNNHL6ZoMWlLKVXdn7xdRkDpjPpV3fBGMnywPwoluo3aVS4+cbQB1P1qj9jt+6k/U1Ekkd0ZSlrI1d+e9WbCTF5D/vCs0PjFT20mJ4j/tD+dSVLY60mOXfE4yp5IPeq6+Q940Jt/uLncRwc0kkix5YsqFuMmkeZVXf5nHqB1rojoeZLURZXF95YtEEW7l8dqnu5ZY0jaGMElvmGM8VTN5EDw8jH0Apwu0Odsczfgaq5Ljo1c0YJpHhVnG1iOR6Gq1gt2hc3U4cn7uBwKgF2Vxst5Du6VItxOR/qQPq1K+4cu3kWrrzWXMLAN71BeRSyzK8TqpC4OQfWoxNdHJ2RqM9zU0bvsHmY398dKhouxPux6nNRSvwaQvUExJHFIaPL/jTpX2iG01ONfnizDJj+6eQfzz+deH3IDjDffHT3r6l1+yXUdLu7RwD5sZUZ9e3618vavC8Ezo4KujFT7EGmUzNzhsYp4KjtzTW+cZ/iAz9aiEgHWs5IcWW1f8KlVxVATCp45c9BxWTibJl+NiRk1YU+tUkapw4x15rJo1iyyr8n0pVbJ9qrhwFoDcdazaLR5vThTacK9Y8ccBTxTFqQUAKKlTtUYFSLQBZirf8ADMnla1YPnG2eM/8Ajwrn4jWrpcmy7hf+66n9aAPrS2k+QVaR6ybSXManPUVcSSsjY0Fen76pK9PV6YFwPQZOlVfMpTJwKYi55lUdaO7T5AOtP8yq+pNmyl+lDKjujz+z04xW9i6K7XEVzl2II+Q962Y7ecEGS7dsAjFMhM2nZGpSGdp5C0Pl4AVcdGzj1FNSS8NyAyIIcnJHXHapm27XOumlFtItpbkTJJ5rnBJ29jmr0b4ZT6EVUDU8NWZqdVdyN5QMcImO4fKT0HrTFec/L5KKgx19c1WZXwZGuWVDggenFMMsIQBp3bODmupJW3PNZrh1A4Io85R/EPzrIS5gX7okY8jp60olj28W8jexFFkBsiQEcEH3pQ9ZsEzltpiKKB1zVjzKhoC3vpDJVYSZ700vSGWd/vUTycE1EXxUbvSGhkrd68M+LmjfY9Xa7iXEN18/HZv4h/X8a9smfiub8X6Umt6NcWpA8zG6I+jDpRYs+byPmHuMVW4YlW+92q9dxNBKVdSGRsEHsao3abZMjj0oZIwHBxU0cn1qtu3fWlSTB5rOSKTNOKQEDmphJWasmDUyyZx9axlE1jIvhiacGqqklSBuKyaNbnCCnCkFOAr0zyx6inAUgp4oAUU4UgpRxQMsRGr1q2GBqhGat2/UUCPqTSpvMsbd8/ejU/oK0o34rnPDE3m6Fp7/AN6BD/46K2keszYvh6kD89apB6kD0AWw9BfiqwenF+OtUhFkPxUN42bWUf7JpoemTnMEg/2TQNGS8bmWHega2KZLlvuntgVSF4ftHliJ/vbd3b60W2oveXM9gobMChskcH2FI1zGrFS3zA4IqHr0OuCcW02XA2akDdazjexqP4j9BUxuQGAAJzU2NLnVq5NohVQ52jg96ZunwNsca+tVI1zbLK0zqgQZA9qSOWFggDyMJPlB57810K1jgluy5uuTx5kY+lIzSYw1woOeoFVxLHHJtVJCQc5x7Unm7sEWzH609BFyDJYP5xcDjHarO6s1ZZgCFgVRn1qSR5iE2bRx82algXt9JvrOEkuyQPKgY/dI7VDIzNj/AErGOuKVhms0lQSSgZyazEkiSbd9od2z07UXMaBJZGLEHJIBpWGWpJkPAYE/WqU1zGpwzgGqokSIkxwO3qSPaoTIzMSbbvnmixSZ5l8T9GSK/a/tADDPzIAPut/9evP5k3wjPbivom/tYb+0kt7iIGORcEV4j4l0aXRtRmtpOUPzRt/eFSDOUZSppueeatuoORVZ0INSAgYjvxU0cmMVVagMRUtXGmaaSdKlD+9ZscvrVlHzisZRNUzlhT1FeoDwro3/AD5/+RX/AMaePCujf8+f/kV/8a7jgPMBTh1r0/8A4RXRv+fP/wAiv/jS/wDCLaN/z5/+RX/xoGeYilr08eFtG/58/wDyK/8AjSnwto//AD5/+RX/AMaAPNI6twnkV6EvhfR/+fP/AMiv/jU8fhjSAf8Aj0/8iv8A40CO58DzeZ4X005/5YgflkV0iPTfBukWMXh60SOHChTgb2P8R9631020/wCeX/jx/wAai2ponoZCvUgkrXGnWuP9V/48f8akXTrX/nl/48f8aYXMdXpd9bI061yP3X/jx/xo/s+2x/q//Hj/AI0AY4elZsqR6g1sjT7X/nl/48f8aU6fa/8APL/x4/40wuccw8qASEomcDcT1/zmkjtI8Al0yRnOK3dU020NnGDFwOfvH/GmJpNk2GaHLFF53t/jU76G6nbVGUtvAOsi1Iq23ZyR61vQ6RYgcW45/wBo/wCNTJpVkvSAc9fmP+NPlSH7RmdbNi1CgZwCAD9abHJPgAxovHrwDW1FYWwhb936/wAR/wAapRWNuwAZGI/32/xqkYyepXSVlB85k9sVVly/mf6UVBzjb2rcGlWR6w5+rN/jUiaVZLgrAAfqf8aBXObj8sE7rqRifU+1PimhQZVnOeO9dF/ZtpknyRn6mmtYWw6R/wDjxoC5hJFCRu8vn3qNmYT7Vtxs3YLZ7etbf2ODzEGw4Lf3j/jUdzZwCVgEIHH8R/xoC5jyPIrELGgHZs0xpJmH3ox6960zptq+A8RII/vt/jU0Ol2YXAh6j+83+NILnNzeZwXutvsKgSZIlKmYvjua6s6TYjpAOf8AaP8AjTW0uy/54D/vo/40DTOVN4mOAx+grA8U6YmuacRgLcJkxk/y/GvRX0y0AOIe394/41X/ALKs9w/c/wDjzf40kHMfLt9A9tO8cqlXU4IPaqbjNe8+PfDekyXEUr2a+Yw5YOwz+tcefDOkc/6J/wCRH/xqWhpnl0gqIivU38MaR/z6f+RH/wAaiPhjSM/8en/kV/8AGpsFzzDOKmik4616O3hfR+f9D/8AIr/40i+GNI/59P8AyK/+NJxuNSsf/9k=");
+		registerMerInfo.setCardBack("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");
+		registerMerInfo.setCustName("测试瑞银");
+		registerMerInfo.setCertificateType("01");
+		registerMerInfo.setCertificateNo("310110198712075477");
+		registerMerInfo.setUserEmail("248780081@qq.com");
+		registerMerInfo.setProvinceId("9");
+		registerMerInfo.setCityId("9");
+		registerMerInfo.setRegionId("887");
+		registerMerInfo.setIdentifyBackUrl("127.0.0.1");
+		registerMerInfo.setTxnDate("2015-11-13");
+		registerMerInfo.setTxnTime("12:10:00");
+		registerMerInfo.setAgentId("88");
+		try {
+			testregisterMerSY(registerMerInfo);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * 
+	 * @Description:获取六位随机数
+	 * @Auther: lijialiang
+	 * @Date: 2014-12-17 上午11:27:48
+	 */
+	private Integer getSixRandom(final int min, final int max) {
+		Random rand = new Random();
+		int tmp = Math.abs(rand.nextInt());
+		return tmp % (max - min + 1) + min;
+	}
+}

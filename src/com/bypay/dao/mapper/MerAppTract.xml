@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerAppTractDao">
+	<resultMap id="merRisk" type="com.bypay.domain.MerAppTract">
+		<result property="id" column="ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="appTractId" column="APP_TRACT_ID" />
+		<result property="transMerId" column="TRANS_MER_ID" />
+		<result property="transRate" column="TRANS_RATE" />
+		<result property="lowestFee" column="LOWEST_FEE" />
+		<result property="highestFee" column="HIGHEST_FEE" />
+		<result property="merProfit" column="MER_PROFIT" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="appTractType" column="APP_TRACT_TYPE" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<association property="appTractInfo" column="APP_TRACT_ID" select="com.bypay.dao.impl.AppTractInfoDaoImpl.selectAppTractById"></association>
+	</resultMap>
+	<select id="selectMerAppTractByMerSysId" parameterType="com.bypay.domain.MerAppTract" resultMap="merRisk">
+	SELECT MAT.* FROM MER_APP_TRACT MAT LEFT JOIN APP_TRACT_INFO ATI ON MAT.APP_TRACT_ID=ATI.APP_TRACT_ID WHERE MER_SYS_ID=#{merSysId}
+	</select>
+	
+	<insert id="insertMerAppTract" parameterType="com.bypay.domain.MerAppTract">
+	INSERT INTO MER_APP_TRACT(MER_SYS_ID, APP_TRACT_ID, TRANS_MER_ID, TRANS_RATE, LOWEST_FEE, HIGHEST_FEE, MER_PROFIT, STATUS, CREATE_TIME,APP_TRACT_TYPE) 
+    VALUES(#{merSysId}, #{appTractId}, #{transMerId}, #{transRate},
+    <if test="lowestFee != null and lowestFee != ''">#{lowestFee}*100, </if>
+	<if  test="lowestFee == null or lowestFee == ''">-1,</if> 
+    <if test="highestFee != null and highestFee != ''">#{highestFee}*100, </if>
+	<if  test="highestFee == null or highestFee == ''">-1,</if>
+    #{merProfit}, #{status}, #{createTime},#{appTractType})
+	</insert>
+	
+	<update id="updateMerAppTractStatus" parameterType="com.bypay.domain.MerAppTract">
+	UPDATE MER_APP_TRACT SET
+	STATUS=#{status}
+	WHERE MER_SYS_ID=#{merSysId} AND ID=#{id}
+	</update>
+	
+	<select id="selectMerAppTractByTractId" parameterType="com.bypay.domain.MerAppTract" resultMap="merRisk">
+	SELECT MAT.* FROM MER_APP_TRACT MAT left join APP_TRACT_INFO ATI ON MAT.APP_TRACT_ID=ATI.APP_TRACT_ID WHERE MAT.MER_SYS_ID=#{merSysId} AND MAT.APP_TRACT_ID=#{appTractId}
+	</select>
+	
+	<update id="updateMerAppTract" parameterType="com.bypay.domain.MerAppTract">
+	UPDATE MER_APP_TRACT SET
+	TRANS_RATE=#{transRate},
+	LOWEST_FEE=
+	<if test="lowestFee != null and lowestFee != ''">#{lowestFee}*100, </if>
+	<if  test="lowestFee == null or lowestFee == ''">-1,</if>
+	HIGHEST_FEE=
+	<if test="highestFee != null and highestFee != ''">#{highestFee}*100, </if>
+	<if  test="highestFee == null or highestFee == ''">-1,</if>
+	MER_PROFIT=#{merProfit},
+	APP_TRACT_TYPE=#{appTractType} 
+	WHERE MER_SYS_ID=#{merSysId} AND APP_TRACT_ID=#{appTractId}
+	</update>
+</mapper>

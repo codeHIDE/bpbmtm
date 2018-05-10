@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//www.ibatis.apache.org//DTD Config 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-config.dtd">
+<configuration>
+	<!-- could be omitted in sake of defaults -->
+	<settings>
+		<setting name="cacheEnabled" value="true" />
+		<setting name="lazyLoadingEnabled" value="false" />
+		<setting name="aggressiveLazyLoading" value="false" />
+		<setting name="autoMappingBehavior" value="FULL" />
+		<setting name="multipleResultSetsEnabled" value="true" />
+		<setting name="useColumnLabel" value="true" />
+		<setting name="useGeneratedKeys" value="false" />
+	</settings>
+
+	<mappers>
+		<mapper resource="com/bypay/dao/mapper/SysManager.xml" />
+		<mapper resource="com/bypay/dao/mapper/SysModel.xml" />
+		<mapper resource="com/bypay/dao/mapper/OrderInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/PlatMerInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/TractInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/AppTractInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerRisk.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerTract.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerAppTract.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerTerminal.xml" />
+		<mapper resource="com/bypay/dao/mapper/AgenctInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerRate.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerTrans.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerTrans.xml" />
+		<mapper resource="com/bypay/dao/mapper/BankBehalfBranch.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerManager.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerModel.xml" />
+		<mapper resource="com/bypay/dao/mapper/PlatModel.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerSettleStatictis.xml" />
+		<mapper resource="com/bypay/dao/mapper/CssConfig.xml" />
+		<mapper resource="com/bypay/dao/mapper/SysOpLog.xml" />
+		<mapper resource="com/bypay/dao/mapper/RegionCode.xml" />
+		<mapper resource="com/bypay/dao/mapper/MccCode.xml" />
+		<mapper resource="com/bypay/dao/mapper/BusType.xml" />
+		<mapper resource="com/bypay/dao/mapper/TerminalType.xml" />
+		<mapper resource="com/bypay/dao/mapper/AgenctModel.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerTerminalInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerAuthInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/OrderRisk.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerInfoUpdate.xml" />
+		<mapper resource="com/bypay/dao/mapper/TractStatictis.xml" />
+		<mapper resource="com/bypay/dao/mapper/TerminalBatchConfig.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerTerminalInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/Procedure.xml" />
+		<mapper resource="com/bypay/dao/mapper/FactoryCode.xml" />
+		<mapper resource="com/bypay/dao/mapper/AccountManage.xml" />
+		<mapper resource="com/bypay/dao/mapper/PayBankCode.xml" />
+		<mapper resource="com/bypay/dao/mapper/RulesAll.xml" />
+		<mapper resource="com/bypay/dao/mapper/Statistics.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerInfoUpdateLog.xml" />
+		<mapper resource="com/bypay/dao/mapper/MerProfitStatictis.xml" />
+		<mapper resource="com/bypay/dao/mapper/OrderProfit.xml" />
+		<mapper resource="com/bypay/dao/mapper/BlackInfo.xml" />
+		<mapper resource="com/bypay/dao/mapper/RulesMerAmt.xml" />
+		<mapper resource="com/bypay/dao/mapper/BypayProfitStatictis.xml" />
+		<mapper resource="com/bypay/dao/mapper/CdateConfig.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerCashout.xml" />
+		<mapper resource="com/bypay/dao/mapper/SubMerCashoutBatch.xml" />
+		<mapper resource="com/bypay/dao/mapper/FactoryRisk.xml" />
+		<mapper resource="com/bypay/dao/mapper/SendFile.xml" />
+		<mapper resource="com/bypay/dao/mapper/OrderStatictis.xml" />
+		<mapper resource="com/bypay/dao/mapper/OrderFrozen.xml" />
+		<mapper resource="com/bypay/dao/mapper/AgentManager.xml" />
+		<mapper resource="com/bypay/dao/mapper/PhoneVerifyCode.xml" />
+		<mapper resource="com/bypay/dao/mapper/MobileUser.xml" />
+		<mapper resource="com/bypay/dao/mapper/CreditInfo.xml" />
+	</mappers>
+ 
+</configuration>

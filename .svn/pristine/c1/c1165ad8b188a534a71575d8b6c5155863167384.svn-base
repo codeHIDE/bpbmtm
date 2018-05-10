@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+    "http://struts.apache.org/dtds/struts-2.0.dtd">
+
+<struts>
+	<include file="struts-default.xml" />
+	<constant name="struts.devMode" value="false"></constant>
+	<!-- convention扫描Action的路径 -->
+	<constant name="struts.convention.package.locators" value="action" />
+	<constant name="struts.action.extension" value="ac" />
+	<constant name="struts.multipart.maxSize" value="4194304" />
+	<constant name="struts.enable.DynamicMethodInvocation" value="true"></constant>
+	<package name="front" extends="struts-default" namespace="/">  
+		<!-- 配置拦截器开始 -->
+		<interceptors>
+			<!-- 登录拦截器 -->
+			<interceptor name="login"
+				class="com.bypay.service.impl.util.LoginInterceptor">
+			</interceptor>
+			<!-- 记录操作日志拦截器 -->
+			<interceptor name="logOperation"
+				class="com.bypay.service.impl.util.LogOpertionInterceptor">
+			</interceptor>
+			<!-- 异常拦截器 -->
+			<interceptor name="systemException"
+				class="com.bypay.service.impl.util.ExceptionInterceptor">
+			</interceptor>
+			<interceptor-stack name="myStack">
+				<interceptor-ref name="login"></interceptor-ref>
+				<interceptor-ref name="logOperation"></interceptor-ref>	
+				<interceptor-ref name="systemException"></interceptor-ref>
+				<interceptor-ref name="defaultStack"></interceptor-ref>
+			</interceptor-stack>
+		</interceptors>
+		<!-- 配置拦截器结束-->
+		<!-- 对全部的action使用myStack拦截器栈-->
+		<default-interceptor-ref name="myStack"></default-interceptor-ref>
+	
+		<global-results>
+			<result name="error">/error.jsp</result>
+			<result name="fail" type="dispatcher">/common/relogin.jsp</result>
+		</global-results>
+	
+		<!-- 登录的ACTION  com.bypay.action.LoginAction-->
+		<action name="login" class="com.bypay.action.LoginAction">
+			<result name="login">/login.jsp</result>
+			<result name="successA">/index.jsp</result>
+		</action>
+		<!-- 系统管理的ACTION  com.bypay.action.SysManageAction-->
+		<action name="sysManage" class="com.bypay.action.SysManageAction">
+			<result name="addManager">/pages/sysManage/addSysManager.jsp</result>
+			<result name="selectModelListAll">/pages/sysManage/adminRight.jsp</result>
+			<result name="selectSysManager">/pages/sysManage/updateSysManagerDetail.jsp</result>
+			
+		</action>
+		
+		<!-- 退出的ACTION  com.bypay.action.ExitAction-->
+		<action name="exit" class="com.bypay.action.ExitAction">
+		</action>
+		<!-- subMerCashout清算状态查询ACTION -->
+		<action name="subMerCashout" class="com.bypay.action.SubMerCashoutAction">
+		</action>
+		
+		<!-- 商户管理  com.bypay.action.MerchantInfoAction-->
+		<action name="merchantInfo" class="com.bypay.action.MerchantInfoAction">
+			<param name="savePath">/upload</param> 
+			<result name="doAddMerchant">/pages/merchant/addMerchant.jsp</result>
+			<result name="addMerchant">merchantInfo!doAddMerchant.ac</result>
+			<result name="merchantIndex">/pages/merchant/MerchantIndex.jsp</result>
+			<result name="platMerIndex">/pages/merchant/PlatMerIndex.jsp</result>
+			<result name="updateMerchantDetail">/pages/merchant/updateMerchantDetail.jsp</result>
+			<result name="updatePlatMerInfoDetail">/pages/merchant/updatePlatMerInfoDetail.jsp</result>
+			<result name="doAddPlatMer">/pages/merchant/addPlatMer.jsp</result>
+			<result name="addPlatMer">/pages/merchant/addPlatMer.jsp</result>
+			<result name="merUploadLogo">/pages/merchant/merUploadLogo.jsp</result>
+			<result name="platUploadLogo">/pages/merchant/platUploadLogo.jsp</result>
+			<result name="toSetTransInfo">/pages/merchant/setTransInfoPanel.jsp</result>
+			<result name="toSetControl">/pages/merchant/setControl.jsp</result>
+			<result name="toSetTract">/pages/merchant/setTract.jsp</result>
+			<result name="toSetAppTract">/pages/merchant/setAppTract.jsp</result>
+			<result name="getTractAndMerToUpdate">/pages/merchant/updateTractConfig.jsp</result>
+			<result name="getTractAndMerAppToUpdate">/pages/merchant/updateAppTractConfig.jsp</result>
+			<result name="toSetMerTract">/pages/merchant/setTrans.jsp</result>
+			<result name="selectSettleMerchant">/pages/merchant/updateSettMerchantDetail.jsp</result>
+			<result name="addMerManager">/pages/merchant/addMerManager.jsp</result>
+			<result name="addPlatManager">/pages/merchant/addPlatManager.jsp</result>
+			<result name="toUpdateMerManager">/pages/merchant/updateMerManager.jsp</result>
+			<result name="toUpdatePlatManager">/pages/merchant/updatePlatManager.jsp</result>
+			<result name="doselectPlatList">/pages/merchant/MerInfoList.jsp</result>
+			<result name="tractRules">/pages/merchant/tractRules.jsp</result>
+			<result name="merInfoUpdateDetailed">/pages/changeApplication/merInfoUpdateDetailed.jsp</result>
+			<result name="toAddPlatManager">/pages/merchant/addPlatMerManager.jsp</result>
+		</action>
+		
+		<!-- 子商户查询相关ACTION com.bypay.action.SubMerInfoAction -->
+		<action name="subMerInfo" class="com.bypay.action.SubMerInfoAction">
+						<!-- 修改跳转 -->
+			<result name="findById">pages/subMerchant/updateSubMerchantDetail.jsp</result>
+			<result name="findSubMerInfoById">pages/subMerchant/findSubMerInfo.jsp</result>
+						<!-- 修改和详情查询错误跳转
+			<result name="selectUpdateSettSubMerchant">pages/subMerchant/updateSettSubMerchantDetail.jsp</result> 
+			 -->
+							<!-- 详情跳转 -->
+			<result name="getByIdSelect">pages/subMerchant/selecrtSubMerDetail.jsp?i=0</result>
+			<result name="getByIdSelect1">pages/subMerchant/selecrtSubMerDetail.jsp?i=1</result>
+			<result name="selectUpdateSettSubMerchant">pages/subMerchant/updateSettSubMerchantDetail.jsp</result>    
+						<!-- 密码验证 -->
+			<result name="checkPass">pages/subMerchant/PassCheck.jsp</result>
+						<!-- 上传图片 -->
+			<result name="uploadYes">/pages/subMerchant/UploadPicture.jsp</result>
+						<!-- LOGO查看 -->
+			<result name="logoLook">pages/subMerchant/subMerchantInfoPicture.jsp</result>
+			<result name="selectSubMerchantNoOnline">/pages/subMerchant/selectSubMerchantInfoNoOnline.jsp</result>
+			<result name="type">pages/subMerchant/rateType.jsp</result>
+			<result name="information">pages/subMerchant/rateInformation.jsp</result>
+		</action>
+
+		<!-- 代理商模块 -->
+		<action name="agentModel" class="com.bypay.action.AgencyModelAction">
+			<result name="insert">/pages/codePage/addAgenctModel.jsp</result>
+			<result name="update">/pages/codePage/updAgenctModel.jsp</result>	
+		</action>
+		
+		<!-- 交易管理 -->
+		<action name="orderInfo" class="com.bypay.action.OrderInfoAction">
+			<result name="selectOrderInfoDetail">/pages/order/orderDetail.jsp</result>	
+		</action>
+		
+		<!-- 通道相关 ACTION  com.bypay.action.TractInfoAction-->
+		<action name="tractInfo"  class="com.bypay.action.TractInfoAction">
+			<result name="goAddTract">/pages/tract/addTract.jsp</result>
+			<result name="addTractInfo">tractInfo!goAddTract.ac</result>
+			<result name="tractAll">/pages/tract/selectTracrInfo.jsp</result>
+			<result name="tractDetail">/pages/tract/tracrDetail.jsp</result> 
+			<result name="selecttractDetail">/pages/tract/tracrInfoDetail.jsp</result> 
+			<result name="updateTractInfoDetail">/pages/tract/updatetracrDetail.jsp</result> 
+			<result name="updatetractInfo">/pages/tract/updatetracrDetail.jsp</result>
+			<result name="insertRulesAllInit">/pages/tract/addRulesAll.jsp</result>
+		</action>
+		
+		<!-- 应用通道相关 ACTION  com.bypay.action.AppTractInfoAction-->
+		<action name="appTractInfo" class="com.bypay.action.AppTractInfoAction">
+			<result name="goAddAppTract">/pages/appTractInfo/addAppTract.jsp</result>
+			<result name="addAppTractInfo">/pages/appTractInfo/addAppTract.jsp</result>
+			<result name="appTractAll">/pages/appTractInfo/selectAppTracrInfo.jsp</result>
+			<result name="appTractDetail">/pages/appTractInfo/appTracrDetail.jsp</result> 
+			<result name="selectAppTractDetail">/pages/appTractInfo/appTracrInfoDetail.jsp</result> 
+			<result name="updateAppTractInfoDetail">/pages/appTractInfo/updateAppTracrDetail.jsp</result> 
+			<result name="updateAppTractInfo">/pages/appTractInfo/updateAppTracrDetail.jsp</result>
+		</action>
+		
+		<!-- 代理商 -->
+		<action name="agencyInfo" class="com.bypay.action.AgenctInfoAction">
+			<result name="agencyUpdateYes">pages/agencyInfo/agencyStop.jsp</result>
+			<result name="agencyDetailOnlineYes">/pages/agencyInfo/agencyDetail.jsp</result>
+			<result name="agencyDetailOnlineNo">error.jsp</result>
+			<result name="ageUploadLogo">/pages/agencyInfo/ageUploadLogo.jsp</result>
+			<result name="updatAgemcuInfo">/pages/agencyInfo/updateAgenctInfoSett.jsp</result>
+						<!-- 密码验证 -->
+			<result name="checkPass">pages/agencyInfo/PassCheck.jsp</result>
+			<result name="updateAgencyRateOnline">pages/agencyInfo/updateAgenctRate.jsp</result>
+		</action>
+		
+		<!-- 报表管理相关  Action  清分 "com.bypay.action.MerSettleStatictisAction"-->
+		<action name="MerSettleStatictis" class="com.bypay.action.MerSettleStatictisAction">  
+			<result name="getSettDate">/pages/theReport/settleStatictisList.jsp</result>
+			<result name="getClearTodo">/pages/theReport/settleSubMerchantList.jsp</result> 
+			<result name="getClear">/pages/theReport/lookSettleSubStatictisList.jsp</result> 
+			<result name="getSettDateFailure">/pages/theReport/settleStatictisListFailure.jsp</result>
+			<result name="getTodayStatistics">/pages/theReport/todayStatisticsList.jsp</result>
+			<result name="getTodayStatisticsDetail">/pages/theReport/todayStatisticsDetailList.jsp</result>
+			<result name="selectReoprt">/pages/theReport/selectSettleReport.jsp</result>
+			<result name="T1SendFile">/pages/theReport/T1Report.jsp</result>
+			<result name="D1SendFile">/pages/theReport/D1Report.jsp</result>
+			<result name="getMerchantList">/pages/theReport/settleSubMerchantList.jsp</result>
+			<result name="merSettleStatictisList">/pages/theReport/settleStatictisList.jsp</result>
+			<result name="merSettleStatictisFailureList">/pages/theReport/settleStatictisListFailure.jsp</result>
+		</action>
+		
+		<!-- 清分款上账 "com.bypay.action.AccountManageAction"-->
+		<action name="accountManage" class="com.bypay.action.AccountManageAction">  
+			<result name="getSettDate">/pages/theReport/statictisUpList.jsp</result>
+			<result name="selectAccountManageDetail">/pages/theReport/accountManageDetail.jsp</result> 
+			<result name="toUpdateAccountManageDetail">/pages/theReport/updateAccuntManagerDetail.jsp</result>
+		</action>
+		
+			<!-- 终端管理 -->
+		<action name="subMerTerminal" class="com.bypay.action.SubMerTerminAction">
+			<result name="selectSubMerTerminalById">/pages/subMerTerminal/detailSubMerTerminal.jsp</result>	
+			<result name="selectMerSysId">/pages/subMerTerminal/resetMerSysId.jsp</result>	
+		</action>
+			<!-- 对应表管理 -->
+		<action name="cssConfig" class="com.bypay.action.CssConfigAction">
+			<result name="goToInsertCssConfig">/pages/codePage/addCssConfig.jsp</result>	
+		</action>
+		
+		<!-- MCC表管理 -->
+		<action name="mccCode" class="com.bypay.action.CssConfigAction">
+			<result name="goToInsertMccCode">/pages/codePage/addMccCode.jsp</result>	
+			<result name="addCdateConfig">/pages/codePage/cdateConfig.jsp</result>
+		</action>
+		
+		<!-- 业务表管理 -->
+		<action name="busType" class="com.bypay.action.CssConfigAction">
+			<result name="goToInsertBusType">/pages/codePage/addBusType.jsp</result>	
+		</action>
+		
+		<!-- 产品表管理 -->
+		<action name="terminalType" class="com.bypay.action.CssConfigAction">
+			<result name="goToInsertTerminalType">/pages/codePage/addTerminalType.jsp</result>	
+		</action>
+		
+		<!-- 地区表管理 -->
+		<action name="regionCode" class="com.bypay.action.CssConfigAction">
+			<result name="goToInsertRegionCode">/pages/codePage/addRegionCode.jsp</result>	
+		</action>
+		
+		<!-- 商户权限 -->
+		<action name="merModel" class="com.bypay.action.CssConfigAction">
+			<result name="updateMerModelInit">/pages/codePage/updateMerModel.jsp</result>	
+		</action>
+		<!-- 平台权限 -->
+		<action name="platModel" class="com.bypay.action.CssConfigAction">
+			<result name="updatePlatModelInit">/pages/codePage/updatePlatModel.jsp</result>	
+		</action>
+		
+		<!-- 厂商码表 -->
+		<action name="factoryCode" class="com.bypay.action.CssConfigAction">
+			<result name="goToInsertFactoryCode">/pages/codePage/addFactoryCode.jsp</result>	
+		</action>
+		
+		<!-- 代发通道表管理 -->
+		<action name="payBankCode" class="com.bypay.action.PayBankCodeAction">
+			<result name="goToInsertFactoryCode">/pages/codePage/addPayBankCode.jsp</result>	
+		</action>
+		
+		<action name="factoryRisk" class="com.bypay.action.CssConfigAction">
+			<result name="updateFactoryRiskInit">/pages/BlackInfo/updateFactoryRisk.jsp</result>	
+		</action>
+		
+		<!-- 终端信息 -->
+		<action name="merTerminalInfo" class="com.bypay.action.MerTerminalInfoAction">
+			<result name="goAddMerTerminalInfo">/pages/merTerminalInfo/addMerTerminalInfo.jsp</result>	
+			<result name="addMerTerminalInfo">/pages/merTerminalInfo/addMerTerminalInfo.jsp</result>
+			<result name="selectMerTerminalInfoOne">/pages/merTerminalInfo/MerTerminalInfoDetail.jsp</result>
+			<result name="selectMerTerminalInfoOneUpdate">/pages/merTerminalInfo/updateMerTerminalInfoDetail.jsp</result>	
+		</action>
+		
+		<!-- 通道统计 -->
+		<action name="tractStatictis" class="com.bypay.action.TractStatictisAction">
+			<result name="getSettDate">/pages/tractStatictis/tractStatictisList.jsp</result>
+		</action>
+		
+		<action name="clearing" class="com.bypay.action.ClearingAction"></action>
+		
+		<!-- 系统模块ACTION -->
+		<action name="sysModel" class="com.bypay.action.SysModelAction">
+			<result name="editSysModel">/pages/codePage/editSysModel.jsp</result>
+		</action>
+		
+		<!-- 异常交易管理 -->
+		<action name="abnormalOrder" class="com.bypay.action.AbnormalOrderAction">
+		
+		</action>
+		
+		<!-- 终端生成批次统计 -->
+		<action name="BatchConfig" class="com.bypay.action.TerminalBatchConfigAction">
+			<result name="OK">/pages/merTerminalInfo/insertTerminalBatchConfig.jsp</result>
+			<result name="selectTerminalBatchConfigAll">/pages/merTerminalInfo/TerminalBatchConfigList.jsp</result>
+		</action>
+		<!-- 统计管理 -->
+		<action name="statistics" class="com.bypay.action.StatisticsAction">
+			<result name="toCardTypeStatistics">/pages/statistics/cardTypeStatistics.jsp</result>
+			<result name="toErrRespCodeStatistics">/pages/statistics/errRespCodeStatistics.jsp</result>
+			<result name="dayMerAmtProfit">/pages/statistics/dayMerAmtProfit.jsp</result>
+			<result name="dayMerAmtFee">/pages/statistics/dayMerAmtFee.jsp</result>
+			<result name="toAgentProfitDetails">/pages/statistics/agentProfitStatistics.jsp</result>
+			<result name="toMerSucTransAmtFeeStatistics">/pages/statistics/sucMerTransAmtFeeStatistics.jsp</result>
+		</action>
+		<!-- 商户日分润统计 -->
+		<action name="merProfitStatictis" class="com.bypay.action.MerProfitStatictisAction">
+			<result name="merDayProfitStatistics">/pages/statistics/merDayProfitStatistics.jsp</result>
+		</action>
+		<!-- 黑名单 -->
+		<action name="blackInfo" class="com.bypay.action.BlackInfoAction">
+			<result name="insert">/pages/BlackInfo/insertBlackInfoList.jsp</result>
+		</action>
+		<action name="notifyGateWay" class="com.bypay.action.NotifyGateWayAction">
+		</action>
+	</package>
+	
+	<package name="second">
+		<action name="settleStatictis2" class="com.bypay.action.SettleStatictisAction">  
+		</action>
+		<action name="clientAction" class="com.bypay.action.ClientInterfaceAction">  
+		</action>
+		
+	</package>
+</struts>

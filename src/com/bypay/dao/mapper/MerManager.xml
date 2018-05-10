@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerManagerDao">
+	<resultMap id="merManager" type="com.bypay.domain.MerManager">
+		<result property="id" column="ID" />
+		<result property="mid" column="MID" />
+		<result property="merType" column="MER_TYPE" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPwd" column="LOGIN_PWD" />
+		<result property="purview" column="PURVIEW" />
+		<result property="realName" column="REAL_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="loginCount" column="MER_SYS_ID" />
+		<result property="lastLoginTime" column="LAST_LOGIN_TIME" />
+		<result property="loginIp" column="LOGIN_IP" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="status" column="STATUS" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	<insert id="insertMerManager" parameterType="com.bypay.domain.MerManager">
+	INSERT INTO MER_MANAGER(MID, MER_TYPE, LOGIN_NAME, LOGIN_PWD, PURVIEW, REAL_NAME, PHONE, EMAIL, CREATE_TIME, STATUS, REMARK) 
+    VALUES(#{mid}, #{merType}, #{loginName}, #{loginPwd}, #{purview}, #{realName}, #{phone}, #{email}, #{createTime}, 1, #{remark})
+	</insert>
+	
+	<select id="selectMerManagerNameByMid" parameterType="com.bypay.domain.MerManager" resultType="int">
+	select count(1) from MER_MANAGER where MID = #{mid} and LOGIN_NAME = #{loginName} and MER_TYPE = #{merType}
+	</select>
+	
+	<select id="selectMerManagerRemarkByMid" parameterType="com.bypay.domain.MerManager" resultMap="merManager">
+	select * from MER_MANAGER where MID = #{mid} and REMARK = #{remark} and MER_TYPE = #{merType}
+	</select>
+	
+	<update id="updateMerManager" parameterType="com.bypay.domain.MerManager">
+	update MER_MANAGER set PURVIEW = #{purview} where MID=#{mid} and REMARK=#{remark} and MER_TYPE = #{merType}
+	</update>
+	
+	<!-- 修改管理员密码 -->
+	<update id="updateMerManagerPassword" parameterType="com.bypay.domain.MerManager">
+		update MER_MANAGER set LOGIN_PWD=#{loginPwd} 
+		where  MID=#{mid} and REMARK='1'
+	</update>
+</mapper>

@@ -1,0 +1,82 @@
+package com.bypay.service.impl;
+
+
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+
+import net.sf.json.JSONObject;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+import com.bypay.util.AESCoder;
+import com.bypay.util.BASE64Util;
+import com.bypay.util.CertificateCoder;
+
+public class TestAesResp {
+
+	public static void main(String[] args)  {
+		sendMobile();
+	}
+	
+//	public static void send() throws DecoderException, Exception{
+//		// 机构号
+//		String orgCode = "4001000009989898";
+//		// 私钥
+//		String key = "oQ3G4xqD6lzmOaWu/m6Llg==";
+//		// 证书路径
+//		String certificatePath = "d:/gaoex.cer";
+//		
+//		// -------data解密--------- 
+//		String data = "ADWZdz0ikg02GfXDMmPk0PPiKag3sxVrs7Nb4KovhIk9IXI3mI8dnttySRqHAugH";
+//		//解密
+//		byte [] decodedData = AESCoder.decrypt(BASE64Util.decodeBySun(data), BASE64Util.decodeBySun(key));
+//
+//		//解密后的原始报文
+//		String outputStr = new String(decodedData);
+//		System.out.println("原始明文内容：" + outputStr);
+//		JSONObject respJson=JSONObject.fromObject(outputStr);
+//		String memberId = respJson.getString("memberId");
+//		System.out.println("原始明文内容：" + memberId);
+//		// -------sign校验---------
+//		String temp = outputStr + orgCode;
+//		String sign = "Jc6pFJMcMLCWJgA8Y1JorjQpQyc3m6kETjuISBtiMbPqhrqqLgJ6C6JnuuUBVeqtoUTIkIKyzT9hfIHsa6w03q0OOXV/9uHXwKNb/WhavRBrQ4Hh+9Hm3SwwrjV78nqGRbYeHYh4OIfh+t0z11aToYR4xSyLyvW0cJC2xWlUuZPfWrYMjyUp5RhW2ea+fV5tptWUnIh/96xBQ7hNiabskN1F3uI/BJLQ3bV0K47PeXJg16jimxXXlI8cxVmU6WU1uhxyZkkxbjbL4IQHC3FJvNvqkgKr6FT/SRzwj5AoxJKvCstzG0yuFtjj1bbrkZDdEvAtDL2naUfN+dQhLtpJwg==";
+//		boolean status = CertificateCoder.verify(temp.getBytes("utf-8"), sign, certificatePath);  
+//		System.out.println("状态:" + status);  
+//	}
+	
+	public static void sendMobile(){
+		DefaultHttpClient httpClient = new DefaultHttpClient();  
+		String mobile = "13800138000";
+		StringBuffer sb = new StringBuffer();
+		HttpGet request = new HttpGet("http://virtual.paipai.com/extinfo/GetMobileProductInfo?mobile="+mobile+"&amount=10&callname=");  
+		try {
+			  HttpResponse response = httpClient.execute(request);  
+		        HttpEntity entity = response.getEntity();  
+		        InputStream instream = entity.getContent();  
+		        BufferedReader in = new BufferedReader(new InputStreamReader(instream,"GBK"));  
+		        sb = new StringBuffer();  
+		        String data = null;  
+		        while((data = in.readLine())!=null){  
+		            sb.append(data);  
+		        }  
+		        if(in != null)  
+		            in.close(); 
+		        System.out.println(sb.toString());
+		        String ss = sb.substring(0, sb.indexOf(");"));
+		        ss = ss.substring(1);
+		        System.out.println(ss);
+		        JSONObject json=JSONObject.fromObject(ss);
+		        System.out.println(json.getString("province"));
+		        System.out.println(json.getString("isp"));
+		        System.out.println(json.getString("cityname"));
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+	}
+}

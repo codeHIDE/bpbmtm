@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.OrderRiskDao">
+	<resultMap id="orderRisk" type="com.bypay.domain.OrderRisk">
+		<result property="orderId" column="ORDER_ID" />
+		<result property="submerId" column="SUB_MER_ID" />
+		<result property="orderRiskType" column="ORDER_RISK_TYPE" />
+		<result property="orderRiskProcType" column="ORDER_RISK_PROCTYPE" />
+		<result property="orderRiskProcTime" column="ORDER_RISK_PROCTIME" />
+		<result property="reseRved1" column="RESERVED1" />
+		<result property="reseRved2" column="RESERVED2" />
+		<result property="reseRved3" column="RESERVED3" />
+		<result property="ext" column="EXT" />
+		<!--  
+		<association property="orderInfo" column="ORDER_ID" select="com.bypay.dao.impl.OrderInfoDaoImpl.getOrderInfo"></association>
+		<association property="subMerInfo" column="SUB_MER_ID" select="com.bypay.dao.impl.SubMerInfoDaoImpl.getSubMerInfoById"></association>
+		-->
+	</resultMap>
+	<!-- 查询异常交易记录的数据总条数 -->
+	<select id="getOrderRiskListCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		SELECT count(RI.ORDER_ID) FROM ORDER_RISK RI INNER JOIN ORDER_INFO INFO ON RI.ORDER_ID=INFO.ORDER_ID  where 1=1	 	 
+		 <if test="submerId != null and submerId != ''">
+    		AND RI.SUB_MER_ID = #{submerId}  
+    	 </if>		
+    	 <if test="orderId != null and orderId != ''">
+    		AND RI.ORDER_ID = #{orderId}  
+    	 </if>	
+    	  <if test="startTime != null and startTime != ''">
+    		AND RI.ORDER_RISK_PROCTIME &gt;= #{startTime}  
+    	 </if>	
+    	 <if test="endTime != null and endTime != ''">
+    		AND RI.ORDER_RISK_PROCTIME &lt;= #{endTime}  
+    	 </if>	
+	</select>
+	
+	<select id="getOrderRiskList" parameterType="java.util.Map" resultMap="orderRisk">
+		SELECT RI.* FROM ORDER_RISK RI INNER JOIN ORDER_INFO INFO ON RI.ORDER_ID=INFO.ORDER_ID  where 1=1	 	 
+		 <if test="submerId != null and submerId != ''">
+    		AND RI.SUB_MER_ID = #{submerId}  
+    	 </if>		
+    	 <if test="orderId != null and orderId != ''">
+    		AND RI.ORDER_ID = #{orderId}  
+    	 </if>	
+    	  <if test="startTime != null and startTime != ''">
+    		AND RI.ORDER_RISK_PROCTIME &gt;= #{startTime}  
+    	 </if>	
+    	 <if test="endTime != null and endTime != ''">
+    		AND RI.ORDER_RISK_PROCTIME &lt;= #{endTime}  
+    	 </if>	
+    	 order by RI.ORDER_RISK_PROCTIME desc
+    	 <if test="isDownload != 1">
+    		limit #{page},#{pageSize}
+    	 </if>
+	</select>
+	
+	<insert id="insertOrderRisk" parameterType="com.bypay.domain.OrderRisk">
+	INSERT INTO ORDER_RISK(ORDER_ID, SUB_MER_ID, ORDER_RISK_TYPE, ORDER_RISK_PROCTYPE, ORDER_RISK_PROCTIME, RESERVED1, RESERVED2, RESERVED3, EXT) 
+    VALUES(#{orderId}, #{submerId}, #{orderRiskType}, #{orderRiskProcType},#{orderRiskProcTime}, #{reseRved1}, #{reseRved2}, #{reseRved3}, #{ext})
+	</insert>
+
+</mapper>
+

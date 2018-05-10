@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.BookOrderDao">
+	<resultMap id="bookOrder" type="com.bypay.domain.BookOrder">
+		<result property="bookOrderId" column="bookOrderId" />
+		<result property="webOrderId" column="webOrderId" />
+		<result property="userId" column="userId" />
+		<result property="bookDate" column="bookDate" />
+		<result property="bookTime" column="bookTime" />
+		<result property="finishTime" column="finishTime" />
+		<result property="detailNum" column="detailNum" />
+		<result property="totalAmt" column="totalAmt" />
+		<result property="orderStatus" column="orderStatus" />
+	</resultMap>
+	
+	<insert id="insertBookOrder"  parameterType="com.bypay.domain.BookOrder">
+	 	INSERT INTO BOOK_ORDER (userId,bookDate,bookTime,detailNum,totalAmt,orderStatus)
+	 	values(#{userId},#{bookDate},#{bookTime},#{detailNum},#{totalAmt},#{orderStatus})
+	</insert>
+	
+	
+</mapper>

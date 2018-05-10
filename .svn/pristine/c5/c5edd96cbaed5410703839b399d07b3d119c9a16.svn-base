@@ -1,0 +1,61 @@
+package com.bypay.domain.clientTool;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="List")
+public class EnquiryList {
+	@XmlElement
+	private String transType;	//	交易类型码	list.transType	N(6)		M	
+	@XmlElement
+	private String transId;	//	交易流水号	list.transId	N(16)		M	
+	@XmlElement
+	private String merchantOrderId;	//	商户订单号	list.merchantOrderId	N(16)		M	
+	@XmlElement
+	private String transAmt;	//	交易金额	list.transAmt	N(12)		M	
+	@XmlElement
+	private String transTime;	//	交易日期	list.transTime	N(12)		M	
+	@XmlElement
+	private String currency;	//	交易币种	list.currency	N(3)		M	
+	public String getTransType() {
+		return transType;
+	}
+	public void setTransType(String transType) {
+		this.transType = transType;
+	}
+	public String getTransId() {
+		return transId;
+	}
+	public void setTransId(String transId) {
+		this.transId = transId;
+	}
+	public String getMerchantOrderId() {
+		return merchantOrderId;
+	}
+	public void setMerchantOrderId(String merchantOrderId) {
+		this.merchantOrderId = merchantOrderId;
+	}
+	public String getTransAmt() {
+		return transAmt;
+	}
+	public void setTransAmt(String transAmt) {
+		this.transAmt = transAmt;
+	}
+	public String getTransTime() {
+		return transTime;
+	}
+	public void setTransTime(String transTime) {
+		this.transTime = transTime;
+	}
+	public String getCurrency() {
+		return currency;
+	}
+	public void setCurrency(String currency) {
+		this.currency = currency;
+	}
+
+	
+}

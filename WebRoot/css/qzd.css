@@ -1,0 +1,61 @@
+table {
+	border-collapse: collapse;
+}
+.qzd {
+	background: url(../image/qzd_bg.jpg) repeat-y left top;
+	width: 304px;
+	padding: 20px 24px 15px 24px;
+}
+.qzd_tit {
+	font: 400 18px "微软雅黑";
+	padding: 0 10px 5px 10px;
+}
+.qzd_tit span {
+	float: right;
+	font-size: 12px;
+	font-weight: lighter;
+	color: #999;
+	padding-top: 8px;
+}
+.qzd_top {
+	background: #FFF;
+	margin-bottom: 10px;
+}
+.qzdt_top {
+	background: url(../image/qzd_bgtop.jpg) no-repeat left top;
+	width: 304px;
+	height: 10px;
+}
+.qzdt_center table td {
+	color: #333;
+	font-size: 12px;
+	padding: 5px 5px 5px 5px;
+}
+.qzdt_center {
+	width: 304px;
+}
+.qzdt_center table td span {
+	color: #999;
+}
+.qzdt_center table td span.special {
+	font-size: 24px;
+	font-family: "宋体";
+	color: #333;
+}
+.qzdt_bottom {
+	background: url(../image/qzd_bgbot.jpg) no-repeat left bottom;
+	width: 304px;
+	height: 10px;
+}
+.qzd_bottom {
+	background: #FFF;
+}
+.tabimg {
+	MARGIN: auto;
+	WIDTH: 190px;
+}
+.tabimg img {
+	MAX-WIDTH: 100%!important;
+	HEIGHT: auto!important;
+width:expression(this.width > 190 ? "190px" : this.width)!important;
+}

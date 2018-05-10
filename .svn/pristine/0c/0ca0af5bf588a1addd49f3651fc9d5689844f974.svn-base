@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.ChannelFeeTypeDao">
+	<resultMap id="channelFeeType" type="com.bypay.domain.ChannelFeeType">
+		<result property="chFeeId" column="chFeeId" />
+		<result property="feeType" column="feeType" />
+		<result property="feeTypeName" column="feeTypeName" />
+		<result property="feeRate" column="feeRate" />
+		<result property="topFee" column="topFee" />
+		<result property="lastUpdTs" column="lastUpdTs" />
+	</resultMap>
+
+	<select id="selectChannelFeeType"  resultMap="channelFeeType" parameterType="java.util.Map">
+		SELECT *
+		FROM channel_fee_type
+		WHERE 1=1
+		<if test="channelFeeType.feeTypeName != null and channelFeeType.feeTypeName  != '' ">
+		AND feeTypeName = #{ChannelFeeType.feeTypeName}
+		</if>
+		ORDER BY chFeeId desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectChannelFeeTypeCount" resultType="int" parameterType="java.util.Map">
+		SELECT  COUNT(*)
+			FROM channel_fee_type
+		WHERE 1=1
+		<if test="channelFeeType.feeTypeName != null and channelFeeType.feeTypeName  != '' ">
+		AND feeTypeName = #{ChannelFeeType.feeTypeName}
+		</if>
+	</select>
+	
+	<insert id="insertChannelFeeType"  parameterType="com.bypay.domain.ChannelFeeType">
+	 	INSERT INTO channel_fee_type (feeType,feeTypeName,feeRate,topFee,lastUpdTs)
+	 	values (#{feeType},#{feeTypeName},#{feeRate},#{topFee},#{lastUpdTs})
+	</insert>
+	
+	<select id="selectAllChannelFeeType"  resultMap="channelFeeType" >
+		SELECT *
+		FROM channel_fee_type
+	</select>
+	
+	
+</mapper>

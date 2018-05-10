@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SysManagerDao">
+	<resultMap id="sysManager" type="com.bypay.domain.SysManager">
+		<result property="id" column="ID"/>
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="loginPwd" column="LOGIN_PWD" />
+		<result property="department" column="DEPARTMENT" />
+		<result property="realName" column="REAL_NAME" />
+		<result property="phone" column="PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="level" column="LEVEL" />
+		<result property="bandIp" column="BAND_IP" />
+		<result property="levelPwd" column="LEVEL_PWD" />
+		<result property="purview" column="PURVIEW" />
+		<result property="lastLoginTime" column="LAST_LOGIN_TIME" />
+		<result property="loginTimes" column="LOGIN_TIMES" />
+		<result property="lastLoginIp" column="LAST_LOGIN_IP" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="reserved" column="RESERVED" />
+		<result property="reportEmail" column="REPORT_EMAIL" />
+	</resultMap>
+
+	<!-- 获取管理员信息 -->
+	<select id="getSysManager" resultMap="sysManager" parameterType="com.bypay.domain.SysManager">
+		select * from SYS_MANAGER where  LOGIN_NAME=#{loginName} and LEVEL_PWD = #{levelPwd} and STATUS = 1
+	</select>
+	<!-- 查询系统管理员 登录用 -->
+	<select id="selectSysManager" resultType="com.bypay.domain.SysManager" parameterType="com.bypay.domain.SysManager">
+		select * from SYS_MANAGER where  LOGIN_NAME=#{loginName} 
+		<if test="loginPwd!=null and loginPwd!=''">
+			AND LOGIN_PWD=#{loginPwd}
+		</if>
+	</select>
+	
+	<!-- 添加系统管理员 -->
+	<insert id="insertSysManager" parameterType="com.bypay.domain.SysManager" >
+		INSERT INTO SYS_MANAGER (LOGIN_NAME,LOGIN_PWD,DEPARTMENT,REAL_NAME,
+		PHONE,EMAIL,LEVEL,BAND_IP,LEVEL_PWD,PURVIEW,LAST_LOGIN_TIME,LOGIN_TIMES,LAST_LOGIN_IP,
+		STATUS,CREATE_TIME,RESERVED,REPORT_EMAIL)
+		VALUES(#{loginName},#{loginPwd},#{department},#{realName},#{phone},#{email},
+		#{level},#{bandIp},#{levelPwd},#{purview},#{lastLoginTime},#{loginTimes},
+		#{lastLoginIp},#{status},#{createTime},#{reserved},#{reportEmail})
+	</insert>
+		
+	<!-- 查询系统管理员权限合法性 -->
+	<select id="selectSysMerModel" resultType="com.bypay.domain.SysManager" parameterType="com.bypay.domain.SysManager">
+		select * from SYS_MANAGER where PURVIEW like 
+		CONCAT('%',(select MODEL_NO from SYS_MODEL where PATH=#{actionName}),'%') 
+		and LOGIN_NAME=#{loginName}
+	</select>
+	
+	<!-- 查询系统管理员 LIST-->
+	<select id="selectSysManagerList" resultMap="sysManager" parameterType="java.util.Map">
+		SELECT * from SYS_MANAGER 
+		where 1=1
+		<if test="sysManager.loginName!=null and sysManager.loginName!=''">
+			AND LOGIN_NAME=#{sysManager.loginName}
+		</if>
+		<if test="sysManager.loginPwd!=null and sysManager.loginPwd!=''">
+			AND LOGIN_PWD=#{sysManager.loginPwd}
+		</if>
+		<if test="sysManager.status!=null and sysManager.status!='' and sysManager.status!='-1'">
+			AND STATUS=#{sysManager.status}
+		</if>
+		<if test="sysManager.realName!=null and sysManager.realName!=''">
+			AND REAL_NAME=#{sysManager.realName}
+		</if>
+		<if test="sysManager.department!=null and sysManager.department!=''">
+			AND DEPARTMENT=#{sysManager.department}
+		</if>
+		limit #{page}, #{pageSize}
+	</select>
+	
+	<!-- 查询查询信息的条数 -->
+	<select id="selectSysManagerCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.SysManager">
+		SELECT COUNT(*) from SYS_MANAGER 
+		where 1=1
+		<if test="loginName!=null and loginName!=''">
+			AND LOGIN_NAME=#{loginName}
+		</if>
+		<if test="loginPwd!=null and loginPwd!=''">
+			AND LOGIN_PWD=#{loginPwd}
+		</if>
+		<if test="status!=null and status!='' and status!='-1'">
+			AND STATUS=#{status}
+		</if>
+		<if test="realName!=null and realName!=''">
+			AND REAL_NAME=#{realName}
+		</if>
+		<if test="department!=null and department!=''">
+			AND DEPARTMENT=#{department}
+		</if>
+	</select>
+	
+	<!-- 更显管理员状态 -->
+	<update id="updateSysManagerStatus" parameterType="com.bypay.domain.SysManager" >
+		update SYS_MANAGER set STATUS=#{status} where ID=#{id}
+	</update>
+	
+	<!-- 重置管理员密码 -->
+	<update id="updateSmPass" parameterType="java.util.Map" >
+		update SYS_MANAGER set LOGIN_PWD=#{loginPwd} where ID=#{id}
+	</update>
+	
+	<!-- 根据id获得用户信息 -->
+	<select id="selectSysManagerBySmId" resultMap="sysManager" parameterType="java.lang.String">
+		select * from SYS_MANAGER where ID = #{id}
+	</select>
+	
+	<!-- 修改管理员权限 -->
+	<update id="updateSysManager" parameterType="com.bypay.domain.SysManager">
+		update SYS_MANAGER set PURVIEW=#{purview} where ID=#{id}
+	</update>
+	
+	<!-- LOGIN成功后修改登录用户信息 -->
+	<update id="updateLoginSysManager" parameterType="com.bypay.domain.SysManager">
+		update SYS_MANAGER set 
+		LAST_LOGIN_TIME=#{lastLoginTime}, 
+		LOGIN_TIMES = #{loginTimes},
+		LAST_LOGIN_IP = #{lastLoginIp}
+		where LOGIN_NAME=#{loginName} and LOGIN_PWD=#{loginPwd}
+	</update>
+	
+	<!-- 修改登录用户的密码 -->
+	<update id="updatePassWord" parameterType="com.bypay.domain.SysManager">
+		update SYS_MANAGER set  LOGIN_PWD=#{loginPwd} where LOGIN_NAME=#{loginName}
+	</update>
+		<!-- 根据登陆名和授权密码查找 -->
+	<select id="selectLevelPass" resultMap="sysManager" parameterType="java.lang.String">
+		select * from SYS_MANAGER where LOGIN_NAME=#{loginName} and  LEVEL_PWD=#{levelPwd}
+	</select>
+	
+	<!-- 修改登录用户的授权 -->
+	<update id="updateLevelPass" parameterType="com.bypay.domain.SysManager">
+		update SYS_MANAGER set  LEVEL_PWD=#{levelPwd} where LOGIN_NAME=#{loginName}
+	</update>
+
+	
+	<select id="valiDateLevelPwd"  parameterType="com.bypay.domain.SysManager" resultType="int">
+		SELECT COUNT(1) FROM SYS_MANAGER WHERE LOGIN_NAME=#{loginName} AND LEVEL_PWD = #{levelPwd}
+	</select>
+	
+	<!-- 修改管理员的基本信息 -->
+	<update id="updateSysManagerDetail" parameterType="com.bypay.domain.SysManager">
+		update SYS_MANAGER set 
+		DEPARTMENT=#{department}, 
+		REAL_NAME = #{realName},
+		PHONE = #{phone},
+		EMAIL =	#{email},
+		REPORT_EMAIL=#{reportEmail}
+		where ID=#{id}
+	</update>
+</mapper>

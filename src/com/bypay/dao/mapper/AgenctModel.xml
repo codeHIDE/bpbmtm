@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.AgenctModelDao">
+	<resultMap id="agentModel" type="com.bypay.domain.AgenctModel">
+		<result property="id" column="ID" />
+		<result property="modelName" column="MODEL_NAME" />
+		<result property="modelNo" column="MODEL_NO" />
+		<result property="path" column="PATH" />
+		<result property="desc" column="DESC" />
+		<result property="superNo" column="SUPER_NO" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+	</resultMap>
+	<!-- 查询所有 -->
+	<select id="selectAgenctModelAll" resultMap="agentModel" parameterType="java.util.Map">
+		select * from AGENT_MODEL  limit #{page}  , #{pageSize}
+	</select>
+	<!-- 查询信息数量 -->
+	<select id="selectAgenctModelCount" resultType="int">
+		SELECT count(1) FROM AGENT_MODEL
+	</select>
+	<!-- 查询指定id的信息，修改 -->
+	<select id="selectAgenctModel" resultMap="agentModel" parameterType="com.bypay.domain.AgenctModel">
+		select * from AGENT_MODEL where id=#{id}
+	</select>
+	<!-- 删除一条 -->
+	<select id="deleteAgenctModel"  parameterType="com.bypay.domain.AgenctModel" >
+		DELETE FROM AGENT_MODEL WHERE  id=#{id}
+	</select>
+	<!-- 增加一条 -->
+	<insert id="insertAgenctModel"  parameterType="com.bypay.domain.AgenctModel" >
+		INSERT INTO AGENT_MODEL(AGENT_MODEL.MODEL_NAME, AGENT_MODEL.MODEL_NO, AGENT_MODEL.PATH, AGENT_MODEL.DESC, AGENT_MODEL.SUPER_NO, AGENT_MODEL.REMARK, AGENT_MODEL.RESERVED) 
+    	VALUES(#{modelName}, #{modelNo}, #{path}, #{desc}, #{superNo}, #{remark}, #{reserved})
+	</insert>
+	<!-- 修改一条 -->
+	<update id="updateAgenctModel"  parameterType="com.bypay.domain.AgenctModel" >
+		UPDATE AGENT_MODEL 
+	    SET  AGENT_MODEL.MODEL_NAME=#{modelName}, 
+	    AGENT_MODEL.MODEL_NO=#{modelNo}, 
+	    AGENT_MODEL.PATH= #{path}, 
+	    AGENT_MODEL.DESC=#{desc}, 
+	    AGENT_MODEL.SUPER_NO=#{superNo}, 
+	    AGENT_MODEL.REMARK=#{remark}, 
+	    AGENT_MODEL.RESERVED=#{reserved}
+	    WHERE ID=#{id}
+	</update>
+</mapper>

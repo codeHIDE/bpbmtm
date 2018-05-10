@@ -1,0 +1,163 @@
+package com.bypay.action;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import javax.inject.Inject;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import com.bypay.common.BaseAction;
+import com.bypay.dao.*;
+import com.bypay.domain.*;
+import com.bypay.util.PageUtil;
+/**
+ * 黑名单ACTION
+ */
+public class BlackInfoAction extends BaseAction {
+	private static final long serialVersionUID = 1L;
+	
+	private BlackInfo blackInfo;
+	@Inject
+	private BlackInfoDao blackInfoDao;
+	@Inject
+	private SubMerInfoDao subMerInfoDao;
+	@Inject
+	private SubMerTerminalDao subMerTerminalDao;
+	private List<BlackInfo> blcakInfoList;
+	private int page=1;
+	private int pageSize=15;
+	///////////////////////////////业务////////////////////////////////
+	/**
+	 * 查询所有黑名单信息
+	 */
+	@SuppressWarnings("unchecked")
+	public void selectBlackInfoList(){
+		try {
+			if(blackInfo==null){
+				blackInfo=new BlackInfo();
+			}
+			if(blackInfo.getRealName()!=null){
+				blackInfo.setRealName(new String(blackInfo.getRealName().
+						getBytes("ISO-8859-1"),"UTF-8"));
+			}
+			Map<String,Object> map = PageUtil.getPageMap(page,pageSize);
+			map.put("blackInfo", blackInfo);
+			int count=blackInfoDao.selectBlackInfoCount(map);
+			blcakInfoList = blackInfoDao.selectBlackInfoList(map);
+			JSONArray array = JSONArray.fromObject(blcakInfoList);
+			JSONObject object = new JSONObject();
+			object.put("Rows", array.toString());
+			object.put("Total", count);
+			String subMerList=object.toString();
+			getResponse().getWriter().write(subMerList);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * 修改指定黑名单信息的状态
+	 */
+	public void updateBlackInfoStatus(){
+		try {
+			if(blackInfo==null){//如果实体类对象中没有子商户号则结束操作
+				return;
+			}
+			if(blackInfoDao.updateBlackInfoStatus(blackInfo))
+				getResponse().getWriter().write("succ");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	/**
+	 * 添加黑名单
+	 * @return
+	 */
+	public String insertBlackInfoList(){
+		if(blackInfo!=null){
+			//验证用户填写的子商户号
+			SubMerInfo smi=new SubMerInfo();
+			smi.setSubMerId(blackInfo.getSubMerId());
+			smi=subMerInfoDao.findById(smi);
+			if(smi==null){//验证未通过
+				getRequest().setAttribute("black", "0");
+				return "insert";
+			}else{//将子商户状态改为黑名单
+				if(!subMerInfoDao.updateStatus(smi)){
+					getRequest().setAttribute("black", "0");
+					return "insert";
+				}
+			}
+			//验证用户填写的终端TSN
+			SubMerTerminal smt=new SubMerTerminal();
+			smt.setTsn(blackInfo.getTerminalId());
+			smt.setSubMerId(blackInfo.getSubMerId());
+			List<SubMerTerminal> smtL=subMerTerminalDao.selectSubMerTerminalAll(smt);
+			if(smtL==null|| smtL.size()==0){//验证未通过
+				getRequest().setAttribute("black", "3");
+				return "insert";
+			}else{//将查到的TSN状态改为黑名单
+				for (int i = 0; i < smtL.size(); i++) {
+					if(subMerTerminalDao.updateTreminalStatus("3", smtL.get(i).getId()+"")){
+						getRequest().setAttribute("black", "3");
+						return "insert";
+					}
+				}
+			}
+			SimpleDateFormat sdf=new SimpleDateFormat("yyyy-MM-dd");
+			blackInfo.setCreateTime(sdf.format(new Date()));//创建时间
+			if(blackInfoDao.insertBlackInfo(blackInfo))
+				getRequest().setAttribute("black", "1");
+			else
+				getRequest().setAttribute("black", "2");
+		}
+		return "insert";
+	}
+	////////////////////////////GET  SET/////////////////////////
+	public BlackInfo getBlackInfo() {
+		return blackInfo;
+	}
+	public void setBlackInfo(BlackInfo blcakInfo) {
+		this.blackInfo = blcakInfo;
+	}
+	public BlackInfoDao getBlackInfoDao() {
+		return blackInfoDao;
+	}
+	public void setBlackInfoDao(BlackInfoDao blcakInfoDao) {
+		this.blackInfoDao = blcakInfoDao;
+	}
+	public List<BlackInfo> getBlcakInfoList() {
+		return blcakInfoList;
+	}
+	public void setBlcakInfoList(List<BlackInfo> blcakInfoList) {
+		this.blcakInfoList = blcakInfoList;
+	}
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+	public SubMerInfoDao getSubMerInfoDao() {
+		return subMerInfoDao;
+	}
+	public void setSubMerInfoDao(SubMerInfoDao subMerInfoDao) {
+		this.subMerInfoDao = subMerInfoDao;
+	}
+	public int getPage() {
+		return page;
+	}
+	public void setPage(int page) {
+		this.page = page;
+	}
+	public int getPageSize() {
+		return pageSize;
+	}
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+	public SubMerTerminalDao getSubMerTerminalDao() {
+		return subMerTerminalDao;
+	}
+	public void setSubMerTerminalDao(SubMerTerminalDao subMerTerminalDao) {
+		this.subMerTerminalDao = subMerTerminalDao;
+	}
+}

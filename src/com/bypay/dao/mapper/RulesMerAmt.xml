@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.RulesMerAmtDao">
+	<resultMap id="rulesMerAmt" type="com.bypay.domain.RulesMerAmt">
+		<result property="id" column="ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="startAmt" column="START_AMT" />
+		<result property="endAmt" column="END_AMT" />
+		<result property="tractId" column="TRACT_ID" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	<insert id="insertRulesMerAmt" parameterType="com.bypay.domain.RulesMerAmt">
+		INSERT INTO RULES_MER_AMT(MER_SYS_ID,START_AMT,END_AMT,TRACT_ID)
+		VALUES(#{merSysId},#{startAmt},#{endAmt},#{tractId})
+	</insert>
+</mapper>

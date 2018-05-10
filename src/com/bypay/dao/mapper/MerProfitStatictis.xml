@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerProfitStatictisDao">
+	<resultMap id="merProfitStatictis" type="com.bypay.domain.MerProfitStatictis">
+		<result property="id" column="ID" />
+		<result property="mid" column="MID" />
+		<result property="merType" column="MER_TYPE" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="agentSysId" column="AGENT_SYS_ID" />
+		<result property="merName" column="MER_NAME" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="sumAmt" column="SUM_AMT" />
+		<result property="profit" column="PROFIT" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="clearStatus" column="CLEAR_STATUS" />
+		<result property="clearOrderId" column="CLEAR_ORDER_ID" />
+		<result property="faileAmt" column="FAILE_AMT" />
+		<result property="bpSerialNumber" column="BP_SERIAL_NUMBER" />
+		<result property="countFee" column="COUNT_FEE" />
+	</resultMap>
+	
+	
+	<select id="dayProfitStatistics" parameterType="com.bypay.domain.MerProfitStatictis" resultMap="merProfitStatictis">
+		SELECT * FROM MER_PROFIT_STATICTIS 
+		WHERE MID = #{mid} 
+		and MER_TYPE = #{merType}
+		and left(SETTLE_DATE, 6) = #{settleDate}
+	</select>
+	
+	<!-- 按每日统计成功交易的金额、手续费 -->
+	<select id="getSucTransAmt" resultMap="merProfitStatictis" parameterType="java.util.Map">
+			SELECT SETTLE_DATE , SUM_AMT 
+			FROM MER_PROFIT_STATICTIS 
+			where SETTLE_DATE between #{startTime} and #{endTime}
+			<if test="mid != null and mid != ''">
+				AND MID = #{mid}
+			</if>
+			<if test="merType != null and merType != ''">
+				AND MER_TYPE = #{merType}
+			</if>
+			order by SETTLE_DATE asc
+	</select> 
+</mapper>

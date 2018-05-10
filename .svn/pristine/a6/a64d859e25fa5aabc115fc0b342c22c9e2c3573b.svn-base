@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.TractInfoDao">
+	<resultMap id="tractInfoMap" type="com.bypay.domain.TractInfo">
+		<result property="tractId" column="TRACT_ID" />
+		<result property="tractName" column="TRACT_NAME" />
+		<result property="transMerId" column="TRANS_MER_ID" />
+		<result property="tractAgency" column="TRACT_AGENCY" />
+		<result property="ratesType" column="RATES_TYPE" />
+		<result property="acqAgencyId" column="ACQ_AGENCY_ID" />
+		<result property="acqAgencyName" column="ACQ_AGENCY_NAME" />
+		<result property="payTract" column="PAY_TRACT" />
+		<result property="tractRate" column="TRACT_RATE" />
+		<result property="tractHighestFee" column="TRACT_HIGHEST_FEE" />
+		<result property="creditRateCost" column="CREDIT_RATE_COST" />
+		<result property="debitRateCost" column="DEBIT_RATE_COST" />
+		<result property="creditHighestCost" column="CREDIT_HIGHEST_COST" />
+		<result property="debitHighestCost" column="DEBIT_HIGHEST_COST" />
+		<result property="lowestCost" column="LOWEST_COST" />
+		<result property="bypayProfit" column="BYPAY_PROFIT" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="perCardQuota" column="PER_CARD_QUOTA" />
+		<result property="cardQuota" column="CARD_QUOTA" />
+		<result property="cardCount" column="CARD_COUNT" />
+		<result property="remark" column="REMARK" />
+		<result property="nightFlag" column="NIGHT_FLAG" />
+		<result property="cardFlag" column="CARD_FLAG" />
+		<result property="reserved" column="RESERVED" />
+		<result property="transTimeBegin" column="TRANS_TIME_BEGIN" />
+		<result property="transTimeEnd" column="TRANS_TIME_END" />
+		<result property="tractFlag" column="TRACT_FLAG" />
+		<result property="tractFlag" column="TRACT_FLAG" />
+		
+		<result property="mcc" column="MCC" />
+		<result property="integral" column="INTEGRAL" />
+		<result property="tractQuota" column="TRACT_QUOTA" />
+		<result property="spId" column="SPID" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="payMerId" column="PAY_MER_ID" />
+		<result property="payTerId" column="PAY_TER_ID" />
+	</resultMap>
+
+	<sql id="baseColumn">
+		TRACT_NAME,TRANS_MER_ID, TRACT_AGENCY, RATES_TYPE,
+		ACQ_AGENCY_ID,ACQ_AGENCY_NAME,PAY_TRACT, TRACT_RATE, TRACT_HIGHEST_FEE,
+		CREDIT_RATE_COST, DEBIT_RATE_COST, CREDIT_HIGHEST_COST,DEBIT_HIGHEST_COST, LOWEST_COST ,
+		BYPAY_PROFIT, STATUS, CREATE_TIME, PER_CARD_QUOTA,CARD_QUOTA, 
+		CARD_COUNT, REMARK,TRANS_TIME_BEGIN,TRANS_TIME_END,MCC,INTEGRAL,NIGHT_FLAG,TRACT_QUOTA,
+		TRACT_FLAG,TERMINAL_ID,SPID,CARD_FLAG,PAY_MER_ID,PAY_TER_ID
+	</sql>
+
+	<insert id="insertTractInfo" parameterType="com.bypay.domain.TractInfo">
+		insert into TRACT_INFO(
+		<include refid="baseColumn" />
+		) values(#{tractName},#{transMerId},#{tractAgency}, #{ratesType},
+		#{acqAgencyId},#{acqAgencyName},#{payTract},#{tractRate},#{tractHighestFee}*100,
+		#{creditRateCost},#{debitRateCost},#{creditHighestCost}*100,#{debitHighestCost}*100,#{lowestCost}*100,
+		#{bypayProfit},#{status},#{createTime},#{perCardQuota}*100,#{cardQuota}*100,
+		#{cardCount},#{remark},#{transTimeBegin},#{transTimeEnd},#{mcc},
+		#{integral},#{nightFlag},#{tractQuota}*100,#{tractFlag},#{terminalId},#{spId},#{cardFlag},#{payMerId},#{payTerId})
+		<selectKey resultType="java.lang.String" keyProperty="tractId">
+       		 SELECT LAST_INSERT_ID() as tractId
+		</selectKey>
+	
+	</insert>
+	
+	<!-- 通道查询 判断添加通道时候的支付商户号是否存在 -->
+	<select id="selectTractInfoRepeat"  resultMap="tractInfoMap" parameterType="com.bypay.domain.TractInfo">
+		select TRANS_MER_ID from TRACT_INFO 
+		WHERE TRANS_MER_ID=#{transMerId}
+	</select>
+	
+	
+	<!-- 通道查询 -->
+	<select id="selectTractInfoList"  resultMap="tractInfoMap" parameterType="java.util.Map">
+		select t.TRACT_ID,t.TRACT_NAME,t.TRANS_MER_ID,t.PAY_TRACT,t.CREATE_TIME,
+			t.STATUS,t.TRACT_RATE,t.RATES_TYPE,t.TRACT_HIGHEST_FEE,t.TRACT_AGENCY,
+			t.MCC,t.INTEGRAL,t.RESERVED
+			from TRACT_INFO t
+			<where>
+			<if test="tractInfo.tractId!=null and tractInfo.tractId!=''">
+				AND t.TRACT_ID=#{tractInfo.tractId}
+			</if>
+			<if test="tractInfo.tractName!=null and tractInfo.tractName!=''">
+				AND t.TRACT_NAME like '%${tractInfo.tractName}%'
+			</if>
+			<if test="tractInfo.transMerId!=null and tractInfo.transMerId!=''">   
+				AND t.TRANS_MER_ID=#{tractInfo.transMerId}
+			</if>
+			<if test="tractInfo.payTract!=null and tractInfo.payTract!='-1' and tractInfo.payTract!=''">
+				AND t.PAY_TRACT=#{tractInfo.payTract}
+			</if>
+			<if test="tractInfo.status!=null and tractInfo.status!='-1' and tractInfo.status!=''">
+				AND t.STATUS=#{tractInfo.status}
+			</if>
+			<if test="tractInfo.tractAgency!=null and tractInfo.tractAgency!=''">   
+				AND t.TRACT_AGENCY=#{tractInfo.tractAgency}
+			</if>
+			<if test="tractInfo.mcc!=null and tractInfo.mcc!='-1' and tractInfo.mcc!=''">
+				AND t.MCC=#{tractInfo.mcc}
+			</if>
+			<if test="tractInfo.integral!=null and tractInfo.integral!='-1' and tractInfo.integral!=''">
+				AND t.INTEGRAL=#{tractInfo.integral}
+			</if>
+			<if test="tractInfo.ratesType!=null and tractInfo.ratesType!='-1' and tractInfo.ratesType!=''">
+				AND t.RATES_TYPE=#{tractInfo.ratesType}
+			</if>
+			</where>
+			order by  t.CREATE_TIME desc limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询通道的条数 -->
+	<select id="selectTractInfoCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.TractInfo">
+		SELECT COUNT(*) from TRACT_INFO 
+		<where>
+		<if test="tractId!=null and tractId!=''">
+			AND TRACT_ID=#{tractId}
+		</if>
+		<if test="tractName!=null and tractName!=''">
+			AND TRACT_NAME like '%${tractName}%'
+		</if>
+		<if test="transMerId!=null and transMerId!=''">   
+			AND TRANS_MER_ID=#{transMerId}
+		</if>
+		<if test="payTract!=null and payTract!='-1' and payTract!=''">
+			AND PAY_TRACT=#{payTract}
+		</if>
+		<if test="status!=null and status!='-1' and status!=''">
+			AND STATUS=#{status}
+		</if>
+		<if test="tractAgency!=null and tractAgency!=''">   
+				AND TRACT_AGENCY=#{tractAgency}
+			</if>
+			<if test="mcc!=null and mcc!='-1' and mcc!=''">
+				AND MCC=#{mcc}
+			</if>
+			<if test="integral!=null and integral!='-1' and integral!=''">
+				AND INTEGRAL=#{integral}
+			</if>
+			<if test="ratesType!=null and ratesType!='-1' and ratesType!=''">
+				AND RATES_TYPE=#{ratesType}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 通道详情，审批  -->
+	<select id="selectTractById"  resultMap="tractInfoMap" parameterType="com.bypay.domain.TractInfo">
+		select * from TRACT_INFO WHERE TRACT_ID=#{tractId}
+	</select>
+	
+	<!-- 通道 启动 更新 -->
+	<update id="updateTractInfo" parameterType="com.bypay.domain.TractInfo">
+		update TRACT_INFO set STATUS=#{status} where TRACT_ID=#{tractId}
+	</update>
+	
+	<!-- 通道 暂停 更新 -->
+	<update id="updateTractInfoOFF" parameterType="com.bypay.domain.TractInfo">
+		update TRACT_INFO set STATUS=#{status} where TRACT_ID=#{tractId}
+	</update>
+	
+	<!-- 修改通道信息 -->
+	<update id="updateTract" parameterType="com.bypay.domain.TractInfo">
+		update TRACT_INFO 
+		<set>
+		<if test="tractId!=null and tractId!=''">
+			TRACT_ID=#{tractId},
+		</if>
+		<if test="tractName!=null and tractName!=''">
+			TRACT_NAME=#{tractName},
+		</if>
+		<if test="payTract!=null and payTract!=''">
+			PAY_TRACT=#{payTract},
+		</if>
+		<if test="acqAgencyName!=null and acqAgencyName!=''">
+			ACQ_AGENCY_NAME=#{acqAgencyName},
+		</if>
+		<if test="acqAgencyId!=null and acqAgencyId!=''">
+			ACQ_AGENCY_ID=#{acqAgencyId},
+		</if>
+		<if test="ratesType!=null and ratesType!=''">
+			RATES_TYPE=#{ratesType},
+		</if>
+		<if test="tractRate!=null and tractRate!=''">
+			TRACT_RATE=#{tractRate},
+		</if>
+		<if test="status!=null and status!=''">
+			STATUS=#{status},
+		</if>
+		<if test="createTime!=null and createTime!=''">
+			CREATE_TIME=#{createTime},
+		</if>
+		<if test="tractHighestFee!=null and tractHighestFee!=''">
+			TRACT_HIGHEST_FEE=#{tractHighestFee}*100,
+		</if>
+		<if test="creditRateCost!=null and creditRateCost!=''">
+			CREDIT_RATE_COST=#{creditRateCost},
+		</if>
+		<if test="creditHighestCost!=null and creditHighestCost!=''">
+			CREDIT_HIGHEST_COST=#{creditHighestCost}*100,
+		</if>
+		<if test="debitHighestCost!=null and debitHighestCost!=''">
+			DEBIT_HIGHEST_COST=#{debitHighestCost}*100,
+		</if>
+		<if test="perCardQuota!=null and perCardQuota!=''">
+			PER_CARD_QUOTA=#{perCardQuota}*100,
+		</if>
+		<if test="cardQuota!=null and cardQuota!=''">
+			CARD_QUOTA=#{cardQuota}*100,
+		</if>
+		<if test="cardCount!=null and cardCount!=''">
+			CARD_COUNT=#{cardCount},
+		</if>
+		<if test="remark!=null and remark!=''">
+			REMARK=#{remark},
+		</if>
+		<if test="lowestCost!=null and lowestCost!=''">
+			LOWEST_COST=#{lowestCost}*100,
+		</if>
+		<if test="debitRateCost!=null and debitRateCost!=''">
+			DEBIT_RATE_COST=#{debitRateCost},
+		</if>
+		<if test="bypayProfit!=null and bypayProfit!=''">
+			BYPAY_PROFIT=#{bypayProfit},
+		</if>
+		<if test="tractQuota!=null and tractQuota!=''">
+			TRACT_QUOTA=#{tractQuota}*100,
+		</if>
+		<if test="integral!=null and integral!=''">
+			INTEGRAL=#{integral},
+		</if>
+		<if test="mcc!=null and mcc!=''">
+			MCC=#{mcc},
+		</if>
+		<if test="nightFlag!=null and nightFlag!=''">
+			NIGHT_FLAG=#{nightFlag},
+		</if>
+		<if test="spId!=null and spId!=''">
+			SPID=#{spId},
+		</if>
+		<if test="terminalId!=null and terminalId!=''">
+			TERMINAL_ID=#{terminalId},
+		</if>
+		<if test="cardFlag != null and cardFlag != ''">
+			CARD_FLAG=#{cardFlag},
+		</if>
+		<if test="payMerId != null and payMerId != ''">
+			PAY_MER_ID=#{payMerId},
+		</if>
+		<if test="payTerId != null and payTerId != ''">
+			PAY_TER_ID=#{payTerId},
+		</if>
+		</set>
+		where TRACT_ID=#{tractId}   
+	</update>
+
+	<!-- 通道类型 -->
+	<select id="selectTractInfoByRatesType"  resultMap="tractInfoMap" parameterType="com.bypay.domain.TractInfo">
+		select * from TRACT_INFO WHERE STATUS='1'
+		<if test="ratesType != null and ratesType != ''">
+			AND	RATES_TYPE=#{ratesType}
+		</if>
+		<if test="cardFlag != null and cardFlag != '' and cardFlag != 0">
+			AND	CARD_FLAG=#{cardFlag}
+		</if>
+		<if test="nightFlag != null and nightFlag != ''">
+		 	AND NIGHT_FLAG = #{nightFlag}
+		</if>
+		<if test="payTract!=null and payTract!='' and payTract!='-1'">
+			AND	PAY_TRACT = #{payTract}
+		</if>
+	</select>
+	
+	<!-- 通道查询 -->
+	<select id="selectTractInfoAllSettle"  resultMap="tractInfoMap" parameterType="com.bypay.domain.TractInfo">
+		select  * from TRACT_INFO 
+	</select>
+	<!-- 子商户上线时查询通道-W 2014-08-01 -->
+	<select id="selectTractInfoSubMerInfoOnline" resultMap="tractInfoMap">
+		select * from TRACT_INFO WHERE STATUS='1' AND TRACT_FLAG='1'
+	</select>
+	<!-- 通道类型 -->
+	<select id="selectTractInfoByStatus"  resultMap="tractInfoMap" parameterType="java.util.Map">
+		select * from TRACT_INFO WHERE 1=1
+		<if test="status!=null and status!='' and status!='-1'">
+			AND	STATUS = #{status}
+		</if>
+	</select>
+	
+	
+	<!-- 更新通道状态 -->
+	<update id="updateReserved" parameterType="com.bypay.domain.TractInfo">
+		update TRACT_INFO set RESERVED = #{reserved} 
+		where TRACT_ID = #{tractId} 
+	</update>
+	
+	<select id="selectTractByMerId"  resultMap="tractInfoMap" parameterType="com.bypay.domain.TractInfo">
+		select * from TRACT_INFO WHERE TRANS_MER_ID=#{transMerId}
+	</select>
+</mapper>

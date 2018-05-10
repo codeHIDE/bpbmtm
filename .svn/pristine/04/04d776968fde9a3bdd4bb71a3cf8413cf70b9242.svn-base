@@ -1,0 +1,32 @@
+#upload-path=D\:/\\
+#upload-path=/usr/local/picture/
+#shimingUrl=http://10.0.3.35:8280/orderGate.html
+#shimingUrl=http://ia.richerpay.com/orderGate.html
+#downImg-Url=/usr/local/file/
+
+#han xin
+#posp-url=http://192.168.1.77:8980/hftxposp/PosDealAction!transPayEntrance.ac
+#upload-path=/usr/local/New_ProjectFiles/New_acqPosPlatform/SubMerImages/
+#ImagesUrl=/usr/local/New_ProjectFiles/New_acqPosPlatform 
+#FileUrl=/usr/local/New_ProjectFiles/New_posPlatform
+#ExcelUrl=/usr/local/New_ProjectFiles/New_ReportFiles
+#hui fu
+upload-path=/usr/local/New_ProjectFiles/New_acqPosPlatform/SubMerImages/
+creditcard-path=/usr/local/New_ProjectFiles/New_acqPosPlatform/CreditCard/
+downImg-Url=/usr/local/file/
+#posp-url=http://172.16.1.101:8280/bpposp/PosDealAction!transPayEntrance.ac
+posp-url=http://172.16.1.21:8280/bpposp/PosDealAction!transPayEntrance.ac
+ImagesUrl=E:/image
+#ImagesUrl=/usr/local/New_ProjectFiles/New_acqPosPlatform
+FileUrl=/usr/local/New_ProjectFiles/New_posPlatform
+ExcelUrl=/usr/local/New_ProjectFiles/New_ReportFiles
+SYurl=http://59.56.73.144:8080/mpcctp/
+SYsign=d7595a55-648c-4368-b0cd-13deaa2df516
+msUrl=192.168.92.50
+msPort=9008
+msKey=12345678901234567890123456789012
+alertSub=/usr/local/New_ProjectFiles/New_ReportFiles/alertSub.txt
+alertAddr=/usr/local/New_ProjectFiles/New_ReportFiles/alertAddr.txt
+#ben di ce shi
+#ExcelUrl=d\:/text
+#FileUrl=d\:/

@@ -1,0 +1,231 @@
+package com.bypay.dao.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.SubMerInfoDao;
+import com.bypay.domain.CoreTransLog;
+import com.bypay.domain.MerTrans;
+import com.bypay.domain.SubMerInfo;
+import com.bypay.domain.SubMerRate;
+import com.bypay.domain.SubMerTerminal;
+import com.sun.xml.internal.bind.annotation.OverrideAnnotationOf;
+
+@Repository("subMerInfoDao")
+public class SubMerInfoDaoImpl implements SubMerInfoDao { 
+
+  @Inject
+  private SqlSessionTemplate sqlSessionTemplate;
+
+  // get set
+  public SqlSessionTemplate getSqlSessionTemplate() {
+    return sqlSessionTemplate;
+  }
+
+  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+    this.sqlSessionTemplate = sqlSessionTemplate;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  // 查询所有子商户信息
+  public List<SubMerInfo> findAll(Map map) {
+    return (List<SubMerInfo>) sqlSessionTemplate.selectList("selectSubMerchantInfo", map);
+  }
+
+  // 查询指定子商户信息
+  @Override
+  public SubMerInfo findById(SubMerInfo smi) {
+    return (SubMerInfo) sqlSessionTemplate.selectOne("selectSubMerInfoDetail", smi);
+  }
+
+  // 修改子商户信息
+  public boolean update(SubMerInfo smi) {
+    if (sqlSessionTemplate.update("updateSubMerInfo", smi) > 0) {
+      return true;
+    } else
+      return false;
+  }
+
+  // 修改子商户状态 /暂停/恢复/上线/
+  public boolean updateStatus(SubMerInfo smi) {
+    if (sqlSessionTemplate.update("updateStatus", smi) > 0)
+      return true;
+    else
+      return false;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  // 查询信息条数
+  public Integer selectSubMerchantInfoCount(Map map) {
+    int num = 0;
+    List<Integer> l = sqlSessionTemplate.selectList("selectSubMerchantInfoCount", map);
+    for (int i = 0; i < l.size(); i++) {
+      num = num + l.get(i);
+    }
+    return num;
+  }
+
+  @Override
+  public boolean updateSubMerInfoSubMerRate(String subMerId, SubMerRate smr) {
+    smr.setSubMerId(subMerId);
+    if (sqlSessionTemplate.update("updateSubMerInfoSubMerRate", smr) > 0)
+      return true;
+    else
+      return false;
+  }
+
+  @Override
+  public boolean updateSubMerInfoSTATUS(SubMerInfo smi) {
+    if (sqlSessionTemplate.update("updateSubMerInfoSTATUS", smi) > 0)
+      return true;
+    else
+      return false;
+  }
+
+  /**
+   * 添加商户信息
+   */
+  @Override
+  public int insertSubMerInfo(SubMerInfo subMerInfo) {
+    return sqlSessionTemplate.insert("insertSubMerInfo", subMerInfo);
+  }
+  
+  @Override
+  public int updateSubMerInfoReg(SubMerInfo subMerInfo) {
+    return sqlSessionTemplate.insert("updateSubMerInfoReg", subMerInfo);
+  }
+
+  /**
+   * 收款功能开通
+   */
+  @Override
+  public boolean updateSubMerInfoByOpenCur(SubMerInfo subMerInfo) {
+    if (sqlSessionTemplate.update("updateSubMerInfoByOpenCur", subMerInfo) > 0)
+      return true;
+    else
+      return false;
+  }
+
+  @Override
+  public SubMerInfo getSubMerInfoById(String subMerId) {
+    return (SubMerInfo) sqlSessionTemplate.selectOne("getSubMerInfoById", subMerId);
+  }
+
+  @Override
+  public SubMerInfo getSubMerInfoByTerminalId(SubMerTerminal subMerTerminal) {
+    return (SubMerInfo) sqlSessionTemplate.selectOne("getSubMerInfoByTerminalId", subMerTerminal);
+  }
+
+  /**
+   * 账户信息查询
+   */
+  @Override
+  public SubMerInfo accountEnquiry(SubMerTerminal subMerTerminal) {
+    return (SubMerInfo) sqlSessionTemplate.selectOne("accountEnquiry", subMerTerminal);// SQL在SubMerInfo.xml中
+  }
+
+  @Override
+  public MerTrans getMerTransOnTerminalType(String merSysId) {
+    return (MerTrans) sqlSessionTemplate.selectOne("getMerTransOnTerminalType", merSysId);
+  }
+
+  /**
+   * 模糊获取相关最大子商户号
+   */
+  @Override
+  public String setMaxSubMerId(SubMerInfo merInfo) {
+    return (String) sqlSessionTemplate.selectOne("setMaxSubMerId", merInfo);
+  }
+
+  /***
+   * 根据法人证件号查询信息
+   */
+  @Override
+  public List<SubMerInfo> selectSubInfoByIdCard(String legalIdcard) {
+    return sqlSessionTemplate.selectList("selectSubInfoByIdCard", legalIdcard);
+  }
+
+  /**
+   * 查询手机号验证
+   */
+  @Override
+  public List<SubMerInfo> selectSubInfoByPhone(String phone) {
+    return sqlSessionTemplate.selectList("selectSubInfoByPhone", phone);
+  }
+
+  @Override
+  public List<SubMerInfo> selectSubMerchantNoOnline(Map map) {
+    return sqlSessionTemplate.selectList("selectSubMerchantNoOnline", map);
+  }
+
+  @Override
+  public Integer selectSubMerchantNoOnlineCount(Map map) {
+    return (Integer) sqlSessionTemplate.selectOne("selectSubMerchantNoOnlineCount", map);
+  }
+
+  @Override
+  public Boolean updateSubMerInfoWithRest(SubMerInfo subMerInfo) {
+    if (sqlSessionTemplate.update("updateSubMerInfoWithRest", subMerInfo) > 0)
+      return true;
+    else
+      return false;
+  }
+
+  @Override
+  public SubMerInfo selectFrozenSumMaxBySubMerId(String subMerId) {
+    return (SubMerInfo) sqlSessionTemplate.selectOne("selectFrozenSumMaxBySubMerId", subMerId);
+  }
+
+  /**
+   * 清空商户的法人信息
+   */
+  @Override
+  public Integer updateLegalInfo(SubMerInfo subMerInfo) {
+    return sqlSessionTemplate.update("updateLegalInfo", subMerInfo);
+  }
+
+  /**
+   * 根据省、市信息查询出联行号信息
+   */
+@Override
+public List<SubMerInfo> findLineNum(SubMerInfo subMerInfo) {
+	  String region = subMerInfo.getRegion();
+	  String[] regions = region.split(",");
+	  String province = regions[0]; //省
+	  String city = regions[1]; //市
+	  String bankName = subMerInfo.getSettAgency();
+	  Map<String, String> subMerInfoMap = new HashMap<String, String>();
+	  subMerInfoMap.put("province", province+"%");
+	  subMerInfoMap.put("city", city+"%");
+	  subMerInfoMap.put("bankName", bankName);
+	return sqlSessionTemplate.selectList("selectLineNum", subMerInfoMap);
+}
+
+	public int updateCheckSub(String subMerId){
+		return sqlSessionTemplate.update("updateCheckSub", subMerId);
+	}
+	
+	  // 查询指定子商户信息
+	  @Override
+	  public SubMerInfo findByPhone(SubMerInfo smi) {
+	    return (SubMerInfo) sqlSessionTemplate.selectOne("findByPhone", smi);
+	  }
+	  
+	  @Override
+	  public void updateMobileFrom(SubMerInfo subMerInfo){
+		  sqlSessionTemplate.update("updateMobileFrom", subMerInfo);
+	  }
+	  
+	  @Override
+	    public List<SubMerInfo> selectCoreTransLogByCh(Map map) {
+	        return (List<SubMerInfo>) sqlSessionTemplate.selectList("selectCoreTransLogByCh", map);
+	        }
+}

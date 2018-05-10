@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.AgenctInfoDao">
+	<resultMap id="agenctInfo" type="com.bypay.domain.AgenctInfo">
+		<result property="agentId" column="AGENT_ID" />
+		<result property="agentName" column="AGENT_NAME" />
+		<result property="regNo" column="REG_NO" />
+		<result property="taxNo" column="TAX_NO" />
+		<result property="regAddr" column="REG_ADDR" />
+		<result property="region" column="REGION" />
+		<result property="settAccountName" column="SETT_ACCOUNT_NAME" />
+		<result property="settAccountNo" column="SETT_ACCOUNT_NO" />
+		<result property="settAgency" column="SETT_AGENCY" />
+		<result property="settAccType" column="SETT_ACC_TYPE" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="level" column="LEVEL" />
+		<result property="superAgentId" column="SUPER_AGENT_ID" />
+		<result property="agentLv2" column="AGENT_LV2" />
+		<result property="agentLv3" column="AGENT_LV3" />
+		<result property="billCycle" column="BILL_CYCLE" />
+		<result property="TerminalType" column="TERMINAL_TYPE" />
+		<result property="busType" column="BUS_TYPE" />
+		<result property="agentRate1" column="AGENT_RATE_1" />
+		<result property="agentRate2" column="AGENT_RATE_2" />
+		<result property="agentHighestFee" column="AGENT_HIGHEST_FEE" />
+		<result property="agentProfitRate" column="AGENT_PROFIT_RATE" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<result property="agentD1Rate" column="AGENT_D1_RATE" />
+		<result property="agentT0Rate" column="AGENT_T0_RATE" />
+		<result property="isIntoPieces" column="IS_INTO_PIECES" />
+		<result property="agentRateNoTop" column="AGENT_RATE_NO_TOP" />
+	</resultMap>
+		<!--  -->
+	<select id="selectAgenctInfoAll" resultMap="agenctInfo" parameterType="java.util.Map">
+		SELECT AGENT_ID, AGENT_NAME, SETT_ACCOUNT_NAME, MER_SYS_ID,
+		SETT_ACCOUNT_NO, SETT_AGENCY, CREATE_TIME, STATUS,
+		LEVEL, SUPER_AGENT_ID , AGENT_LV2 , AGENT_LV3
+		FROM AGENCT_INFO where 1=1 
+							<!-- 根据机构商户号 --> 
+		<if test="agenctInfo.merSysId!='' and agenctInfo.merSysId!=null">
+			AND MER_SYS_ID=#{agenctInfo.merSysId}  
+		</if>				<!-- 根据代理商户名 -->
+		<if test="agenctInfo.agentName!='' and agenctInfo.agentName!=null">
+			AND AGENT_NAME like '%${agenctInfo.agentName}%'
+		</if>				<!-- 根据代理商户号 -->
+		<if test="agenctInfo.agentId!='' and agenctInfo.agentId!=null">
+			AND AGENT_ID=#{agenctInfo.agentId}  
+		</if>				<!-- 根据上级代理商户号 准确查找 -->
+		<if test="agenctInfo.superAgentId!='' and agenctInfo.superAgentId!=null">
+			AND SUPER_AGENT_ID = #{agenctInfo.superAgentId}  
+		</if>
+		<if test="agenctInfo.level!='-1' and agenctInfo.level!=null">
+			AND LEVEL = #{agenctInfo.level}  
+		</if>
+		<if test="agenctInfo.status!=null and agenctInfo.status!='' and agenctInfo.status!='-1'">
+			and STATUS=#{agenctInfo.status}  
+		</if>
+		    order by CREATE_TIME desc
+		<if test="pageSize>0  ">
+			 limit #{page}  , #{pageSize}
+		</if>
+	</select>
+	
+	<select id="queryAgenctInfoAll" resultMap="agenctInfo" parameterType="java.util.Map">
+		SELECT AGENT_ID, AGENT_NAME, SETT_ACCOUNT_NAME, MER_SYS_ID,
+		SETT_ACCOUNT_NO, SETT_AGENCY, CREATE_TIME, STATUS,
+		LEVEL, SUPER_AGENT_ID , AGENT_LV2 , AGENT_LV3
+		FROM AGENCT_INFO where 1=1 
+		<if test="agenctInfo.merSysId!='' and agenctInfo.merSysId!=null">
+			AND MER_SYS_ID=#{agenctInfo.merSysId}   
+		</if>
+		<if test="agenctInfo.superAgentId!='' and agenctInfo.superAgentId!=null">
+			AND SUPER_AGENT_ID = #{agenctInfo.superAgentId}  
+		</if>
+		<if test="agenctInfo.agentLv2!='' and agenctInfo.agentLv2!=null">
+			AND AGENT_LV2 = #{agenctInfo.agentLv2}  
+		</if>
+		<if test="agenctInfo.agentLv3!='' and agenctInfo.agentLv3!=null">
+			AND AGENT_LV3 = #{agenctInfo.agentLv3}  
+		</if>
+		<if test="agenctInfo.level!='-1' and agenctInfo.level!=null">
+			AND LEVEL = #{agenctInfo.level}  
+		</if>
+		<if test="agenctInfo.status!=null and agenctInfo.status!='' and agenctInfo.status!='-1'">
+			and STATUS=#{agenctInfo.status}  
+		</if>
+		    order by CREATE_TIME desc
+		<if test="pageSize>0  ">
+			 limit #{page}  , #{pageSize}
+		</if>
+	</select>
+	
+	
+	
+	<!-- 查询数量 -->
+	<select id="selectAgenctInfoAllCount" resultType="int" parameterType="java.util.Map">
+		SELECT count(1) FROM AGENCT_INFO where 1=1  
+		<if test="agenctInfo.merSysId!='' and agenctInfo.merSysId!=null">
+			AND MER_SYS_ID = #{agenctInfo.merSysId}  
+		</if>
+		<if test="agenctInfo.agentName!='' and agenctInfo.agentName!=null">
+			AND AGENT_NAME like #{agenctInfo.agentName}  
+		</if>
+		<if test="agenctInfo.agentId!='' and agenctInfo.agentId!=null">
+			AND AGENT_ID = #{agenctInfo.agentId}  
+		</if>
+		<if test="agenctInfo.superAgentId!='' and agenctInfo.superAgentId!=null">
+			AND SUPER_AGENT_ID = #{agenctInfo.superAgentId};
+		</if>
+		<if test="agenctInfo.level!='' and agenctInfo.level!=null and agenctInfo.level!=-1">
+			AND LEVEL = #{agenctInfo.level};
+		</if>
+	</select>
+	
+	
+	<!-- 查询指定ID的代理商-W 所有数据-->
+	<select id="selectAgenctInfoById" resultMap="agenctInfo" parameterType="com.bypay.domain.AgenctInfo">
+		select * from AGENCT_INFO where AGENT_ID=#{agentId}
+	</select>
+	<!-- 修改结算信息 和 基本信息-W -->
+	<update id="updateAgenctInfoStatus" parameterType="com.bypay.domain.AgenctInfo">
+		UPDATE AGENCT_INFO   SET  AGENT_ID=#{agentId}
+		<if test="settAccountName!=null and settAccountName!=''"><!-- 结算账户名 -->
+   		,SETT_ACCOUNT_NAME=#{settAccountName}
+   		</if><if test="settAccountNo!=null and settAccountNo!=''"><!-- 结算账户号 -->
+   		,SETT_ACCOUNT_NO=#{settAccountNo}
+   		</if><if test="settAccType!=null and settAccType!=''"><!-- 账户类型 -->
+   		,SETT_ACC_TYPE=#{settAccType}
+   		</if><if test="settAgency!=null and settAgency!=''"><!-- 结算机构 -->
+   		,SETT_AGENCY=#{settAgency}
+   		</if><if test="billCycle!=null and billCycle!=''"><!-- 清分周期 -->
+   		,BILL_CYCLE=#{billCycle}
+   		</if><if test="status!=null and status!=''"><!-- 状态 -->
+   		,STATUS=#{status}
+   		</if><if test="agentName!=null and agentName!=''"><!-- 代理商名-q -->
+   		,AGENT_NAME=#{agentName}
+   		</if><if test="busType!=null and busType!=''"><!-- 交易类型-q -->
+   		,BUS_TYPE=#{busType}
+   		</if><if test="TerminalType!=null and TerminalType!=''"><!-- 产品类型-q -->
+   		,TERMINAL_TYPE=#{TerminalType}
+   		</if><if test="color!=null and color!=''"><!-- 色值-q -->
+   		,COLOR=#{color}
+   		</if><if test="regNo!=null and regNo!=''"><!-- 工商注册号-q -->
+   		,REG_NO=#{regNo}
+   		</if><if test="taxNo!=null and taxNo!=''"><!-- 税务登记号-q -->
+   		,TAX_NO=#{taxNo}
+   		</if><if test="regAddr!=null and regAddr!=''"><!-- 工商注册地址-q -->
+   		,REG_ADDR=#{regAddr}
+   		</if><if test="remark!=null and remark!=''"><!-- 备注-q -->
+   		,REMARK=#{remark}
+   		</if><if test="logo!=null and logo!=''"><!-- LOGO-q -->
+   		,LOGO=#{logo}
+   		</if><if test="agentRate1!=null and agentRate1!=''"><!-- AGENT_RATE_1-q -->
+   		,AGENT_RATE_1=#{agentRate1} 
+   		</if><if test="agentProfitRate!=null and agentProfitRate!=''"><!-- AGENT_RATE_2-q -->
+   		,AGENT_PROFIT_RATE=#{agentProfitRate} 
+   		</if><!-- AGENT_HIGHEST_FEE-q -->
+   		<if test="agentD1Rate!=null and agentD1Rate!=''">
+   		,AGENT_D1_RATE=#{agentD1Rate}
+   		</if><!-- AGENT_PROFIT_RATE-q -->
+   		<if test="agentT0Rate!=null and agentT0Rate!=''">
+   		,AGENT_T0_RATE=#{agentT0Rate}
+   		</if>
+   		<if test="agentRate2!=null and agentRate2!=''">
+   		,AGENT_RATE_2=#{agentRate2}
+   		</if>
+   		<if test="agentHighestFee!=null and agentHighestFee!=''">
+   		,AGENT_HIGHEST_FEE=#{agentHighestFee}
+   		</if>
+   		<if test="agentHighestFee!=null and agentHighestFee!=''">
+   		,AGENT_RATE_NO_TOP=#{agentRateNoTop}
+   		</if>
+
+	    WHERE AGENT_ID=#{agentId}
+	</update>
+	
+	<!-- 根据代理ID获取代理商信息-P -->
+	<select id="getAgentInfo" resultMap="agenctInfo" parameterType="java.lang.String">
+		select * from AGENCT_INFO where AGENT_ID=#{agentId}
+	</select>
+	
+	<!-- 代理商户LOGO上传成功后修改代理数据库中LOGO字段地址 -->
+	<update id="updateAgeLogo" parameterType="com.bypay.domain.AgenctInfo">
+		update AGENCT_INFO set LOGO = #{logo} where AGENT_ID = #{agentId}
+	</update>
+	
+	<!-- 查询数量 -->
+	<select id="getAgentInfoByRateInfo" resultMap="agenctInfo" parameterType="java.util.Map">
+		SELECT * FROM AGENCT_INFO where SUPER_AGENT_ID = #{superAgentId} order by ${orderby} 
+		<if test="desc=='true'">
+		 	DESC
+   		</if>
+   		<if test="desc=='false'">
+		 	ASC
+   		</if>
+		 limit 1
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerCashoutDao">
+	<resultMap id="subMerCashout" type="com.bypay.domain.SubMerCashout">
+		<result property="id" column="ID" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="orderAmt" column="ORDER_AMT" />
+		<result property="orderStatus" column="ORDER_STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="finishTime" column="FINISH_TIME" />
+		<result property="transId" column="TRANS_ID" />
+		<result property="TransQid" column="TRANS_QID" />
+		<result property="TransFee" column="TRANS_FEE" />
+		<result property="batchId" column="BATCH_ID" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+		<result property="merProfitRate" column="MER_PROFIT_RATE" />
+		<result property="t0MerGain" column="T0_MER_GAIN" />
+		<result property="t0MerRate" column="T0_MER_RATE" />
+		<result property="bankName" column="BANK_NAME" />
+		<result property="settAccountNo" column="SETT_ACCOUNT_NO" />   
+		<result property="settAccountName" column="SETT_ACCOUNT_NAME"/>
+		<result property="lineNum" column="LINE_NUM"/>
+		<result property="openBank" column="OPEN_BANK"/>
+		<result property="settAgency" column="SETT_AGENCY"/>
+		<result property="grade" column="GRADE"/>  
+	</resultMap>
+	
+	<sql id="baseColumn">
+		SUB_MER_ID, MER_SYS_ID, ORDER_AMT,	
+		ORDER_STATUS,CREATE_TIME,FINISH_TIME,TRANS_ID,TRANS_QID,TRANS_FEE,BATCH_ID,RESERVED1,RESERVED2,RESERVED3	
+	</sql>
+	
+	<select id="selectSubMerCashoutReport" resultMap="subMerCashout" parameterType="java.util.Map">
+		SELECT SMC.SUB_MER_ID,SMC.MER_SYS_ID,SMC.FINISH_TIME,SMC.CREATE_TIME,SMC.ORDER_STATUS,SMI.SETT_ACCOUNT_NO
+		,BBB.BANK_NAME,SMC.T0_MER_RATE,SMC.T0_MER_GAIN,SMC.TRANS_FEE,MT.MER_PROFIT_RATE,SMC.ID,SMC.ORDER_AMT
+		FROM SUB_MER_CASHOUT SMC LEFT JOIN SUB_MER_INFO SMI ON SMI.SUB_MER_ID = SMC.SUB_MER_ID
+		LEFT JOIN MER_TRANS MT ON MT.MER_SYS_ID = SMC.MER_SYS_ID 
+		LEFT JOIN BANK_BEHALF_BRANCH BBB ON BBB.CODE = SMI.SETT_AGENCY
+		<where>
+			<if test="merSysId != null and merSysId != ''">
+				SMC.MER_SYS_ID = #{merSysId}
+			</if>
+			<if test="settleDate1 != null and settleDate1 != ''">
+				AND SMC.FINISH_TIME >= #{settleDate1}
+			</if>
+			<if test="settleDate2 != null and settleDate2 != ''">
+				AND SMC.FINISH_TIME &lt;= #{settleDate2}
+			</if>
+			<if test="clearStatus != null and clearStatus != '' and clearStatus != -1">
+				AND SMC.ORDER_STATUS = #{clearStatus}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectSubMerCashoutReportCount" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(1)
+		FROM SUB_MER_CASHOUT SMC LEFT JOIN SUB_MER_INFO SMI ON SMI.SUB_MER_ID = SMC.SUB_MER_ID
+		LEFT JOIN MER_TRANS MT ON MT.MER_SYS_ID = SMC.MER_SYS_ID 
+		LEFT JOIN BANK_BEHALF_BRANCH BBB ON BBB.CODE = SMI.SETT_AGENCY
+		<where>
+			<if test="merSysId != null and merSysId != ''">
+				SMC.MER_SYS_ID = #{merSysId}
+			</if>
+			<if test="settleDate1 != null and settleDate1 != ''">
+				AND SMC.FINISH_TIME >= #{settleDate1}
+			</if>
+			<if test="settleDate2 != null and settleDate2 != ''">
+				AND SMC.FINISH_TIME &lt;= #{settleDate2}
+			</if>
+			<if test="clearStatus != null and clearStatus != ''">
+				AND CLEAR_STATUS = #{clearStatus}
+			</if>
+		</where>
+	</select>
+	
+	
+	<select id="selectSubMerCashoutById" resultMap="subMerCashout">
+		SELECT * FROM SUB_MER_CASHOUT where id = #{id}
+	</select>
+	
+	<select id="selectSubMerCashout" resultMap="subMerCashout">
+		SELECT * FROM SUB_MER_CASHOUT
+	</select>
+		<insert id="insertFactoryCode" parameterType="com.bypay.domain.SubMerCashout">
+		insert into SUB_MER_CASHOUT(
+		<include refid="baseColumn" />
+		) values(#{subMerId},#{merSysId},#{orderAmt},#{orderStatus},#{createTime},#{finishTime},#{TransTime},#{TransQid},#{TransFee},
+		#{batchId},#{reserved1},#{reserved2},#{reserved3})
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectSubMerCashoutList"  resultMap="subMerCashout" parameterType="java.util.Map">
+			select * from SUB_MER_CASHOUT 
+			<where>
+			<if test="subMerCashout.subMerId!=null and subMerCashout.subMerId!=''">
+				AND SUB_MER_ID=#{subMerCashout.subMerId}
+			</if>
+			<if test="subMerCashout.createTime!=null and subMerCashout.createTime!=''">
+				AND CREATE_TIME=#{subMerCashout.createTime}
+			</if>
+			<if test="subMerCashout.orderStatus!=null and subMerCashout.orderStatus!=''">
+				AND ORDER_STATUS=#{subMerCashout.orderStatus}
+			</if>
+			<if test="subMerCashout.batchId!=null and subMerCashout.batchId!=''">
+				AND BATCH_ID=#{subMerCashout.batchId}
+			</if>
+			</where>
+			<if test="page!='-1' and pageSize!='-1'">
+			limit #{page},#{pageSize}
+			</if>
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectSubMerCashoutCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.SubMerCashout">
+		SELECT COUNT(*) from SUB_MER_CASHOUT 
+		<where>
+		<if test="subMerCashout.subMerId!=null and subMerCashout.subMerId!=''">
+			AND SUB_MER_ID=#{subMerCashout.subMerId}
+		</if>
+		<if test="subMerCashout.createTime!=null and subMerCashout.createTime!=''">
+			AND CREATE_TIME=#{subMerCashout.createTime}
+		</if>
+		<if test="subMerCashout.orderStatus!=null and subMerCashout.orderStatus!=''">
+			AND ORDER_STATUS=#{subMerCashout.orderStatus}
+		</if>
+		<if test="subMerCashout.batchId!=null and subMerCashout.batchId!=''">
+			AND BATCH_ID=#{subMerCashout.batchId}
+		</if>
+		</where>
+	</select>
+	
+	<delete id="deleteSubMerCashout" parameterType="com.bypay.domain.SubMerCashout">
+		delete  from SUB_MER_CASHOUT where ID=#{id}
+	</delete>
+	
+	<!-- 根据商户号获取提现记录 -->
+	<select id="getSubMerCashoutBySubId" resultMap="subMerCashout" parameterType="java.util.Map">
+		SELECT * FROM SUB_MER_CASHOUT WHERE SUB_MER_ID = #{subMerId} 
+		<if test="beginTime != null and beginTime != ''">
+			AND CREATE_TIME &lt;= #{beginTime}
+		</if>
+		<if test="endTime != null and endTime != ''">
+			AND CREATE_TIME >= #{endTime}
+		</if>
+		ORDER BY ID DESC
+		limit #{page},#{pageSize}
+	</select>
+	<!-- 根据商户号获取提现记录总条数 -->
+	<select id="getSubMerCashoutBySubIdCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		SELECT COUNT(SUB_MER_ID) FROM SUB_MER_CASHOUT WHERE SUB_MER_ID = #{subMerId} 
+	</select>
+	
+	<!-- T+0结算中数据总条数 -->
+	<select id="selectSubMerCashoutListNotPageCount" parameterType="java.util.Map" resultType="java.lang.Integer">
+		select count(*) from SUB_MER_CASHOUT 
+		<where>
+		<if test="subMerCashout.createTime!=null and subMerCashout.createTime!=''">
+			AND CREATE_TIME like '%${subMerCashout.createTime}%'
+		</if>
+		<if test="subMerCashout.orderStatus!=null and subMerCashout.orderStatus!=''">
+			AND ORDER_STATUS=#{subMerCashout.orderStatus}
+		</if>
+		<if test="subMerCashout.batchId!=null and subMerCashout.batchId!=''">
+			AND BATCH_ID=#{subMerCashout.batchId}
+		</if>
+		</where>
+	</select>
+	
+	<select id="selectSubMerCashoutListNotPage"  resultMap="subMerCashout" parameterType="java.util.Map">
+		select * from SUB_MER_CASHOUT 
+		<where>
+		<if test="subMerCashout.createTime!=null and subMerCashout.createTime!=''">
+			AND CREATE_TIME like '%${subMerCashout.createTime}%'
+		</if>
+		<if test="subMerCashout.orderStatus!=null and subMerCashout.orderStatus!=''">
+			AND ORDER_STATUS=#{subMerCashout.orderStatus}
+		</if>
+		<if test="subMerCashout.batchId!=null and subMerCashout.batchId!=''">
+			AND BATCH_ID=#{subMerCashout.batchId}
+		</if>
+		<if test="subMerCashout.grade!=null and subMerCashout.grade!=''">
+			AND GRADE = #{subMerCashout.grade}
+		</if>
+		
+		</where>
+		<if test="page!=null and page!=''">
+		limit #{page},#{pageSize}
+		</if>
+	</select>
+	
+	
+	<select id="selectSubMerCashoutList2" parameterType="com.bypay.domain.SubMerCashout" resultMap="subMerCashout">
+	SELECT SMC.ID, SMC.CREATE_TIME, SMI.SETT_ACCOUNT_NO, SMI.SETT_ACCOUNT_NAME, SMI.LINE_NUM, SMI.OPEN_BANK, SMI.SETT_AGENCY, SMC.ORDER_AMT, SMC.BATCH_ID FROM SUB_MER_CASHOUT SMC, SUB_MER_INFO SMI
+	WHERE 
+	SMC.SUB_MER_ID = SMI.SUB_MER_ID 
+	<if test="createTime!=null and createTime!=''">
+<!--		AND SMC.CREATE_TIME LIKE '${createTime}%' -->
+	</if>
+	<if test="orderStatus!=null and orderStatus!=''">
+		AND SMC.ORDER_STATUS = #{orderStatus}
+	</if>
+	
+	</select>
+	
+	<select id="selectSubMerCashoutAmt"  resultMap="subMerCashout" parameterType="java.util.Map">
+		select SUM(ORDER_AMT) AS ORDER_AMT,SUM(TRANS_FEE) AS TRANS_FEE,ORDER_STATUS from SUB_MER_CASHOUT 
+		<where>
+		<if test="subMerCashout.createTime!=null and subMerCashout.createTime!=''">
+			AND CREATE_TIME like '%${subMerCashout.createTime}%'
+		</if>
+		<if test="subMerCashout.merSysId!=null and subMerCashout.merSysId!=''">
+			AND MER_SYS_ID=#{subMerCashout.merSysId}
+		</if>
+		</where>
+		GROUP BY ORDER_STATUS
+	</select>
+	
+	
+	<update id="updateSubMerCashout" parameterType="com.bypay.domain.SubMerCashout">
+		update SUB_MER_CASHOUT 
+		<set>
+		<if test="orderStatus != null and orderStatus != ''">
+			ORDER_STATUS = #{orderStatus},
+		</if>
+		<if test="batchId != null and batchId != ''">
+			BATCH_ID = #{batchId},
+		</if>
+		<if test="createTime != null and createTime != ''">
+			CREATE_TIME = #{createTime},
+		</if>
+		<if test="finishTime != null and finishTime != ''">
+			FINISH_TIME = #{finishTime},
+		</if>
+		<if test="reserved1 != null and reserved1 != ''">
+			RESERVED1 = #{reserved1},
+		</if>
+		</set>
+			where ID=#{id}
+	</update>
+	
+	
+	<!-- SubMerCashout查询所有LIST -->
+	<select id="getSubMerCashoutList"  resultMap="subMerCashout" parameterType="java.util.Map">
+		select * from SUB_MER_CASHOUT 
+			<where>
+			<if test="subMerCashout.orderStatus!=null and subMerCashout.orderStatus!='-1' and subMerCashout.orderStatus!=''">
+				AND ORDER_STATUS=#{subMerCashout.orderStatus}
+			</if>
+			
+			</where>
+			order by  CREATE_TIME desc limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询SubMerCashout的条数 -->
+	<select id="getSubMerCashoutListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.SubMerCashout">
+		SELECT COUNT(*) from SUB_MER_CASHOUT 
+		<where>
+		<if test="orderStatus!=null and orderStatus!='-1' and orderStatus!=''">
+			AND ORDER_STATUS=#{orderStatus}
+		</if>
+		
+		</where>
+	</select>
+	
+		<!-- SubMerCashout查询LIST根据失败报表查询 -->
+	<select id="getSubMerCashoutListByOrderStatus"  resultMap="subMerCashout" parameterType="java.util.Map">
+		select * from SUB_MER_CASHOUT  where ORDER_STATUS=#{subMerCashout.orderStatus}
+	</select>
+	
+	<select id="seleSubMerCashoutReport" resultMap="subMerCashout" parameterType="com.bypay.domain.SubMerCashout">
+		select * from SUB_MER_CASHOUT where ORDER_STATUS = #{orderStatus} AND CREATE_TIME LIKE '${createTime}%'
+	</select>
+	
+	<insert id="insertSubMerCashout" parameterType="com.bypay.domain.SubMerCashout">
+		INSERT INTO SUB_MER_CASHOUT (SUB_MER_ID,MER_SYS_ID,ORDER_AMT,ORDER_STATUS,CREATE_TIME,FINISH_TIME,TRANS_ID,TRANS_QID,T0_MER_GAIN,T0_MER_RATE,GRADE,#{BATCH_ID})
+		values
+		(#{subMerId},#{merSysId},#{orderAmt},#{orderStatus},#{createTime},#{finishTime},#{transId},#{TransQid},#{t0MerGain},#{t0MerRate},#{grade},#{batchId}) 
+	</insert>
+</mapper>

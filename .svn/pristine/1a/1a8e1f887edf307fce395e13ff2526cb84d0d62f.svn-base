@@ -1,0 +1,544 @@
+package com.bypay.action;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+import org.apache.commons.lang3.StringUtils;
+
+import com.Ostermiller.util.MD5;
+import com.bypay.common.BaseAction;
+import com.bypay.dao.AgenctInfoDao;
+import com.bypay.dao.MerInfoDao;
+import com.bypay.dao.MobileUserDao;
+import com.bypay.dao.SubMerInfoDao;
+import com.bypay.dao.SubMerTerminalDao;
+import com.bypay.dao.SubMerTerminalInfoDao;
+import com.bypay.domain.AgenctInfo;
+import com.bypay.domain.MerInfo;
+import com.bypay.domain.MobileUser;
+import com.bypay.domain.SubMerInfo;
+import com.bypay.domain.SubMerTerminal;
+import com.bypay.domain.SubMerTerminalInfo;
+import com.bypay.service.InterfaceService;
+import com.bypay.service.SubMerRateService;
+import com.bypay.util.PageUtil;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+
+public class SubMerTerminAction extends BaseAction {
+
+  /**
+   * 
+   */
+  private static final long serialVersionUID = 1L;
+  @Inject
+  private SubMerTerminalInfoDao subMerTerminalInfoDao;
+  @Inject
+  private InterfaceService interfaceService;
+  @Inject
+  private SubMerTerminalDao subMerTerminalDao;
+  @Inject
+  private AgenctInfoDao agenctInfoDao;
+  @Inject
+  private SubMerInfoDao subMerInfoDao;
+  @Inject
+  private MerInfoDao merInfoDao;
+  @Inject
+  private MobileUserDao mobileUserDao;
+
+  private List<MerInfo> merInfoList;
+
+  private SubMerTerminal subMerTerminal;
+
+  private List<SubMerTerminal> subMerTerminalList;
+
+  private String subMerTerminalListJson;
+
+  private String op;
+  // 分页开始
+  private int page = 1;
+  private int pageSize = 15;
+
+  /**
+   * 设备注销
+   * 
+   * @throws IOException
+   */
+  public void terminalCancel() {
+    try {
+      if (subMerTerminal != null && 0 != subMerTerminal.getId()) {
+        // 获取设备信息
+        SubMerTerminal terminal = subMerTerminalDao.selectSubMerTerminalOne(subMerTerminal);
+        if (null == terminal) {
+          getResponse().getWriter().write("fail");
+        } else {
+          if (null != terminal.getTsn() && !"".equals(terminal.getTsn())
+              && null != terminal.getFactory() && !"".equals(terminal.getFactory())) {
+            // 调用终端注销方法
+            String result = interfaceService.terminalCancel(terminal);
+            if ("1".equals(result)) {
+              SubMerTerminal subMerTerminal = new SubMerTerminal();
+              subMerTerminal.setId(subMerTerminal.getId());
+              subMerTerminal.setStatus("0");
+              int results = 0;
+              results = subMerTerminalDao.reset(subMerTerminal);
+              if (results > 0) {
+                getResponse().getWriter().write("success");
+              } else {
+                getResponse().getWriter().write("fail");
+              }
+            } else {
+              getResponse().getWriter().write("fail");
+            }
+          } else {
+            getResponse().getWriter().write("fail");
+          }
+        }
+      } else {
+        getResponse().getWriter().write("fail");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+      try {
+        getResponse().getWriter().write("fail");
+      } catch (IOException e1) {
+        e1.printStackTrace();
+      }
+    }
+  }
+
+  // 查询所有终端信息 LIST yjh
+  public void selectSubMerTerminal() {
+    try {
+      if (subMerTerminal == null) {
+        subMerTerminal = new SubMerTerminal();
+      }
+      Map map = PageUtil.getPageMap(page, pageSize);
+      map.put("subMerTerminal", subMerTerminal);
+      int count = 0;
+      count = subMerTerminalDao.selectSubMerTerminalCount(map);
+      subMerTerminalList = subMerTerminalDao.selectSubMerTerminal(map);
+      JSONArray array = JSONArray.fromObject(subMerTerminalList);
+      JSONObject object = new JSONObject();
+      object.put("Rows", array.toString());
+      object.put("Total", count);
+      subMerTerminalListJson = object.toString();
+      getResponse().getWriter().write(subMerTerminalListJson);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void resetSubMerTerminal() {
+    try {
+      if (subMerTerminal == null) {
+        getResponse().getWriter().write("fone");
+        return;
+      }
+      // 根据ID获取子商户终端信息
+      SubMerTerminal subMerTerminals = subMerTerminalDao.selectSubMerTerminalOne(subMerTerminal);
+
+      if (subMerTerminal.getLoginPwd() != null) {
+        subMerTerminal.setLoginPwd(MD5.getHashString("123456"));
+      }
+      int i = subMerTerminalDao.reset(subMerTerminal);
+      if (i != 1) {
+        getResponse().getWriter().write("fone");
+      } else {
+        if ("-1".equals(subMerTerminal.getSubMerId())) {
+          // 删除子商户设备明细表信息
+          SubMerTerminalInfo subMerTerminalInfo = new SubMerTerminalInfo();
+          subMerTerminalInfo.setTsn(subMerTerminals.getTsn());
+          subMerTerminalInfo.setSubMerId(subMerTerminals.getSubMerId());
+          Integer result = subMerTerminalInfoDao.deleteSubMerTInfo(subMerTerminalInfo);
+          if (result > 0) {
+            System.out.println("删除子商户终端明细成功");
+          }
+        }
+        getResponse().getWriter().write("succ");
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * 
+   * @Description:清空子商户
+   * @Auther: ljl
+   * @Date: 2014-10-31 上午10:36:25
+   */
+  public void resetSubMerInfo() {
+    try {
+      if (subMerTerminal == null) {
+        this.renderText("fone");
+        return;
+      }
+      // 根据ID获取子商户终端信息
+      SubMerTerminal subMerTerminals = subMerTerminalDao.selectSubMerTerminalOne(subMerTerminal);
+      int i = subMerTerminalDao.resetSubMerInfo(subMerTerminal);
+      if (i != 1) {
+        this.renderText("fone");
+      } else {
+        // 删除子商户设备明细表信息
+        SubMerTerminalInfo subMerTerminalInfo = new SubMerTerminalInfo();
+        subMerTerminalInfo.setTsn(subMerTerminals.getTsn());
+        subMerTerminalInfo.setSubMerId(subMerTerminals.getSubMerId());
+        Integer result = subMerTerminalInfoDao.deleteSubMerTInfo(subMerTerminalInfo);
+        if (result > 0) {
+          System.out.println("删除子商户终端明细成功");
+        }
+        // 删除子商户信息
+        SubMerInfo subMerInfo = new SubMerInfo();
+        subMerInfo.setSubMerId(subMerTerminals.getSubMerId());
+        subMerInfo.setLegalIdcard("");
+        subMerInfo.setContactorPhone("");
+        Boolean falg = subMerInfoDao.updateSubMerInfoWithRest(subMerInfo);
+        if (falg) {
+          log.info("删除子商户相关信息成功");
+        }
+        //删除新表
+        MobileUser mobileUser = new MobileUser();
+        mobileUser.setSubMerId(subMerTerminals.getSubMerId());
+        mobileUserDao.deleteMobileUser(mobileUser);
+        
+        this.renderText("succ");
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public String selectSubMerTerminalById() {
+    try {
+      subMerTerminal = subMerTerminalDao.selectSubMerTerminalOne(subMerTerminal);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return "selectSubMerTerminalById";
+  }
+
+  // 登录名修改
+  public String updatetractInfo() {
+    if (subMerTerminal == null) {
+      subMerTerminal = new SubMerTerminal();
+      // subMerTerminal.setTractId(getRequest().getParameter("tractId"));
+    }
+    System.out.println(subMerTerminal.getLoginName());
+
+    int result = subMerTerminalDao.updateSubMerTerminalLoginName(subMerTerminal);
+    if (result > 0) {
+      System.out.println("修改成功");
+      getRequest().setAttribute("updatetractInfo", "success");
+
+    }
+    // tractId = getRequest().getParameter("tractId");
+    // tractInfo = tractInfoService.selectTractById(tractId);
+    return "selectSubMerTerminalById";
+  }
+
+  /**
+   * 查询所有机构号和机构名
+   * 
+   * @return
+   */
+  public String selectMerSysId() {
+    merInfoList = merInfoDao.selectMerInfoByAllSysId(null);// 查询所有机构号
+    return "selectMerSysId";
+  }
+
+  /**
+   * 
+   * @Description: 获取代理商
+   * @Auther: lijialiang
+   * @Date: 2014-12-5 下午2:15:35
+   */
+  public void getAgency() throws IOException {
+    String merSysId = this.getParameterForString("merSysId");
+    String agentIdL1 = this.getParameterForString("agentIdL1");
+    String agentIdL2 = this.getParameterForString("agentIdL2");
+    String agentIdL3 = this.getParameterForString("agentIdL3");
+    Map<String, Object> map = new HashMap<String, Object>();
+    AgenctInfo agenctInfo = new AgenctInfo();
+    agenctInfo.setMerSysId(merSysId);
+    if (StringUtils.isNotBlank(agentIdL1)) {
+	    agenctInfo.setSuperAgentId(agentIdL1);
+	    agenctInfo.setLevel("2");
+    } else if (StringUtils.isNotBlank(agentIdL2)) {
+        agenctInfo.setAgentLv2(agentIdL2);
+        agenctInfo.setLevel("3");
+    } else if (StringUtils.isNotBlank(agentIdL3)) {
+        agenctInfo.setAgentLv3(agentIdL3);
+        agenctInfo.setLevel("4");
+    } else {
+        agenctInfo.setLevel("1");
+    } 
+
+    agenctInfo.setStatus("1");
+    map.put("agenctInfo", agenctInfo);
+
+    Map<String,Object> result = Maps.newHashMap();
+    result.put("list", agenctInfoDao.queryAgenctInfoAll(map));
+    this.renderJSON(result);
+  }
+
+  /**
+   * 重置机构商
+   * 
+   * @return
+   */
+  public void resetMerSysId() {
+    List<Map<String,Object>> list = Lists.newArrayList();
+    String[] tsns = subMerTerminal.getTsn().split("\r\n");// 截取用户输入的TSN，存入数组
+    if (tsns.length > 0) {// 如果截取到TSN 则执行数据库操作
+      for (int i = 0; i < tsns.length; i++) {// 循环操作
+        Map<String,Object> map = Maps.newHashMap();
+        map.put("tsn", tsns[i]);
+        subMerTerminal.setTsn(tsns[i]);// 获取TSN
+        SubMerTerminal smt = subMerTerminalDao.selectSubMerTerminalByTerminalId(subMerTerminal);
+//        if (null != smt) {
+//          if (StringUtils.isNotBlank(smt.getSubMerId()) && !"-1".equals(smt.getSubMerId())) {
+//            // 已有子商户
+//            /*if (StringUtils.isBlank(subMerTerminal.getAgentIdL1()) || "-1".equals(subMerTerminal.getAgentIdL1())) {// 无一级代理商,不可重置
+//              map.put("status", "失败");
+//              map.put("desc", "无一级代理商,不可重置");
+//              list.add(map);
+//              continue;
+//            }*/
+//            subMerTerminalDao.resetMerSysIdByTsn(subMerTerminal);// 修改子商户设备明细
+//
+        	if(smt!=null){
+	            SubMerInfo subMerInfo = new SubMerInfo(); // 修改子商户所属商户
+	            subMerInfo.setSubMerId(StringUtils.isEmpty(smt.getSubMerId())?"":smt.getSubMerId());
+	            subMerInfo.setMerSysId(subMerTerminal.getMerSysId());
+	            subMerInfo.setAgentIdL1(subMerTerminal.getAgentIdL1());
+	            subMerInfo.setAgentIdL2(subMerTerminal.getAgentIdL2());
+	            subMerInfo.setAgentIdL3(subMerTerminal.getAgentIdL3());
+	            subMerInfo.setAgentIdL4(subMerTerminal.getAgentIdL4());
+	            if(StringUtils.isNotEmpty(subMerInfo.getSubMerId())
+	            		&& !"-1".equals(subMerInfo.getSubMerId())){
+	            	subMerInfoDao.update(subMerInfo);
+	            }
+        	}
+//
+//            SubMerRate subMerRate = new SubMerRate();
+//            subMerRate.setSubMerId(smt.getSubMerId());
+//            subMerRate = subMerRateService.getSubMerRateBySubMerId(subMerRate);
+//            if(null==subMerRate){
+//              map.put("status", "失败");
+//              map.put("desc", "子商户无交易费率");
+//              list.add(map);
+//              continue;
+//            }
+//            // 1级代理
+//            AgenctInfo agentInfo1Level = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL1());
+//
+//            AgenctInfo agentInfo2Level = agenctInfoDao.getAgentInfo(subMerTerminal.getAgentIdL2());
+//
+//            if ("01".equals(subMerRate.getRateType())) {// 扣率
+//              subMerRate.setTransHighestFee("-1");
+//              
+//              if(null!=agentInfo1Level){
+//                subMerRate.setAgentL1Rate(agentInfo1Level.getAgentRate1());
+//                subMerRate.setAgentL1ProfitRate(agentInfo1Level.getAgentProfitRate());
+//              }else{//有子商户,未选择代理商,直接重置到机构,清空代理商费率
+//                subMerRate.setAgentL1Rate("-1");
+//                subMerRate.setAgentL1ProfitRate("-1");
+//              }
+//              subMerRate.setAgentL1RateH("-1");
+//              subMerRate.setAgentL1HighestFee("-1");   
+//              
+//              if(null!=agentInfo2Level){
+//                subMerRate.setAgentL2ProfitRate(agentInfo2Level.getAgentProfitRate());
+//                subMerRate.setAgentL2Rate(agentInfo2Level.getAgentRate1());
+//              }else{
+//                subMerRate.setAgentL2ProfitRate("-1");
+//                subMerRate.setAgentL2Rate("-1");
+//              }
+//              subMerRate.setAgentL2RateH("-1");
+//              subMerRate.setAgentL2HigestFee("-1");
+//
+//            }
+//            if ("02".equals(subMerRate.getRateType())) {// 封顶
+//              subMerRate.setTeransRate("-1");
+//
+//              subMerRate.setAgentL1Rate("-1");
+//              if(null!=agentInfo1Level){
+//                subMerRate.setAgentL1RateH(agentInfo1Level.getAgentRate2());
+//                subMerRate.setAgentL1HighestFee(agentInfo1Level.getAgentHighestFee());
+//                subMerRate.setAgentL1ProfitRate(agentInfo1Level.getAgentProfitRate());
+//              }else{
+//                subMerRate.setAgentL1RateH("-1");
+//                subMerRate.setAgentL1HighestFee("-1");
+//                subMerRate.setAgentL1ProfitRate("-1");
+//              }  
+//              if(null!=agentInfo2Level){
+//                subMerRate.setAgentL2RateH(agentInfo2Level.getAgentRate2());
+//                subMerRate.setAgentL2HigestFee(agentInfo2Level.getAgentHighestFee());
+//                subMerRate.setAgentL2ProfitRate(agentInfo2Level.getAgentProfitRate());
+//              }else{
+//                subMerRate.setAgentL2RateH("-1");
+//                subMerRate.setAgentL2HigestFee("-1");
+//                subMerRate.setAgentL2ProfitRate("-1");
+//              }
+//              subMerRate.setAgentL2Rate("-1");
+//            }
+//            subMerRateService.updateSubMerRate(subMerRate);
+//            map.put("status", "成功");
+//            map.put("desc", "成功");
+//          } else {
+//            // 无子商户直接修改终端所属
+//            subMerTerminalDao.resetMerSysIdByTsn(subMerTerminal);
+//            map.put("status", "成功");
+//            map.put("desc", "成功");
+//          }
+
+//        } else {
+          // 终端不存在
+          subMerTerminalDao.resetMerSysIdByTsn(subMerTerminal);
+          map.put("status", "成功");
+          map.put("desc", "成功");
+//        }
+        list.add(map);
+      }
+    }
+    try {
+      Map<String,Object> result = Maps.newHashMap();
+      result.put("result", list);
+      this.renderJSON(result);
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void cloneTerminal(){
+	  String msg="";
+	  try{
+	  String oldTsn = getRequest().getParameter("oldTsn");
+	  String newTsn = getRequest().getParameter("newTsn");
+	  SubMerTerminal oldTerminal = new SubMerTerminal();
+	  oldTerminal.setTsn(oldTsn);
+	  oldTerminal = subMerTerminalDao.selectSubMerTerminalByTerminalId(oldTerminal);
+	  int usingId=oldTerminal.getId();
+	  if(oldTerminal==null){
+		  msg="原终端不存在";
+		  getResponse().getWriter().write(msg);
+		  return;
+	  }
+	  String SubMerId = oldTerminal.getSubMerId();
+	  SubMerTerminal newTerminal = new SubMerTerminal();
+	  newTerminal.setTsn(newTsn);
+	  newTerminal.setMerSysId(oldTerminal.getMerSysId());
+	  newTerminal = subMerTerminalDao.getSubMerTerMer(newTerminal);
+	  if(newTerminal==null){
+		  msg="替换终端不存在或不在同一机构下";
+		  getResponse().getWriter().write(msg);
+		  return;
+	  }
+	  if(!newTerminal.getSubMerId().equals("-1")){
+		  msg="替换终端正在使用中";
+		  getResponse().getWriter().write(msg);
+		  return;
+	  }
+	  int newId = newTerminal.getId();
+	  
+	  oldTerminal.setId(newId);
+	  if(subMerTerminalDao.cloneTer(oldTerminal)){//如果克隆成功  清空掉原来的终端
+		  	SubMerTerminalInfo sti = new SubMerTerminalInfo();
+		  	sti.setSubMerId(SubMerId);
+		  	sti.setTsn(newTsn);
+		  	subMerTerminalInfoDao.updateTerminalInfoTsn(sti);
+		  	oldTerminal.setId(usingId);
+			subMerTerminalDao.cleanLogin(oldTerminal);
+			MobileUser mobileUser = new MobileUser();
+			mobileUser.setOldSubMerId(SubMerId);
+			mobileUser.setTerminalId(newTsn);
+			mobileUserDao.updateTerminal(mobileUser);
+			msg="替换终端成功";
+			getResponse().getWriter().write(msg);
+			return;
+		}
+	  }catch(Exception e){
+		  e.printStackTrace();
+		  msg="系统异常";
+		  try{
+		  getResponse().getWriter().write(msg);
+		  }catch(Exception ex){
+			  ex.printStackTrace();
+		  }
+		  return;
+	  }
+  }
+  
+  public SubMerTerminalDao getSubMerTerminalDao() {
+    return subMerTerminalDao;
+  }
+
+  public void setSubMerTerminalDao(SubMerTerminalDao subMerTerminalDao) {
+    this.subMerTerminalDao = subMerTerminalDao;
+  }
+
+  public SubMerTerminal getSubMerTerminal() {
+    return subMerTerminal;
+  }
+
+  public void setSubMerTerminal(SubMerTerminal subMerTerminal) {
+    this.subMerTerminal = subMerTerminal;
+  }
+
+  public List<SubMerTerminal> getSubMerTerminalList() {
+    return subMerTerminalList;
+  }
+
+  public void setSubMerTerminalList(List<SubMerTerminal> subMerTerminalList) {
+    this.subMerTerminalList = subMerTerminalList;
+  }
+
+  public String getSubMerTerminalListJson() {
+    return subMerTerminalListJson;
+  }
+
+  public void setSubMerTerminalListJson(String subMerTerminalListJson) {
+    this.subMerTerminalListJson = subMerTerminalListJson;
+  }
+
+  public String getOp() {
+    return op;
+  }
+
+  public void setOp(String op) {
+    this.op = op;
+  }
+
+  public int getPage() {
+    return page;
+  }
+
+  public void setPage(int page) {
+    this.page = page;
+  }
+
+  public int getPageSize() {
+    return pageSize;
+  }
+
+  public void setPageSize(int pageSize) {
+    this.pageSize = pageSize;
+  }
+
+  public List<MerInfo> getMerInfoList() {
+    return merInfoList;
+  }
+
+  public void setMerInfoList(List<MerInfo> merInfoList) {
+    this.merInfoList = merInfoList;
+  }
+
+}

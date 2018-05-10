@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.FactoryCodeDao">
+	<resultMap id="factoryCode" type="com.bypay.domain.FactoryCode">
+		<result property="id" column="ID" />
+		<result property="factoryNo" column="FACTORY_NO" />
+		<result property="factoryName" column="FACTORY_NAME" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	
+	<sql id="baseColumn">
+		FACTORY_NO,FACTORY_NAME, RESERVED1, RESERVED2,	
+		RESERVED3
+		
+	</sql>
+	
+	<select id="selectFactoryCode" resultMap="factoryCode">
+		SELECT CSS_NAME,CSS_ID FROM CSS_CONFIG
+	</select>
+	<!-- 因名字重复，2014-10-06 王杰在名字后面加One -->
+	<insert id="insertFactoryCodeOne" parameterType="com.bypay.domain.FactoryCode">
+		INSERT INTO FACTORY_CODE(FACTORY_NO, FACTORY_NAME, RESERVED1, RESERVED2, RESERVED3) 
+    	VALUES(#{factoryNo}, #{factoryName}, #{reserved1}, #{reserved2}, #{reserved3})
+	</insert>
+
+	<!-- 对应表查询 -->
+	<select id="selectFactoryCodeList"  resultMap="factoryCode" parameterType="java.util.Map">
+			select * from FACTORY_CODE 
+			<if test="page!='-1' and pageSize!='-1'">
+			limit #{page},#{pageSize}
+			</if>
+	</select>
+	
+	<!-- 查询对应表条数 -->
+	<select id="selectFactoryCodeListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.FactoryCode">
+		SELECT COUNT(*) from FACTORY_CODE 
+	</select>
+	
+	<!-- 删除样式 -->
+		<delete id="deleteFactoryCode" parameterType="com.bypay.domain.FactoryCode">
+		delete  from FACTORY_CODE where  ID=#{id}
+	</delete>
+</mapper>

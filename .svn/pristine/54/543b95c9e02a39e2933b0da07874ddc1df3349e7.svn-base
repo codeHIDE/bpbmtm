@@ -1,0 +1,45 @@
+package com.bypay.dao.impl;
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.OrderStatictisDao;
+import com.bypay.domain.OrderStatictis;
+@Repository("OrderStatictisDao")
+public class OrderStatictisDaoImpl implements OrderStatictisDao{
+	@Inject
+	private SqlSessionTemplate sqlSessionTemplate;
+
+	@Override
+	public Integer insertOrderStatictis(OrderStatictis orderStatictis) {
+		return sqlSessionTemplate.insert("insertOrderStatictis",orderStatictis);
+	}
+
+	@Override
+	public Integer selectOrderStatictisOrderId(String orderId) {
+		return (Integer) sqlSessionTemplate.selectOne("selectOrderStatictisOrderId",orderId);
+	}
+	
+	@Override
+	public OrderStatictis selectbyRight(String orderId) {
+		return (OrderStatictis) sqlSessionTemplate.selectOne("selectbyRight",orderId);
+	}
+	
+	@Override
+	public Integer updateOrderStatus(OrderStatictis orderStatictis) {
+		return (Integer) sqlSessionTemplate.update("updateOrderStatus",orderStatictis);
+	}
+	
+	@Override
+	public List<OrderStatictis> selectOrderByStatus(OrderStatictis orderStatictis) {
+		return  sqlSessionTemplate.selectList("selectOrderByStatus",orderStatictis);
+	}
+	
+	@Override
+	public List<OrderStatictis> selectSingleOrder(OrderStatictis orderStatictis) {
+		return  sqlSessionTemplate.selectList("selectSingleOrder",orderStatictis);
+	}
+}

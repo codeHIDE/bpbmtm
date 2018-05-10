@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.StatisticsDao">
+	<resultMap id="statisticsInfo" type="com.bypay.domain.StatisticsInfo">
+		<result property="debitCard" column="Debit_Card" />
+		<result property="creditCard" column="Credit_Card" />
+		<result property="respCode" column="RESP_CODE" />
+		<result property="respDesc" column="RESP_DESC" />
+		<result property="countNum" column="COUNT_NUM" />
+		
+		<result property="sumTransAmt" column="SUM_AMT" /><!-- 总交易金额 -->
+		<result property="sumTransFee" column="SUM_TRANS_FEE" /><!-- 总交易手续费 -->
+		<result property="createTime" column="CREATE_TIME" /><!-- 时间 -->
+		
+		<result property="agentId" column="AGENT_ID" />
+		<result property="agentName" column="AGENT_NAME" />
+		<result property="level" column="LEVEL" />
+		<result property="merAmt" column="MER_AMT" />
+		<result property="transFee" column="TRANS_FEE" />
+		<result property="merCapital" column="MER_CAPITAL" />
+		<result property="bypayProfit" column="BYPAY_PROFIT" />
+		<result property="merProfit" column="MER_PROFIT" />
+		<result property="agent1Profit" column="AGENT1_PROFIT" />
+		<result property="agent2Profit" column="AGENT2_PROFIT" />
+		
+		<result property="merName" column="MER_NAME" />
+	</resultMap>
+	<!-- 根据卡类型和订单状态统计 -->
+	<select id="getOrderInfoByCardType" resultMap="statisticsInfo" parameterType="java.util.Map">
+			SELECT
+			SUM(CASE WHEN CARD_TYPE = 1 THEN 1 ELSE 0 END) as Debit_Card,
+			SUM(CASE WHEN CARD_TYPE = 2 THEN 1 ELSE 0 END) as Credit_Card
+			FROM ORDER_INFO OI WHERE OI.ORDER_STATUS = 1
+			AND OI.CREATE_TIME between #{startTime} and #{endTime}
+	</select>
+	<!-- 错误码统计 -->
+	<select id="getErrRespCodeStatistics" resultMap="statisticsInfo" parameterType="java.util.Map">
+			SELECT RESP_CODE, RESP_DESC, count(RESP_CODE) as COUNT_NUM
+			FROM ORDER_INFO OI
+			where OI.ORDER_STATUS = 2
+			AND OI.CREATE_TIME between #{startTime} and #{endTime}
+			<if test="merSysId != null and merSysId != ''">
+			AND OI.MER_SYS_ID = #{merSysId}
+			</if>
+			<if test="transType != null and transType != '' and transType!='-1'">
+			AND OI.TRANS_TYPE = #{transType}
+			</if>
+			group by OI.RESP_CODE;
+	</select>
+	<!-- 按每日统计成功交易的金额、手续费 -->
+	<select id="getSucTransAmtFeeStatistics" resultMap="statisticsInfo" parameterType="java.util.Map">
+			SELECT DATE(CREATE_TIME) as CREATE_TIME, SUM_AMT,SUM_TRANS_FEE 
+			FROM MER_SETTLE_STATICTIS 
+			where CREATE_TIME between #{startTime} and #{endTime}
+			<if test="merSysId != null and merSysId != ''">
+				AND MID = #{merSysId} and MER_TYPE = 0
+			</if>
+			order by DATE(CREATE_TIME) asc
+	</select>
+	
+	
+	<!-- 按每月统计成功交易的金额、手续费 -->
+	<select id="getMonSucTransAmtFeeStatistics" resultMap="statisticsInfo" parameterType="java.util.Map">
+			SELECT left(CREATE_TIME, 7) as CREATE_TIME, SUM(SUM_AMT)  SUM_AMT, SUM(SUM_TRANS_FEE) SUM_TRANS_FEE
+			FROM MER_SETTLE_STATICTIS  
+			<where>
+				left(CREATE_TIME, 4) = #{years}
+			<if test="merSysId != null and merSysId != ''">
+				and  MID = #{merSysId} and MER_TYPE = 0 
+			</if>
+			</where>
+			GROUP BY left(CREATE_TIME, 7) 
+	</select>
+	<!-- 代理商利润数据总条数 -->
+	<select id="getAgentProfitStatisticsCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+		select count(*) from
+		(SELECT 
+		OI.SETTLE_DATE,
+		OI.AGENT_ID,
+		AI.AGENT_NAME,
+		AI.LEVEL,
+		SUM(OS.TRANS_FEE) TRANS_FEE,
+		SUM(OS.AGENT1_PROFIT) AGENT1_PROFIT,
+		SUM(OS.AGENT2_PROFIT) AGENT2_PROFIT
+		FROM ORDER_INFO OI
+		left join AGENCT_INFO AI
+		on AI.AGENT_ID = OI.AGENT_ID	
+		left join ORDER_STATICTIS OS
+		on OS.ORDER_ID = OI.ORDER_ID
+		WHERE left(OI.SETTLE_DATE, 6) = #{yearMonth}
+		and OI.MER_SYS_ID = #{merSysId} and OI.ORDER_STATUS = 1
+		GROUP BY OI.AGENT_ID) tmp
+	</select>
+	<!-- 代理商利润数据 -->
+	<select id="getAgentProfitStatistics" resultMap="statisticsInfo" parameterType="java.util.Map">
+		SELECT 
+		OI.AGENT_ID,
+		AI.AGENT_NAME,
+		AI.LEVEL,
+		SUM(OS.TRANS_FEE) TRANS_FEE,
+		SUM(OS.AGENT1_PROFIT) AGENT1_PROFIT,
+		SUM(OS.AGENT2_PROFIT) AGENT2_PROFIT
+		FROM ORDER_INFO OI
+		left join AGENCT_INFO AI
+		on AI.AGENT_ID = OI.AGENT_ID	
+		left join ORDER_STATICTIS OS
+		on OS.ORDER_ID = OI.ORDER_ID
+		WHERE left(OI.SETTLE_DATE, 6) = #{yearMonth}
+		and OI.MER_SYS_ID = #{merSysId} and OI.ORDER_STATUS = 1
+		GROUP BY OI.AGENT_ID
+		limit #{page},#{pageSize}
+	</select>
+	<!-- 代理商利润统计 -->
+	<select id="agentProfitDayStatistics" resultMap="statisticsInfo" parameterType="java.util.Map">
+		SELECT 
+		OI.SETTLE_DATE as CREATE_TIME,
+		OI.AGENT_ID,
+		AI.AGENT_NAME,
+		AI.LEVEL,
+		SUM(OS.TRANS_FEE) TRANS_FEE,
+		SUM(OI.MER_AMT) MER_AMT,
+		SUM(OI.SETTLE_AMT) MER_CAPITAL,
+		SUM(OS.BYPAY_PROFIT) BYPAY_PROFIT,
+		SUM(OS.MER_PROFIT) MER_PROFIT,
+		SUM(OS.AGENT1_PROFIT) AGENT1_PROFIT,
+		SUM(OS.AGENT2_PROFIT) AGENT2_PROFIT
+		FROM ORDER_INFO OI
+		LEFT JOIN ORDER_STATICTIS OS
+		ON OS.ORDER_ID = OI.ORDER_ID
+		LEFT JOIN AGENCT_INFO AI
+		ON AI.AGENT_ID = OI.AGENT_ID
+		WHERE left(OI.SETTLE_DATE, 6) = #{yearMonth}
+		and OI.AGENT_ID = #{agentId} and OI.ORDER_STATUS = 1
+		GROUP BY OI.SETTLE_DATE
+		order by OI.SETTLE_DATE asc
+	</select>
+	
+	
+	<!-- 机构商成功交易利润日统计 -->
+	<select id="getMerFeeStatistics" resultMap="statisticsInfo"  parameterType="java.util.Map">
+			select  
+			OI.SETTLE_DATE as CREATE_TIME,
+			OI.MER_AMT,
+			OI.SETTLE_AMT,
+			OI.MER_SYS_ID,
+			SUM(OS.MER_PROFIT) as MER_PROFIT,
+			SUM(OS.TRANS_FEE) as TRANS_FEE,
+			OS.MER_PROFIT,
+			OS.AGENT1_PROFIT,
+			OS.AGENT2_PROFIT,
+	      	OS.BYPAY_PROFIT,
+	      	mer.MER_NAME
+			from ORDER_INFO OI
+			left join 
+			ORDER_STATICTIS OS
+			on OS.ORDER_ID = OI.ORDER_ID
+			left join 
+			MER_INFO mer
+			on OI.MER_SYS_ID = mer.MER_SYS_ID
+			<where>
+				left(OI.SETTLE_DATE, 6) = #{createTime}
+				and OI.MER_SYS_ID = #{merSysId}
+				and OI.ORDER_STATUS = 1
+			</where>
+			order by right(OI.SETTLE_DATE, 2) asc
+	</select>
+	
+
+</mapper>

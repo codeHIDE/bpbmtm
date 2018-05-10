@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.BlackInfoDao">
+	<resultMap id="blackInfo" type="com.bypay.domain.BlackInfo">
+		<result property="id" column="ID" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="cardNo" column="CARD_NO" />
+		<result property="cardType" column="CARD_TYPE" />
+		<result property="realName" column="REAL_NAME" />
+		<result property="idNum" column="ID_NUM" />
+		<result property="phone" column="PHONE" />
+		<result property="level" column="LEVEL" />
+		<result property="blackType" column="BLACK_TYPE" />
+		<result property="status" column="STATUS" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+		<result property="remark" column="REMARK" />
+		
+		<result property="subMerName" column="SUB_MER_NAME" />
+	</resultMap>
+
+		<!-- 查询所有黑名单 -->
+	<select id="selectBlackInfoList" resultMap="blackInfo"  parameterType="java.util.Map">
+		SELECT BI.CREATE_TIME,BI.SUB_MER_ID,BI.CARD_NO,BI.CARD_TYPE,BI.REAL_NAME,
+		BI.ID_NUM,BI.PHONE,BI.LEVEL,BI.BLACK_TYPE,BI.STATUS,BI.TERMINAL_ID
+		,SMI.SUB_MER_NAME  FROM BLACK_INFO BI 
+		left join SUB_MER_INFO SMI ON BI.SUB_MER_ID=SMI.SUB_MER_ID WHERE 1=1  
+				<!-- 状态 -->
+		<if test="blackInfo.status!='-1' and blackInfo.status!=null">
+			AND BI.STATUS=#{blackInfo.status}  
+		</if>  <!-- 黑名单级别 -->
+		<if test="blackInfo.level!='-1' and blackInfo.level!=null">
+			AND BI.LEVEL=#{blackInfo.level}  
+		</if>  <!-- 黑名单类型 -->
+		<if test="blackInfo.blackType!='-1' and blackInfo.blackType!=null">
+			AND BI.BLACK_TYPE=#{blackInfo.blackType}  
+		</if> <!-- 子商户号 -->
+		<if test="blackInfo.subMerId!='' and blackInfo.subMerId!=null">
+			AND BI.SUB_MER_ID=#{blackInfo.subMerId}  
+		</if> <!-- 姓名 --> 
+		<if test="blackInfo.realName!='' and blackInfo.realName!=null">
+			AND BI.REAL_NAME like #{blackInfo.realName}
+		</if>
+		<if test="blackInfo.terminalId!='' and blackInfo.terminalId!=null">
+			AND BI.TERMINAL_ID=#{blackInfo.terminalId}  
+		</if>
+		 <!-- 创建时间 -->
+		<if test="blackInfo.createTime!='' and blackInfo.createTime!=null">
+			AND BI.CREATE_TIME = #{blackInfo.createTime}  
+		</if> 
+		<if test="blackInfo.cardNo!='' and blackInfo.cardNo!=null">
+			AND BI.CARD_NO = #{blackInfo.cardNo}
+		</if>
+		<if test="blackInfo.phone!='' and blackInfo.phone!=null">
+			AND BI.PHONE = #{blackInfo.phone}
+		</if>
+		<if test="blackInfo.idNum!='' and blackInfo.idNum!=null">
+			AND BI.ID_NUM = #{blackInfo.idNum}
+		</if>
+		 limit #{page},#{pageSize}
+	</select>
+	<!-- 查询所有黑名单信息数量 -->
+	<select id="selectBlackInfoCount" resultType="int"  parameterType="java.util.Map">
+		SELECT count(1) FROM BLACK_INFO BI  
+		left join SUB_MER_INFO SMI ON BI.SUB_MER_ID=SMI.SUB_MER_ID WHERE 1=1  
+				<!-- 状态 -->
+		<if test="blackInfo.status!='-1' and blackInfo.status!=null">
+			AND BI.STATUS=#{blackInfo.status}  
+		</if>  <!-- 黑名单级别 -->
+		<if test="blackInfo.level!='-1' and blackInfo.level!=null">
+			AND BI.LEVEL=#{blackInfo.level}  
+		</if>  <!-- 黑名单类型 -->
+		<if test="blackInfo.blackType!='-1' and blackInfo.blackType!=null">
+			AND BI.BLACK_TYPE=#{blackInfo.blackType}  
+		</if> <!-- 子商户号 -->
+		<if test="blackInfo.subMerId!='' and blackInfo.subMerId!=null">
+			AND BI.SUB_MER_ID=#{blackInfo.subMerId}  
+		</if> <!-- 姓名 --> 
+		<if test="blackInfo.realName!='' and blackInfo.realName!=null">
+			AND BI.REAL_NAME like #{blackInfo.realName}  
+		</if>
+		<if test="blackInfo.terminalId!='' and blackInfo.terminalId!=null">
+			AND BI.TERMINAL_ID=#{blackInfo.terminalId}  
+		</if>
+		<!-- 创建时间 -->
+		<if test="blackInfo.createTime!='' and blackInfo.createTime!=null">
+			AND BI.CREATE_TIME = #{blackInfo.createTime}  
+		</if>
+		<if test="cardNo!='' and cardNo!=null">
+		and CARD_NO = #{cardNo}
+		</if>
+		<if test="phone!='' and phone!=null">
+		and PHONE = #{phone}
+		</if>
+		<if test="idNum!='' and idNum!=null">
+		and ID_NUM = #{idNum}
+		</if> 
+	</select>
+	<!-- 修改指定黑名单信息的状态 -->
+	<update id="updateBlackInfoStatus" parameterType="com.bypay.domain.BlackInfo">
+		UPDATE BLACK_INFO BI  SET BI.STATUS=#{status} WHERE BI.SUB_MER_ID=#{subMerId}
+	</update>
+	
+	<delete id="deleteBlackInfo" parameterType="com.bypay.domain.BlackInfo">
+		DELETE FROM BLACK_INFO WHERE SUB_MER_ID=#{subMerId}
+	</delete>
+	<!-- 添加黑名单 -->
+	<insert id="insertBlackInfo" parameterType="com.bypay.domain.BlackInfo">
+		INSERT INTO BLACK_INFO(CREATE_TIME, SUB_MER_ID, CARD_NO, CARD_TYPE, REAL_NAME, 
+		ID_NUM, PHONE, LEVEL, BLACK_TYPE, STATUS, TERMINAL_ID) 
+    VALUES(#{createTime},#{subMerId},#{cardNo},#{cardType},#{realName},#{idNum},#{phone},
+    #{level},#{blackType},#{status},#{terminalId})
+	</insert>
+	
+	<select id="selectBlackInfo" parameterType="com.bypay.domain.BlackInfo" resultMap="blackInfo" >
+		select * from BLACK_INFO
+		where STATUS = 1
+		<if test="cardNo!='' and cardNo!=null">
+		and CARD_NO = #{cardNo}
+		</if>
+		<if test="phone!='' and phone!=null">
+		and PHONE = #{phone}
+		</if>
+		<if test="idNum!='' and idNum!=null">
+		and ID_NUM = #{idNum}
+		</if>
+	</select>
+	
+</mapper>

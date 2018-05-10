@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.OrderStatictisDao">
+	<resultMap id="orderStatictis" type="com.bypay.domain.OrderStatictis">
+		<result property="orderId" column="ORDER_ID" />
+		<result property="serialNo" column="SERIAL_NO" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="merAmt" column="MER_AMT" />
+		<result property="transFee" column="TRANS_FEE" />
+		<result property="clearAmt" column="CLEAR_AMT" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="transType" column="TRANS_TYPE" />
+		<result property="clearType" column="CLEAR_TYPE" />
+		<result property="clearBatchNo" column="CLEAR_BATCH_NO" />
+		<result property="clearTract" column="CLEAR_TRACT" />
+		<result property="clearTime" column="CLEAR_TIME" />
+		<result property="agent3Profit" column="AGENT3_PROFIT" />
+		<result property="reserved" column="RESERVED" />
+		<result property="status" column="STATUS" />
+		<result property="checkStatus" column="CHECKSTATUS" />
+	</resultMap>
+	<insert id="insertOrderStatictis" parameterType="com.bypay.domain.OrderStatictis">
+		INSERT INTO ORDER_STATICTIS( ORDER_ID, SUB_MER_ID, MER_AMT, TRANS_FEE, CLEAR_AMT, CLEAR_TYPE,
+		 CREATE_TIME, TRANS_TYPE, SETTLE_DATE) 
+    	VALUES(#{orderId}, #{subMerId}, #{merAmt}, #{transFee}, #{clearAmt}, #{clearType}, #{createTime},
+    	 #{transType}, #{settleDate})
+	</insert>
+	<select id="selectOrderStatictisOrderId" parameterType="java.lang.String" resultType="int">
+		SELECT COUNT(1) FROM ORDER_STATICTIS WHERE ORDER_ID = #{orderId} AND TRANS_TYPE = '01'
+	</select>
+	
+	<select id="selectbyRight" parameterType="java.lang.String" resultMap="orderStatictis">
+		SELECT * FROM ORDER_STATICTIS WHERE RIGHT(ORDER_ID,6)=#{orderId}
+	</select>
+	
+	<update id="updateOrderStatus" parameterType="com.bypay.domain.OrderStatictis">
+		UPDATE ORDER_STATICTIS SET CHECKSTATUS=#{checkStatus} WHERE ORDER_ID =#{orderId}
+	</update>
+	
+	<select id="selectOrderByStatus" parameterType="com.bypay.domain.OrderStatictis" resultMap="orderStatictis">
+		SELECT * FROM ORDER_STATICTIS WHERE SETTLE_DATE=#{settleDate}
+		AND CHECKSTATUS=#{checkStatus} 
+	</select>
+	
+	<select id="selectSingleOrder" parameterType="com.bypay.domain.OrderStatictis" resultMap="orderStatictis">
+		SELECT * FROM ORDER_STATICTIS WHERE SETTLE_DATE=#{settleDate}
+		AND CHECKSTATUS is null
+	</select>
+</mapper>

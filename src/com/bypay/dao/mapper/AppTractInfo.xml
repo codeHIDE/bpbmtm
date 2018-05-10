@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.AppTractInfoDao">
+
+	<resultMap id="appTractInfo" type="com.bypay.domain.AppTractInfo">
+		<result property="appTractId" column="APP_TRACT_ID" />
+		<result property="appTractName" column="APP_TRACT_NAME" />
+		<result property="transMerId" column="TRANS_MER_ID" />
+		<result property="payTract" column="PAY_TRACT" />
+		<result property="tractType" column="TRACT_TYPE" /> 
+		<result property="transRateCost" column="TRANS_RATE_COST" />
+		<result property="transLowestCost" column="TRANS_LOWEST_COST" />
+		<result property="transHighestCost" column="TRANS_HIGHEST_COST" />
+		<result property="bypayProfit" column="BYPAY_PROFIT" />
+		<result property="status" column="STATUS" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="remark" column="REMARK" />
+		<result property="reserved" column="RESERVED" />
+		<result property="perCardQuota" column="PER_CARD_QUOTA" />
+		<result property="cardQuota" column="CARD_QUOTA" />
+		<result property="cardCount" column="CARD_COUNT" />
+		<result property="transTimeBegin" column="TRANS_TIME_BEGIN" />
+		<result property="transTimeEnd" column="TRANS_TIME_END" />
+		<result property="terminalId" column="TERMINAL_ID" />
+		<result property="spid" column="SPID" />
+	</resultMap>
+
+	<sql id="baseColumn">
+		APP_TRACT_NAME, TRANS_MER_ID, PAY_TRACT,
+		TRANS_RATE_COST, TRANS_LOWEST_COST, TRANS_HIGHEST_COST,
+		BYPAY_PROFIT, STATUS, CREATE_TIME, REMARK,
+		PER_CARD_QUOTA,CARD_QUOTA,CARD_COUNT,TRANS_TIME_BEGIN,
+		TRANS_TIME_END,TRACT_TYPE,TERMINAL_ID,SPID
+	</sql>
+
+	<insert id="insertAppTractInfo" parameterType="com.bypay.domain.AppTractInfo">
+		insert into APP_TRACT_INFO(
+		<include refid="baseColumn" />, RESERVED
+		) values(
+		#{appTractName},#{transMerId},#{payTract},#{transRateCost},
+		#{transLowestCost},#{transHighestCost},#{bypayProfit},#{status},
+		#{createTime},#{remark},#{perCardQuota},#{cardQuota},
+		#{cardCount},#{transTimeBegin},#{transTimeEnd},#{tractType},#{terminalId},#{spid}, #{reserved})
+	</insert>
+
+	<!-- 通道查询 判断添加通道时候的支付商户号是否存在 -->
+	<select id="selectAppTractInfoRepeat" resultMap="appTractInfo"
+		parameterType="com.bypay.domain.AppTractInfo">
+		select TRANS_MER_ID from APP_TRACT_INFO WHERE
+		TRANS_MER_ID=#{transMerId}
+	</select>
+	
+	<!-- 通道查询 -->
+	<select id="selectAppTractInfoList"  resultMap="appTractInfo" parameterType="java.util.Map">
+		select t.APP_TRACT_ID,t.APP_TRACT_NAME,t.TRANS_MER_ID,t.PAY_TRACT,t.CREATE_TIME,
+			t.STATUS,t.TRACT_TYPE,t.TERMINAL_ID,t.SPID
+			from APP_TRACT_INFO t
+			<where>
+			<if test="appTractInfo.appTractId!=null and appTractInfo.appTractId!=''">
+				AND t.APP_TRACT_ID=#{appTractInfo.appTractId}
+			</if>
+			<if test="appTractInfo.appTractName!=null and appTractInfo.appTractName!=''">
+				AND t.APP_TRACT_NAME like '%${appTractInfo.appTractName}%'
+			</if>
+			<if test="appTractInfo.transMerId!=null and appTractInfo.transMerId!=''">   
+				AND t.TRANS_MER_ID=#{appTractInfo.transMerId}
+			</if>
+			<if test="appTractInfo.payTract!=null and appTractInfo.payTract!='-1' and appTractInfo.payTract!=''">
+				AND t.PAY_TRACT=#{appTractInfo.payTract}
+			</if>
+			<if test="appTractInfo.status!=null and appTractInfo.status!='-1' and appTractInfo.status!=''">
+				AND t.STATUS=#{appTractInfo.status}
+			</if>
+			</where>
+			limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询通道的条数 -->
+	<select id="selectAppTractInfoCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.AppTractInfo">
+		SELECT COUNT(*) from APP_TRACT_INFO 
+		<where>
+		<if test="appTractId!=null and appTractId!=''">
+			AND APP_TRACT_ID=#{appTractId}
+		</if>
+		<if test="appTractName!=null and appTractName!=''">
+			AND APP_TRACT_NAME like '%${appTractName}%'
+		</if>
+		<if test="transMerId!=null and transMerId!=''">   
+			AND TRANS_MER_ID=#{transMerId}
+		</if>
+		<if test="payTract!=null and payTract!='-1' and payTract!=''">
+			AND PAY_TRACT=#{payTract}
+		</if>
+		<if test="status!=null and status!='-1' and status!=''">
+			AND STATUS=#{status}
+		</if>
+		</where>
+	</select>
+	
+	<!-- 通道详情，审批  -->
+	<select id="selectAppTractById"  resultMap="appTractInfo" parameterType="com.bypay.domain.AppTractInfo">
+		select * from APP_TRACT_INFO WHERE APP_TRACT_ID=#{appTractId}
+	</select>
+	
+	<!-- 通道 启动 更新 -->
+	<update id="updateAppTractInfo" parameterType="com.bypay.domain.AppTractInfo">
+		update APP_TRACT_INFO set STATUS=#{status} where APP_TRACT_ID=#{appTractId}
+	</update>
+	
+	<!-- 通道 暂停 更新 -->
+	<update id="updateAppTractInfoOFF" parameterType="com.bypay.domain.AppTractInfo">
+		update APP_TRACT_INFO set STATUS=#{status} where APP_TRACT_ID=#{appTractId}
+	</update>
+	
+	<!-- 修改通道信息 -->
+	<update id="updateAppTract" parameterType="com.bypay.domain.AppTractInfo">
+		update APP_TRACT_INFO 
+		<set>
+		<if test="appTractId!=null and appTractId!=''">
+			APP_TRACT_ID=#{appTractId},
+		</if>
+		<if test="appTractName!=null and appTractName!=''">
+			APP_TRACT_NAME=#{appTractName},
+		</if>
+		<if test="payTract!=null and payTract!=''">
+			PAY_TRACT=#{payTract},
+		</if>
+		<if test="transRateCost!=null and transRateCost!=''">
+			TRANS_RATE_COST=#{transRateCost},
+		</if>
+		<if test="transLowestCost!=null and transLowestCost!=''">
+			TRANS_LOWEST_COST=#{transLowestCost},
+		</if>
+		<if test="transHighestCost!=null and transHighestCost!=''">
+			TRANS_HIGHEST_COST=#{transHighestCost},
+		</if>
+		<if test="bypayProfit!=null and bypayProfit!=''">
+			BYPAY_PROFIT=#{bypayProfit},
+		</if>
+		<if test="remark!=null and remark!=''">
+			REMARK=#{remark},
+		</if>
+		<if test="perCardQuota!=null and remark!=''">
+			PER_CARD_QUOTA=#{perCardQuota},
+		</if>
+		<if test="cardQuota!=null and cardQuota!=''">
+			CARD_QUOTA=#{cardQuota},
+		</if>
+		<if test="cardCount!=null and cardCount!=''">
+			CARD_COUNT=#{cardCount},
+		</if>
+		<if test="terminalId!=null and terminalId!=''">
+			TERMINAL_ID=#{terminalId},
+		</if>
+		<if test="spid!=null and spid!=''">
+			SPID=#{spid},
+		</if>
+		<if test="tractType!=null and tractType!=''">
+			TRACT_TYPE=#{tractType},
+		</if>
+		<if test="reserved!=null and reserved!=''">
+			RESERVED=#{reserved},
+		</if>
+		</set>
+		where APP_TRACT_ID=#{appTractId}   
+	</update>
+
+	<select id="selectAppTractInfoListByTractType" resultMap="appTractInfo" parameterType="com.bypay.domain.AppTractInfo">
+		SELECT * FROM APP_TRACT_INFO WHERE STATUS='1'  AND TRACT_TYPE like '%${tractType}%'
+	</select>
+
+
+</mapper>

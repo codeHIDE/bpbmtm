@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.BankBehalfBranchDao">
+	<resultMap id="bankBehalfBranch" type="com.bypay.domain.BankBehalfBranch">
+		<result property="bankLineId" column="BANK_LINE_ID" />
+		<result property="bankLineNumber" column="BANK_LINE_NUMBER" />
+		<result property="bankName" column="BANK_NAME" />
+		<result property="onlineBankNumber" column="ONLINE_BANK_NUMBER" />
+		<result property="settleLineNumber" column="SETTLE_LINE_NUMBER" />
+		<result property="status" column="STATUS" />
+		<result property="interbankSettleStatus" column="INTERBANK_SETTLE_STATUS" />
+		<result property="bankType" column="BANK_TYPE" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="finishTime" column="FINISH_TIME" />
+		<result property="keyword" column="KEYWORD" />
+		<result property="code" column="CODE" />
+		<result property="withHoldingCode" column="WITH_HOLDING_CODE" />
+	</resultMap>
+	<select id="selectBankBehalfBranchList" resultMap="bankBehalfBranch">
+	SELECT CODE,BANK_NAME FROM BANK_BEHALF_BRANCH
+	</select>
+</mapper>

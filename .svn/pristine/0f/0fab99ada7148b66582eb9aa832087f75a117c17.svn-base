@@ -1,0 +1,542 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/taglibs.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>添加通道</title>
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css?332'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Gray/css/all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<script src="<s:url value='/js/jqui/jquery/jquery-1.5.2.min.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/core/base.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerToolBar.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDialog.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerGrid.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDrag.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerResizable.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerGrid.showFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDateEditor.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jquery/jquery-ui-1.7.1.custom.min.js'/>"></script>
+		<script src="<s:url value='/js/CheckLength.js'/>" type="text/javascript"></script> 
+		<script src="<s:url value='/js/common.js'/>"></script>
+		 <script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerCheckBox.js'/>" type="text/javascript"></script>
+	    <script type="text/javascript">
+	    	var flag=false;
+	    	
+		$(function(){
+			//$("#transTimeBegin").ligerDateEditor({ showTime: true});
+           // $("#transTimeEnd").ligerDateEditor({ showTime: true});
+            $("#transTimeBegin").ligerDateEditor({ showTime: true,format: "hh:mm:ss"});
+            $("#transTimeEnd").ligerDateEditor({ showTime: true,format: "hh:mm:ss"});
+			$("#transMerId").blur(function(){
+	        		var transMerId=$(this).val();
+	        		if(transMerId!=null&&transMerId!=""){
+		      		var url="<%=request.getContextPath()%>/tractInfo!selectTransMerId.ac"
+		      		$.post(url,{transMerId:transMerId},function(data){
+		        			if(data=="true"){
+		        			 alert("该支付商户号已经存在");
+		        			 $("#transMerId").val("");
+		        				 flag=false;
+		        			}else{
+		        				flag=true;
+		        			}
+		        		});
+	        		}
+	        		
+	        	});
+	       
+	        $("#transMerId").onchange(function(){
+	       	var transMerId=$("#transMerId").val();
+	        		if(transMerId!=null&&transMerId!=""){
+		        		var url="<%=request.getContextPath()%>/tractInfo!selectTransMerId.ac"
+		        		$.post(url,{transMerId:transMerId},function(data){
+		        			if(data=="true"){
+		       				 flag=true;
+		        			}else if(data=="false"){
+		        				 flag=false;
+		      			}
+		        		});
+	        		}else{
+	        		 	flag=false;
+	        		}
+	        });
+		});
+		
+			
+			function adda(){
+				var ratesType=$('#ratesType').val();
+				var payTract=$('#payTract').val();
+				var integral=$('#integral').val();
+				var mcc=$('#mcc').val();
+				if(payTract == -1){
+					alert("请选择支付通道");
+					return false;
+				}else if(payTract == 'CSTP'){
+					var spId = $("#spId").val();
+					if(spId == '0000'){
+						alert("请选择SPID");
+						return false;
+					}
+				}
+				if(ratesType==-1){
+					alert("请选择手续费类型");
+					return false;
+				}
+				if(mcc==-1){
+					alert("请选择行业类别");
+					return false;
+				}
+				if(ratesType==-1){
+					alert("请选择手续费类型");
+					return false;
+				}
+				if(	
+					len('acqAgencyName',30,'All','收单机构') &&
+					len('transMerId',20,'N','支付商户号')	&&
+					len('tractName',50,'All','通道名称')     	&&
+					len('acqAgencyId',10,'N','收单机构号') &&
+					len('tractAgency',30,'All','通道机构') &&
+					len('tractRate',10,'NS','通道费率') &&
+					len('debitRateCost',10,'NS','借记卡成本') &&
+					len('perCardQuota',10,'N','单卡单笔限额') &&
+					len('creditRateCost',10,'NS','信用卡成本') &&
+					len('cardQuota',10,'N','单卡单日限额') &&
+					len('cardCount',2,'N','单日单卡累计次数') &&
+					len('tractQuota',10,'N','通道限额') &&
+					len('lowestCost',10,'N','最小成本值')
+					)
+					{
+						addTract.submit();
+						return true;
+					}
+					return false;
+			}
+			
+			
+    </script>
+		<style type="">
+			tr{
+				height:30px;
+			}
+			td{
+				width:120px;
+			}
+		</style>
+		<script type="text/javascript">
+			function change(val){
+	        	if(val=='02'){
+	        		$(".td_show").css("visibility","visible");
+	        		$(".pay_show").css("visibility","hidden");
+	        	}else if(val=='10'){
+	        		$(".pay_show").css("visibility","visible");
+	        		$(".td_show").css("visibility","hidden");
+	        	}else{
+	        		$(".td_show").css("visibility","hidden");
+	        		$(".pay_show").css("visibility","hidden");
+	        	}
+			}
+		
+		</script>
+	</head>
+	<body style="padding: 4px;">
+		<div id="content">
+			<s:if test="message!=null">
+				<span><s:property value="message" /></span>
+			</s:if>
+			<div class="box_system">
+				<form action="<s:url value="/tractInfo!addTractInfo.ac"/>" id="addTract" method="post"  >
+					<table width="96%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+						<td style="text-align: right;">
+								支付商户号：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.transMerId"/>"
+									name="tractInfo.transMerId" id="transMerId" />
+									</div>
+								</td>
+							<td width="150px" style="text-align: right;">
+								通道名称：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.tractName"/>"
+									name="tractInfo.tractName" id="tractName" />
+									</div>
+								</td>
+								<td  style="text-align: right;">
+								通道机构：
+							</td>
+							<td>
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.tractAgency"/>"
+									name="tractInfo.tractAgency" id="tractAgency" />
+									</div>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">
+								收单机构：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.acqAgencyName"/>"
+									name="tractInfo.acqAgencyName" id="acqAgencyName" />
+									</div>
+							</td>
+							<td  style="text-align: right;">
+								收单机构号：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.acqAgencyId"/>"
+									name="tractInfo.acqAgencyId" id="acqAgencyId" />
+							</div>
+							</td>
+							<td style="text-align: right;">
+								是否支持积分：
+							</td>
+							<td>
+								<select name="tractInfo.integral" id="integral" >
+									<option value="0">
+										否
+									</option>
+									<option value="1">
+										是
+									</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+								<td style="text-align: right;">
+								支付通道：
+							</td>
+							<td>
+								<select name="tractInfo.payTract" id="payTract">
+									<option value="-1">
+										---请选择---
+									</option>
+									<option value="CSTP">
+										CSTP
+									</option>
+									<option value="BJPOSP">
+										BJPOSP
+									</option>
+									<option value="UMSBJ">
+										UMSBJ
+									</option>
+									<option value="RUIYIN">
+										RUIYIN
+									</option>
+									
+								</select>
+							</td>
+							<td style="text-align: right;">
+								行业类别：
+							</td>
+							<td style="text-align: left;">
+								<select name="tractInfo.mcc" id="mcc"  style="width:135px">
+												<option selected="selected" value="0">--请选择-- </option>
+												<s:iterator value="mccCodeList" var="bank">
+													<option value="<s:property value="#bank.mcc" />" >
+														<s:property value="#bank.desc" />
+													</option>
+											</s:iterator>
+								   </select>
+							</td>
+							<!-- 2014-7-15/W 增加是否支持夜间支付 -->
+							<td style="text-align: right;">
+								支持夜间支付：
+							</td>
+							<td style="text-align: left;">
+								<select name="tractInfo.nightFlag" id="nightFlag"  style="width:135px">
+									<option value="0">不支持</option>
+									<option value="1">支持</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">
+								通道标识：
+							</td>
+							<td>
+								<select name="tractInfo.tractFlag" id="tractFlag" >
+									<option value="0">
+										普通通道
+									</option>
+									<option value="1">
+										POS商户通道
+									</option>
+								</select>
+							</td>
+							<td  style="text-align: right;">
+								终端号：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.terminalId"/>"
+									name="tractInfo.terminalId" id="terminalId" />
+							</div>
+							</td>
+							<td  style="text-align: right;">
+								SPID：
+							</td>
+							<td>
+								<select name="tractInfo.spId" id="spId" style="width:135px">
+									<option value="0000">请选择</option>
+									<option value="0013">上海</option>
+									<option value="0359">四川</option>
+									<option value="0358">安徽</option>
+									<option value="0297">深圳</option>
+									<option value="0331">北京</option>
+									<option value="0365">河北</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td width="150px" style="text-align: right;">
+								通道说明：
+							</td>
+							<td style="text-align: left;" colspan="3">
+							<div class="l-text"  style="float:left; width:550px;" >
+								<input type="text"   class="l-text-field" style="width: 550px" value="<s:property value="tractInfo.remark"/>"
+									name="tractInfo.remark" id="remark" />
+									</div>
+							</td>
+							<td width="150px" style="text-align: right;">
+								支持卡类型：
+							</td>
+							<td width="150px" style="text-align: right;">
+								<select name="tractInfo.cardFlag" style="float:left;width:135px ">
+									<option value="0">全部</option>
+									<option value="1">借记卡</option>
+									<option value="2">贷记卡</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+					</tr>
+						<tr>
+							<td style="text-align:center" colspan="6">
+								------------------------------费率信息------------------------------
+							</td>
+						</tr>
+						<tr>
+						<td style="text-align: right;">
+								手续费类型：
+							</td>
+							<td>
+								<select name="tractInfo.ratesType" id="ratesType" onchange="change(this.value);">
+									<option value="-1">
+										---请选择---
+									</option>
+									<option value="01">
+										扣率型
+									</option>
+									<option value="02">
+										封顶型
+									</option>
+									<option value="05">
+										积分扣率
+									</option>
+									<option value="10">
+										代付扣率
+									</option>
+								</select>
+							</td>
+							<%-- <td width="150px" style="text-align: right;">
+								平台分润比：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.bypayProfit"/>" name="tractInfo.bypayProfit" id="bypayProfit" />
+								</div><div style="width:10px;float:left;">&nbsp;%</div>
+							</td> --%>
+								<td width="220px" style="text-align: right;visibility: hidden" class="td_show">
+								最高封顶值：
+							</td>
+							<td style="visibility: hidden" class="td_show">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.tractHighestFee"/>"
+									name="tractInfo.tractHighestFee" id="tractHighestFee" />
+								</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+							</tr>
+							<tr>
+							<td  style="text-align: right;">
+								借记卡成本费率：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"
+									value="<s:property value="tractInfo.debitRateCost"/>"
+									name="tractInfo.debitRateCost" id="debitRateCost" /> 
+									</div><div style="width:10px;float:left;">&nbsp;%</div>
+							</td>
+								<td width="150px" style="text-align: right;">
+								信用卡成本费率：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"
+									value="<s:property value="tractInfo.creditRateCost"/>"
+									name="tractInfo.creditRateCost" id="creditRateCost" />
+									</div><div style="width:10px;float:left;">&nbsp;%</div>
+							</td>
+							<td width="220px" style="text-align: right;visibility: hidden" class="td_show">
+								信用卡封顶成本：
+							</td>
+							<td style="visibility: hidden" class="td_show">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.creditHighestCost"/>" name="tractInfo.creditHighestCost" id="creditHighestCost" /> 
+									</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+							
+						</tr>
+						<tr>
+							<td width="150px" style="text-align: right;">
+								通道费率：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"
+									value="<s:property value="tractInfo.tractRate"/>"
+									name="tractInfo.tractRate" id="tractRate" />
+								</div><div style="width:10px;float:left;">&nbsp;%</div>
+							</td>
+							<td width="150px" style="text-align: right;">
+								最小成本值：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"  value="<s:property value="tractInfo.lowestCost"/>"
+									name="tractInfo.lowestCost" id="lowestCost" />
+									</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+							<td width="220px" style="text-align: right;visibility: hidden" class="td_show">
+								借记卡封顶成本：
+							</td>
+							<td style="visibility: hidden" class="td_show">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"
+									value="<s:property value="tractInfo.debitHighestCost"/>"
+									name="tractInfo.debitHighestCost" id="debitHighestCost" /> 
+									</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+							</tr>
+							<tr>
+								
+					</tr>
+						<tr>
+							<td style="text-align:center" colspan="6">
+								------------------------------风控信息------------------------------
+							</td>
+						</tr>
+						
+							<tr>
+								<td style="text-align: right;">
+								单卡单笔限额：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field" width="20px" value="<s:property value="tractInfo.perCardQuota"/>"
+									name="tractInfo.perCardQuota" id="perCardQuota" />
+									</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+							<td  style="text-align: right;">
+								单卡单日限额：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"
+									value="<s:property value="tractInfo.cardQuota"/>"
+									name="tractInfo.cardQuota" id="cardQuota" /> 
+								</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+							<td width="220px" style="text-align: right;visibility: hidden" class="pay_show">
+								代付商户号：
+							</td>
+							<td style="visibility: hidden" class="pay_show">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.payMerId"/>" name="tractInfo.payMerId" id="payMerId" /> 
+									</div><div style="width:10px;float:left;"></div>
+							</td>
+						</tr>
+						<tr>
+							<td width="150px" style="text-align: right;">
+								通道限额：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"  value="<s:property value="tractInfo.tractQuota"/>"
+									name="tractInfo.tractQuota" id="tractQuota" />
+									</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+						<td width="200px" style="text-align: right;">
+								单日单卡累计次数：
+							</td>
+							<td style="text-align: left;">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field"
+									value="<s:property value="tractInfo.cardCount"/>"
+									name="tractInfo.cardCount" id="cardCount" />
+									</div>
+							</td>
+							<td width="220px" style="text-align: right;visibility: hidden" class="pay_show">
+								代付终端号：
+							</td>
+							<td style="visibility: hidden" class="pay_show">
+							<div class="l-text"  style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="tractInfo.payTerId"/>" name="tractInfo.payTerId" id="payTerId" /> 
+									</div><div style="width:10px;float:left;"></div>
+							</td> 
+						</tr>
+						<tr>
+								
+					</tr>
+						<tr>
+							<td style="text-align:center" colspan="6">
+								------------------------------配置时间------------------------------
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">
+								通道使用时间：
+							</td>
+							<td style="text-align: left;">
+								<input type="text" name="tractInfo.transTimeBegin" id="transTimeBegin" value="${param.transTimeBegin}" />
+							</td>
+							<td style="text-align: right;">
+								通道关闭时间：
+							</td>
+							<td style="text-align: left;">
+								<input type="text" name="tractInfo.transTimeEnd" id="transTimeEnd" value="${param.transTimeEnd}" />
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" align="center">
+								<input type="button" value="确认配置" id="btn" onclick="adda()" class="btn1" />
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+		<s:if test="#request.addTractInfo == 'success'">
+			<script>
+				alert("添加通道成功!");
+			</script>
+		</s:if>
+		<s:if test="#request.addTractInfo == 'noPass'">
+			<script>
+				alert("添加通道失败!");
+			</script>
+		</s:if>
+	</body>
+</html>

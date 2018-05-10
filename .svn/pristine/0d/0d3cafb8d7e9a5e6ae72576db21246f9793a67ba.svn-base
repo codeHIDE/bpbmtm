@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.IdCardInfoDao">
+	<resultMap id="idCardInfo" type="com.bypay.domain.IdCardInfo" >
+		<result property="id" column="id" />
+		<result property="idNum" column="idNum" />
+		<result property="userName" column="userName" />
+		<result property="picPath" column="picPath" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+
+	<insert id="insertIdCardInfo" parameterType="com.bypay.domain.IdCardInfo">
+		INSERT INTO IDCARD_INFO (idNum,userName,picPath,createTime) values(#{idNum},#{userName},#{picPath},#{createTime})
+	</insert>
+	
+	
+	<select id="selectIdCardInfo" parameterType="com.bypay.domain.IdCardInfo" resultMap="idCardInfo">
+		SELECT *
+		FROM IDCARD_INFO
+		WHERE 1=1
+		<if test="idCardInfo.idNum != null and idCardInfo.idNum != '' ">
+		AND idNum = #{idCardInfo.idNum}
+		</if>
+		<if test="idCardInfo.userName != null and idCardInfo.userName != '' ">
+		AND userName = #{idCardInfo.userName}
+		</if>
+		ORDER BY ID desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<!-- 查询终端信息条数 -->
+	<select id="selectIdCardInfoCount" parameterType="com.bypay.domain.IdCardInfo" resultType="int">
+		SELECT count(*)
+		FROM IDCARD_INFO
+		WHERE 1=1
+		<if test="idCardInfo.idNum != null and idCardInfo.idNum != '' ">
+		AND idNum = #{idCardInfo.idNum}
+		</if>
+		<if test="idCardInfo.userName != null and idCardInfo.userName != '' ">
+		AND userName = #{idCardInfo.userName}
+		</if>
+	</select>
+	
+	<select id="selectOne"  parameterType="com.bypay.domain.IdCardInfo"   resultType="com.bypay.domain.IdCardInfo">
+		SELECT *
+		FROM IDCARD_INFO
+		WHERE idNum = #{idNum}
+		AND userName = #{userName}
+	</select>
+	
+</mapper>

@@ -1,0 +1,127 @@
+package com.bypay.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.bypay.domain.MerTrans;
+import com.bypay.domain.SubMerInfo;
+import com.bypay.domain.SubMerRate;
+import com.bypay.domain.SubMerTerminal;
+
+@SuppressWarnings("unchecked")
+public interface SubMerInfoDao {
+
+  // 查询所有子商户信息
+  List<SubMerInfo> findAll(Map map); 
+
+  // 查询指定子商户信息
+  SubMerInfo findById(SubMerInfo smi);
+
+  // 修改指定的子商户信息
+  boolean update(SubMerInfo smi);
+
+  // 修改子商户状态 /暂停/恢复/上线/
+  boolean updateStatus(SubMerInfo smi);
+
+  Integer selectSubMerchantInfoCount(Map map);
+
+  boolean updateSubMerInfoSubMerRate(String subMerId, SubMerRate smr);
+
+  // 修改同一个代理商的子商户
+  boolean updateSubMerInfoSTATUS(SubMerInfo smi);
+
+  /**
+   * 查询未上线的 子商户信息
+   * 
+   * @param subMerInfo
+   * @return
+   */
+  Integer selectSubMerchantNoOnlineCount(Map map);
+
+  List<SubMerInfo> selectSubMerchantNoOnline(Map map);
+
+  /**
+   * 添加商户信息
+   * 
+   * @param subMerInfo
+   * @return
+   */
+  int insertSubMerInfo(SubMerInfo subMerInfo);
+
+  /**
+   * 收款功能开通
+   * 
+   * @param subMerInfo
+   * @return
+   */
+  boolean updateSubMerInfoByOpenCur(SubMerInfo subMerInfo);
+
+  /**
+   * 根据ID查询子商户信息
+   */
+  SubMerInfo getSubMerInfoById(String subMerId);
+
+  SubMerInfo getSubMerInfoByTerminalId(SubMerTerminal subMerTerminal);
+
+  /**
+   * 账户信息查询
+   * 
+   * @param subMerTerminal
+   * @return
+   */
+  SubMerInfo accountEnquiry(SubMerTerminal subMerTerminal);
+
+  /**
+   * 子商户上线-查询子商户的机构的终端产品类型
+   * 
+   * @param si
+   *          机构号
+   * @return
+   */
+  MerTrans getMerTransOnTerminalType(String merSysId);
+
+  /**
+   * 模糊获取相关最大子商户号
+   * 
+   * @param merchantId
+   * @return
+   */
+  String setMaxSubMerId(SubMerInfo merInfo);
+
+  /**
+   * 根据法人证件号查询信息
+   * 
+   * @param legalManIdcard
+   * @return
+   */
+  List<SubMerInfo> selectSubInfoByIdCard(String legalManIdcard);
+
+  /**
+   * 查询手机号验证
+   * 
+   * @param mobileNum
+   * @return
+   */
+  List<SubMerInfo> selectSubInfoByPhone(String mobileNum);
+
+  Boolean updateSubMerInfoWithRest(SubMerInfo subMerInfo);
+
+  SubMerInfo selectFrozenSumMaxBySubMerId(String subMerId);
+
+  /**
+   * 清空商户的法人信息
+   * 
+   * @param subMerInfo
+   * @return
+   */
+  Integer updateLegalInfo(SubMerInfo subMerInfo);
+
+  /**
+   * 根据省份信息查询出联行号信息
+   * @param subMerInfo
+   * @return
+   */
+  List<SubMerInfo> findLineNum(SubMerInfo subMerInfo);
+  
+  int updateCheckSub(String subMerId);
+}

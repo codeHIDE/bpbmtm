@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerTransDao">
+	<resultMap id="merTrans" type="com.bypay.domain.MerTrans">
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="transKey" column="TRANS_KEY" />
+		<result property="publicKey" column="PUBLIC_KEY" />
+		<result property="privateKey" column="PRIVATE_KEY" />
+		<result property="rules" column="RULES" />
+		<result property="lowsetTransAmt" column="LOWEST_TRANS_AMT" />
+		<result property="terminalType" column="TERMINAL_TYPE" />
+		<result property="busType" column="BUS_TYPE" />
+		<result property="actionList" column="ACTION_LIST" />
+		<result property="autoApprove" column="AUTO_APPROVE" />
+		<result property="authStatus" column="AUTH_STATUS" />
+		<result property="t0Status" column="T0_STATUS" />
+		<result property="clearType" column="CLEAR_TYPE" />
+		<result property="clearTract" column="CLEAR_TRACT" />
+		<result property="transNotifyStatus" column="TRANS_NOTIFY_STATUS" />
+		<result property="transNotifyUrl" column="TRANS_NOTIFY_URL" />
+		<result property="transNotifyActionList" column="TRANS_NOTIFY_ACTION_LIST" />
+		<result property="basicRate" column="BASIC_RATE" />
+		<result property="basicRate2" column="BASIC_RATE2" />
+		<result property="basicHighestFee" column="BASIC_HIGHEST_FEE" />
+		<result property="basicPerCardQuota" column="BASIC_PER_CARD_QUOTA" />
+		<result property="basicCardQuota" column="BASIC_CARD_QUOTA" />
+		<result property="basicCardCount" column="BAISC_CARD_COUNT" />
+		<result property="basicRegion" column="BASIC_REGION" />
+		<result property="basicMcc" column="BASIC_MCC" />
+		<result property="basicTerminalQuota" column="BASIC_TERMINAL_QUOTA" />
+		<result property="merRate1" column="MER_RATE_1" />
+		<result property="merRate2" column="MER_RATE_2" />
+		<result property="merHighestFee" column="MER_HIGHEST_FEE" />
+		<result property="merLowestFee" column="MER_LOWEST_FEE" />
+		<result property="merProfitRate" column="MER_PROFIT_RATE" />
+		<result property="reserved" column="RESERVED" />
+		<result property="rateType" column="RATE_TYPE" />
+		<result property="dispName" column="DISP_NAME" />
+		<result property="t0MerRate" column="T0_MER_RATE" />
+		<result property="d1MerRate" column="D1_MER_RATE" />
+		<result property="t0MerProfit" column="T0_MER_PROFIT" />
+		<result property="d1MerProfit" column="D1_MER_PROFIT" />
+		<result property="merRateNoTop" column="MER_RATE_NO_TOP" />
+	</resultMap>
+	<select id="selectMerTransByMerSysId" resultMap="merTrans" parameterType="com.bypay.domain.MerTrans">
+		select * from MER_TRANS WHERE MER_SYS_ID=#{merSysId}
+	</select>
+	<insert id="insertMerTrans" parameterType="com.bypay.domain.MerTrans">
+	INSERT INTO MER_TRANS(MER_SYS_ID, LOWEST_TRANS_AMT, TERMINAL_TYPE, BUS_TYPE, ACTION_LIST, AUTO_APPROVE, 
+	AUTH_STATUS, T0_STATUS, CLEAR_TYPE, CLEAR_TRACT, TRANS_NOTIFY_STATUS, TRANS_NOTIFY_URL,
+	 TRANS_NOTIFY_ACTION_LIST, BASIC_RATE, BASIC_RATE2, BASIC_HIGHEST_FEE, BASIC_PER_CARD_QUOTA, 
+	 BASIC_CARD_QUOTA, BAISC_CARD_COUNT, BASIC_TERMINAL_QUOTA,RATE_TYPE,MER_RATE_1,MER_RATE_2,MER_HIGHEST_FEE
+	 ,MER_LOWEST_FEE,MER_PROFIT_RATE,T0_MER_RATE,D1_MER_RATE,T0_MER_PROFIT,D1_MER_PROFIT,BASIC_MCC,BASIC_REGION,
+	 MER_RATE_NO_TOP) 
+    VALUES(#{merSysId}, #{lowsetTransAmt}, #{terminalType}, #{busType}, #{actionList}, #{autoApprove},
+     #{authStatus}, #{t0Status}, #{clearType}, #{clearTract}, #{transNotifyStatus}, #{transNotifyUrl}, 
+     #{transNotifyActionList}, #{basicRate}, #{basicRate2}, #{basicHighestFee}, #{basicPerCardQuota},
+      #{basicCardQuota}, #{basicCardCount}, #{basicTerminalQuota},#{rateType},#{merRate1},#{merRate2},#{merHighestFee}
+      ,#{merLowestFee},#{merProfitRate},#{t0MerRate},#{d1MerRate},#{t0MerProfit},#{d1MerProfit},#{basicMcc},#{basicRegion},
+      #{merRateNoTop})
+	</insert>
+	<update id="updateMerTrans" parameterType="com.bypay.domain.MerTrans">
+	UPDATE MER_TRANS SET 
+	LOWEST_TRANS_AMT=#{lowsetTransAmt}, 
+	TERMINAL_TYPE=#{terminalType}, 
+	BUS_TYPE=#{busType}, 
+	ACTION_LIST=#{actionList}, 
+	AUTO_APPROVE=#{autoApprove}, 
+	AUTH_STATUS=#{authStatus}, 
+	T0_STATUS=#{t0Status}, 
+	RATE_TYPE=#{rateType}, 
+	CLEAR_TYPE=#{clearType}, 
+	CLEAR_TRACT=#{clearTract}, 
+	TRANS_NOTIFY_STATUS=#{transNotifyStatus}, 
+	TRANS_NOTIFY_URL=#{transNotifyUrl}, 
+	TRANS_NOTIFY_ACTION_LIST=#{transNotifyActionList},
+	BASIC_RATE=#{basicRate}, 
+	BASIC_RATE2=#{basicRate2}, 
+	BASIC_HIGHEST_FEE=#{basicHighestFee}, 
+	BASIC_PER_CARD_QUOTA=#{basicPerCardQuota}, 
+	BASIC_CARD_QUOTA=#{basicCardQuota}, 
+	BAISC_CARD_COUNT=#{basicCardCount}, 
+	BASIC_TERMINAL_QUOTA=#{basicTerminalQuota},
+	BASIC_MCC=#{basicMcc},
+	BASIC_REGION=#{basicRegion},
+	MER_RATE_1 = #{merRate1},
+	MER_RATE_2 = #{merRate2},
+	MER_HIGHEST_FEE = #{merHighestFee},
+	MER_LOWEST_FEE = #{merLowestFee},
+	MER_PROFIT_RATE = #{merProfitRate},
+	T0_MER_RATE = #{t0MerRate},
+	D1_MER_RATE = #{d1MerRate},
+	T0_MER_PROFIT = #{t0MerProfit},
+	D1_MER_PROFIT = #{d1MerProfit},
+	MER_RATE_NO_TOP = #{merRateNoTop} 
+    WHERE MER_SYS_ID=#{merSysId}
+	</update>
+	
+	<!-- 获取机构交易配置信息 -->
+	<select id="getMerTransInfo" resultMap="merTrans" parameterType="java.lang.String">
+		select MT.*, MI.DISP_NAME from MER_TRANS MT 
+		LEFT JOIN MER_INFO MI
+		on MI.MER_SYS_ID = MT.MER_SYS_ID
+		WHERE MT.MER_SYS_ID=#{merSysId}
+	</select>
+	
+	
+	<update id="updateMerTransRules" parameterType="com.bypay.domain.MerTrans">
+		update MER_TRANS set
+		RULES = #{rules}
+		where MER_SYS_ID = #{merSysId}
+	</update>
+	
+	<!-- 子商户上线时查询机构交易配置的终端产品类型-2014 08 01 W -->
+	<select id="getMerTransOnTerminalType" resultMap="merTrans" parameterType="java.lang.String">
+		select TERMINAL_TYPE from MER_TRANS where MER_SYS_ID=#{merSysId}
+	</select>
+</mapper>

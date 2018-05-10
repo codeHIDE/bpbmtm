@@ -1,0 +1,94 @@
+package com.bypay.domain;
+
+public class SumMerProfit {
+    private long id;
+    private String merSysId;
+    private String sumAmt;
+    private String sumMerProfit;
+    private String sumAgent1Profit;
+    private String sumAgent2Profit;
+    private String sumAgent3Profit;
+    private String sumAgent4Profit;
+    private String createDate;
+    private String transType;       
+    private String payfor;          //0默认  1申请 2 成功  3 失败
+    
+    //其他字段
+    private String phone;
+    
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+    public long getId() {
+        return id;
+    }
+    public void setId(long id) {
+        this.id = id;
+    }
+    public String getMerSysId() {
+        return merSysId;
+    }
+    public void setMerSysId(String merSysId) {
+        this.merSysId = merSysId;
+    }
+    public String getSumAmt() {
+        return sumAmt;
+    }
+    public void setSumAmt(String sumAmt) {
+        this.sumAmt = sumAmt;
+    }
+    public String getSumMerProfit() {
+        return sumMerProfit;
+    }
+    public void setSumMerProfit(String sumMerProfit) {
+        this.sumMerProfit = sumMerProfit;
+    }
+    public String getSumAgent1Profit() {
+        return sumAgent1Profit;
+    }
+    public void setSumAgent1Profit(String sumAgent1Profit) {
+        this.sumAgent1Profit = sumAgent1Profit;
+    }
+    public String getSumAgent2Profit() {
+        return sumAgent2Profit;
+    }
+    public void setSumAgent2Profit(String sumAgent2Profit) {
+        this.sumAgent2Profit = sumAgent2Profit;
+    }
+    public String getSumAgent3Profit() {
+        return sumAgent3Profit;
+    }
+    public void setSumAgent3Profit(String sumAgent3Profit) {
+        this.sumAgent3Profit = sumAgent3Profit;
+    }
+    public String getSumAgent4Profit() {
+        return sumAgent4Profit;
+    }
+    public void setSumAgent4Profit(String sumAgent4Profit) {
+        this.sumAgent4Profit = sumAgent4Profit;
+    }
+    public String getCreateDate() {
+        return createDate;
+    }
+    public void setCreateDate(String createDate) {
+        this.createDate = createDate;
+    }
+    public String getTransType() {
+        return transType;
+    }
+    public void setTransType(String transType) {
+        this.transType = transType;
+    }
+    public String getPayfor() {
+        return payfor;
+    }
+    public void setPayfor(String payfor) {
+        this.payfor = payfor;
+    }
+    
+    
+
+}

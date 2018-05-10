@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerTractDao">
+	<resultMap id="merTract" type="com.bypay.domain.MerTract">
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="tractId" column="TRACT_ID" />
+		<result property="profitType" column="PROFIT_TYPE" />
+		<!-- <result property="rate" column="RATE" />
+		<result property="highestFee" column="HIGHEST_FEE" />
+		<result property="lowestFee" column="LOWEST_FEE" />
+		<result property="merRatio" column="MER_RATIO" /> -->
+		<result property="defaultStatus" column="DEFALUT_STATUS" />
+		<result property="status" column="STATUS" />
+		<result property="reserved" column="RESERVED" />
+		<association property="tractInfo"  column="TRACT_ID" select="com.bypay.dao.impl.TractInfoDaoImpl.selectTractById"></association>
+	</resultMap>
+	<select id="selectmerTractByMerSysId" parameterType="com.bypay.domain.MerTract" resultMap="merTract">
+		SELECT * FROM MER_TRACT WHERE MER_SYS_ID=#{merSysId}
+	</select>
+	<select id="selectmerTractByTractId" parameterType="com.bypay.domain.MerTract" resultMap="merTract">
+		SELECT * FROM MER_TRACT WHERE MER_SYS_ID=#{merSysId} AND TRACT_ID=#{tractId} AND PROFIT_TYPE=#{profitType}
+	</select>
+	<insert id="insertMerTract" parameterType="com.bypay.domain.MerTract">
+	INSERT INTO MER_TRACT(MER_SYS_ID, TRACT_ID, PROFIT_TYPE, DEFALUT_STATUS, STATUS) 
+    VALUES(#{merSysId}, #{tractId}, #{profitType},'0','0')
+	</insert>
+	<insert id="insertMerTractInfo" parameterType="com.bypay.domain.MerTract">
+	INSERT INTO MER_TRACT(MER_SYS_ID, TRACT_ID, PROFIT_TYPE, DEFALUT_STATUS, STATUS) 
+    VALUES(#{merSysId}, #{tractId}, #{profitType},#{defaultStatus},#{status})
+	</insert>
+	<update id="updateMerTrackDefaultStatus"  parameterType="com.bypay.domain.MerTract">
+	UPDATE MER_TRACT SET  DEFALUT_STATUS='1' WHERE MER_SYS_ID=#{merSysId} AND TRACT_ID=#{tractId} AND PROFIT_TYPE=#{profitType}
+	</update>
+	
+	<update id="updateAllMerTrackDefaultStatus"  parameterType="com.bypay.domain.MerTract">
+	UPDATE MER_TRACT SET  DEFALUT_STATUS='0' WHERE MER_SYS_ID=#{merSysId}
+	</update>
+	<update id="updateMerTractStatus"  parameterType="com.bypay.domain.MerTract">
+	UPDATE MER_TRACT SET  STATUS=#{status} WHERE MER_SYS_ID=#{merSysId} AND TRACT_ID=#{tractId} AND PROFIT_TYPE=#{profitType}
+	</update>
+	<update id="tractAndMerToUpdate"  parameterType="com.bypay.domain.MerTract">
+	UPDATE MER_TRACT SET  
+	RATE=#{rate},
+	HIGHEST_FEE=
+	<if test="highestFee != null and highestFee != ''">#{highestFee}*100, </if>
+	<if  test="highestFee == null or highestFee == ''">-1,</if>
+	LOWEST_FEE=
+	<if test="lowestFee != null and lowestFee != ''">#{lowestFee}*100, </if>
+	<if  test="lowestFee == null or lowestFee == ''">-1,</if>
+	MER_RATIO=#{merRatio} WHERE MER_SYS_ID=#{merSysId} AND TRACT_ID=#{tractId} AND PROFIT_TYPE=#{profitType}
+	</update>
+
+</mapper>

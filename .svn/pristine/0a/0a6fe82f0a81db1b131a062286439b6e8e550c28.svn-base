@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.TractStatictisDao">
+
+	<resultMap id="tractStatictis" type="com.bypay.domain.TractStatictis">
+		<result property="tractId" column="TRACT_ID" />
+		<result property="statictisDate" column="STATICTIS_DATE" />
+		<result property="payAmt" column="PAY_AMT" />
+		<result property="refundAmt" column="REFUND_AMT" />
+		<result property="useAmt" column="USE_AMT" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+		<result property="tractName" column="TRACT_NAME" />
+		<result property="ratesType" column="RATES_TYPE" />
+	</resultMap>
+	
+	<sql id="baseColumn">
+		TRACT_ID,STATICTIS_DATE,PAY_AMT,REFUND_AMT,USE_AMT,
+		RESERVED1,RESERVED2,RESERVED3
+	</sql>
+	
+	<resultMap type="java.util.HashMap" id="sumInfo">
+		<result property="count" column="COUNT" />
+		<result property="payAmtCount" column="PAY_AMT_COUNT" />
+		<result property="refundAmt" column="REFUND_AMT_COUNT" />
+		<result property="useAmt" column="USE_AMT_COUNT" />
+		<result property="reserved1" column="RESERVED1_COUNT" />
+	</resultMap>
+	
+	<!-- 通道查询 -->
+	<select id="selectTractStatictisList"  resultMap="tractStatictis" parameterType="java.util.Map">
+		select t.TRACT_ID,t.STATICTIS_DATE,t.PAY_AMT,t.REFUND_AMT,t.USE_AMT,
+			info.TRACT_NAME,info.RATES_TYPE
+			from TRACT_STATICTIS t
+			left join TRACT_INFO info
+			on t.TRACT_ID =info.TRACT_ID
+			<where>
+			<if test="tractStatictis.tractId!=null and tractStatictis.tractId!=''">
+				AND t.TRACT_ID=#{tractStatictis.tractId}
+			</if>
+			<if test="tractStatictis.tractName!=null and tractStatictis.tractName!=''">
+				AND info.TRACT_NAME like '%${tractStatictis.tractName}%'
+			</if>
+			<if test="tractStatictis.ratesType!=null and tractStatictis.ratesType!='-1' and tractStatictis.ratesType!=''">
+				AND info.RATES_TYPE=#{tractStatictis.ratesType}
+			</if>
+			<if test="tractStatictis.statictisDate!=null and tractStatictis.statictisDate!='-1' and tractStatictis.statictisDate!=''">
+				AND t.STATICTIS_DATE=#{tractStatictis.statictisDate}
+			</if>
+			<if test="tractStatictis.payTract!=null and tractStatictis.payTract!='-1' and tractStatictis.payTract!=''">
+				AND info.PAY_TRACT=#{tractStatictis.payTract}
+		</if>
+			</where>
+			limit #{page},#{pageSize}
+	</select>
+	
+	<!-- 查询通道的条数 -->
+	<select id="selectTractStatictisCount" resultMap="sumInfo" parameterType="com.bypay.domain.TractStatictis">
+		SELECT count(t.TRACT_ID) as COUNT,COALESCE(SUM(t.PAY_AMT),0) as PAY_AMT_COUNT,
+	        COALESCE(SUM(t.REFUND_AMT),0) as REFUND_AMT_COUNT,COALESCE(SUM(t.USE_AMT),0) as USE_AMT_COUNT,COALESCE(SUM(t.RESERVED1),0) as RESERVED1_COUNT
+	         from TRACT_STATICTIS t
+			left join TRACT_INFO info
+			on t.TRACT_ID =info.TRACT_ID 
+			<where>
+		<if test="tractId!=null and tractId!=''">
+			AND t.TRACT_ID=#{tractId}
+		</if>
+		<if test="tractName!=null and tractName!=''">
+			AND info.TRACT_NAME like '%${tractName}%'
+		</if>
+		<if test="ratesType!=null and ratesType!='-1' and ratesType!=''">
+			AND info.RATES_TYPE=#{ratesType}
+		</if>
+		<if test="statictisDate!=null and statictisDate!='-1' and statictisDate!=''">
+			AND t.STATICTIS_DATE=#{statictisDate}
+		</if>
+		<if test="payTract!=null and payTract!='-1' and payTract!=''">
+			AND info.PAY_TRACT=#{payTract}
+		</if>
+		</where>
+	</select>
+	
+	<!-- 跑批时插入 -->
+	<insert id="insertTractStatictisCount" parameterType="com.bypay.domain.TractStatictis">
+		insert into TRACT_STATICTIS(TRACT_ID,STATICTIS_DATE,PAY_AMT,USE_AMT,REFUND_AMT) 
+		values(#{tractId},#{statictisDate},#{payAmt}, #{useAmt},#{refundAmt})
+	</insert>
+	
+	
+	
+	<!-- 修改统计中通道手续费 -->
+	<update id="updateTractStatictis" parameterType="com.bypay.domain.TractStatictis">
+		update TRACT_STATICTIS set RESERVED1 = #{reserved1} where TRACT_ID = #{tractId} and STATICTIS_DATE = #{statictisDate}
+	</update>
+
+	<select id="getTractStatictis" resultMap="tractStatictis" parameterType="com.bypay.domain.TractStatictis">
+		select * from TRACT_STATICTIS where TRACT_ID = #{tractId} and STATICTIS_DATE = #{statictisDate}
+	</select>
+</mapper>

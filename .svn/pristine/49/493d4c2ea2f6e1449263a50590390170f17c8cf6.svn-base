@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerTransDao">
+	<resultMap id="subMerTrans" type="com.bypay.domain.SubMerTrans">
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="dispMerId" column="DISP_MER_ID" />
+		<result property="disMerName" column="DISP_MER_NAME" />
+		<result property="terminalType" column="TERMINAL_TYPE" />
+		<result property="busType" column="BUS_TYPE" />
+		<result property="clearTime" column="CLEAR_TIME" />
+		<result property="authStatus" column="AUTH_STATUS" />
+		<result property="authTime" column="AUTH_TIME" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="reserved" column="RESERVED" />
+		<result property="subMerTractR1" column="SUB_MER_TRACT_R1" />
+		<result property="subMerTractR2" column="SUB_MER_TRACT_R2" />
+		<result property="subMerTractR3" column="SUB_MER_TRACT_R3"/>
+		<result property="t0Status" column="T0_STATUS" />
+		<result property="rateType" column="RATE_TYPE"/>
+		<result/>
+	</resultMap>
+	<!-- 查询指定的单条子商户交易费率信息，用于子商户的详情显示..有用 -->
+	<select id="selectSubMerTransById" resultMap="subMerTrans" parameterType="com.bypay.domain.SubMerTrans">
+		select *  from SUB_MER_TRANS where SUB_MER_ID=#{subMerId}
+	</select>
+	
+	<!-- 添加子商户交易配置信息 -->
+	<insert id="insertSubMerTransInfo" parameterType="com.bypay.domain.SubMerTrans" >
+		INSERT INTO SUB_MER_TRANS (SUB_MER_ID,DISP_MER_ID,DISP_MER_NAME,TERMINAL_TYPE,
+		BUS_TYPE,AUTH_STATUS,AUTH_TIME,CREATE_TIME)
+		VALUES(#{subMerId},#{dispMerId},#{disMerName},#{terminalType},#{busType},
+		#{authStatus},#{authTime},#{createTime})
+	</insert>
+	<!-- 修改子商户交易配置信息 -->
+	<update id="updateSubMerTransInfo" parameterType="com.bypay.domain.SubMerTrans">
+		update SUB_MER_TRANS 
+		<set> 
+		<if test="authStatus != null and authStatus != ''">
+			AUTH_STATUS = #{authStatus},
+		</if>
+		<if test="authTime != null and authTime != ''">
+		 	AUTH_TIME = #{authTime},
+		</if>
+		<if test="subMerTractR1 != null and subMerTractR1 != ''">
+			SUB_MER_TRACT_R1 = #{subMerTractR1},
+		</if>
+		<if test="subMerTractR2 != null and subMerTractR2 != ''">
+			SUB_MER_TRACT_R2 = #{subMerTractR2},
+		</if>
+		<if test="subMerTractR3 != null and subMerTractR3 != ''">
+			SUB_MER_TRACT_R3 = #{subMerTractR3},
+		</if>
+		
+		<if test="t0Status != null and t0Status != ''">
+			T0_STATUS = #{t0Status},
+		</if>
+		<if test="dispMerId != null and dispMerId != ''">
+			DISP_MER_ID = #{dispMerId},
+		</if>
+		<if test="disMerName != null and disMerName != ''">
+			DISP_MER_NAME = #{disMerName},
+		</if>
+		<if test="rateType != null and rateType != ''">
+			RATE_TYPE = #{rateType},
+		</if>
+		</set>
+		 where SUB_MER_ID = #{subMerId}
+	</update>
+</mapper>

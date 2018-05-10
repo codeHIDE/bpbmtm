@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerRiskDao">
+	<resultMap id="merRisk" type="com.bypay.domain.MerRisk">
+		<result property="mId" column="MID" />
+		<result property="merType" column="MER_TYPE" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="subMerName" column="SUB_MER_NAME" />
+		<result property="debitPerCardQuota" column="DEBIT_PER_CARD_QUOTA" />
+		<result property="debitCardQuota" column="DEBIT_CARD_QUOTA" />
+		<result property="debitCardCount" column="DEBIT_CARD_COUNT" />
+		<result property="creditPerCardQuota" column="CREDIT_PER_CARD_QUOTA" />
+		<result property="creditCardQuota" column="CREDIT_CARD_QUOTA" />
+		<result property="creditCardCount" column="CREDIT_CARD_COUNT" />
+		<result property="terminalCardQuota" column="TERMINAL_CARD_QUOTA" />
+		<result property="transferPerCardQuota" column="TRANSFER_PER_CARD_QUOTA" />
+		<result property="transferCardQuota" column="TRANSFER_CARD_QUOTA" />
+		<result property="transferCardCount" column="TRANSFER_CARD_COUNT" />
+		<result property="terminalTransferCardQuota" column="TERMINAL_TRANSFER_CARD_QUOTA" />
+		<result property="payCreditPerCardQuota" column="PAY_CREDIT_PER_CARD_QUOTA" />
+		<result property="payCreditCardQuota" column="PAY_CREDIT_CARD_QUOTA" />
+		<result property="payCreditCardCount" column="PAY_CREDIT_CARD_COUNT" />
+		<result property="transTimeBegin" column="TRANS_TIME_BEGIN" />
+		<result property="transTimeEnd" column="TRANS_TIME_END" />
+		<result property="transRules" column="TRANS_RULES" />
+		<result property="queryCreditCardCount" column="QUERY_CREDIT_CARD_COUNT" />
+		<result property="queryDebitCardCount" column="QUERY_DEBIT_CARD_COUNT" />
+		<result property="terminalD0DayQuota" column="TERMINAL_D0_DAY_QUOTA" />
+	</resultMap>
+	<select id="selectmerRiskByMerSysId" parameterType="com.bypay.domain.MerRisk" resultMap="merRisk">
+		SELECT * FROM MER_RISK WHERE MER_SYS_ID=#{merSysId}
+	</select>
+	
+	<insert id="inserMerRisk" parameterType="com.bypay.domain.MerRisk">
+		INSERT INTO MER_RISK( MER_TYPE, MER_SYS_ID,  DEBIT_PER_CARD_QUOTA, DEBIT_CARD_QUOTA, DEBIT_CARD_COUNT, 
+		CREDIT_PER_CARD_QUOTA, CREDIT_CARD_QUOTA, CREDIT_CARD_COUNT, TERMINAL_CARD_QUOTA, 
+		TRANSFER_PER_CARD_QUOTA, TRANSFER_CARD_QUOTA, TRANSFER_CARD_COUNT, TERMINAL_TRANSFER_CARD_QUOTA, 
+		PAY_CREDIT_PER_CARD_QUOTA, PAY_CREDIT_CARD_QUOTA, PAY_CREDIT_CARD_COUNT,QUERY_CREDIT_CARD_COUNT,
+		QUERY_DEBIT_CARD_COUNT,TRANS_TIME_BEGIN,TRANS_TIME_END,TERMINAL_D0_DAY_QUOTA) 
+    	VALUES( #{merType}, #{merSysId}, 
+    	<if test="debitPerCardQuota == null or debitPerCardQuota == ''">-1,</if>
+	    <if test="debitPerCardQuota != null and debitPerCardQuota != ''">#{debitPerCardQuota}*100,</if> 
+    	<if test="debitCardQuota == null or debitCardQuota == ''">-1,</if>
+	    <if test="debitCardQuota != null and debitCardQuota != ''">#{debitCardQuota}*100,</if>
+    	<if test="debitCardCount == null or debitCardCount == ''">-1,</if>
+	    <if test="debitCardCount != null and debitCardCount != ''">#{debitCardCount},</if>
+    	<if test="creditPerCardQuota == null or creditPerCardQuota == ''">-1,</if>
+	    <if test="creditPerCardQuota != null and creditPerCardQuota != ''">#{creditPerCardQuota}*100,</if> 
+    	<if test="creditCardQuota == null or creditCardQuota == ''">-1,</if>
+	    <if test="creditCardQuota != null and creditCardQuota != ''">#{creditCardQuota}*100,</if>
+	    <if test="creditCardCount == null or creditCardCount == ''">-1,</if>
+	    <if test="creditCardCount != null and creditCardCount != ''">#{creditCardCount},</if>
+	    <if test="terminalCardQuota == null or terminalCardQuota == ''">-1,</if>
+	    <if test="terminalCardQuota != null and terminalCardQuota != ''">#{terminalCardQuota}*100,</if>
+	    <if test="transferPerCardQuota == null or transferPerCardQuota == ''">-1,</if>
+	    <if test="transferPerCardQuota != null and transferPerCardQuota != ''">#{transferPerCardQuota}*100,</if>
+	    <if test="transferCardQuota == null or transferCardQuota == ''">-1,</if>
+	    <if test="transferCardQuota != null and transferCardQuota != ''">#{transferCardQuota}*100,</if> 
+	    <if test="transferCardCount == null or transferCardCount == ''">-1,</if>
+	    <if test="transferCardCount != null and transferCardCount != ''">#{transferCardCount},</if> 
+	    <if test="terminalTransferCardQuota == null or terminalTransferCardQuota == ''">-1,</if>
+	    <if test="terminalTransferCardQuota != null and terminalTransferCardQuota != ''">#{terminalTransferCardQuota}*100,</if> 
+	    <if test="payCreditPerCardQuota == null or payCreditPerCardQuota == ''">-1,</if>
+	    <if test="payCreditPerCardQuota != null and payCreditPerCardQuota != ''">#{payCreditPerCardQuota}*100,</if>
+	    <if test="payCreditCardQuota == null or payCreditCardQuota == ''">-1,</if>
+	    <if test="payCreditCardQuota != null and payCreditCardQuota != ''">#{payCreditCardQuota}*100,</if> 
+	    <if test="payCreditCardCount == null or payCreditCardCount == ''">-1,</if>
+	    <if test="payCreditCardCount != null and payCreditCardCount != ''">#{payCreditCardCount},</if>
+	    <if test="queryCreditCardCount == null or queryCreditCardCount == ''">-1,</if>
+	    <if test="queryCreditCardCount != null and queryCreditCardCount != ''">#{queryCreditCardCount},</if>
+	    <if test="queryDebitCardCount == null or queryDebitCardCount == ''">-1,</if>
+	    <if test="queryDebitCardCount != null and queryDebitCardCount != ''">#{queryDebitCardCount},</if>
+	    #{transTimeBegin}, #{transTimeEnd},
+	    <if test="terminalD0DayQuota != null and terminalD0DayQuota != ''">#{terminalD0DayQuota}*100,</if>
+	    )
+	</insert>
+	
+	<update id="updateMerRisk" parameterType="com.bypay.domain.MerRisk" >
+		UPDATE MER_RISK  SET 
+		DEBIT_PER_CARD_QUOTA=
+		<if test="debitPerCardQuota != null and debitPerCardQuota != ''">#{debitPerCardQuota}*100, </if>
+		<if  test="debitPerCardQuota == null or debitPerCardQuota == ''">-1,</if>
+		DEBIT_CARD_QUOTA= 
+		<if test="debitCardQuota != null and debitCardQuota != ''">#{debitCardQuota}*100, </if>
+		<if  test="debitCardQuota == null or debitCardQuota == ''">-1,</if>
+		DEBIT_CARD_COUNT=
+		<if test="debitCardCount != null and debitCardCount != ''">#{debitCardCount}, </if>
+		<if  test="debitCardCount == null or debitCardCount == ''">-1,</if>
+		CREDIT_PER_CARD_QUOTA=
+		<if test="creditPerCardQuota != null and creditPerCardQuota != ''">#{creditPerCardQuota}*100, </if>
+		<if  test="creditPerCardQuota == null or creditPerCardQuota == ''">-1,</if>
+		CREDIT_CARD_QUOTA=
+		<if test="creditCardQuota != null and creditCardQuota != ''">#{creditCardQuota}*100, </if>
+		<if  test="creditCardQuota == null or creditCardQuota == ''">-1,</if>
+		CREDIT_CARD_COUNT=
+		<if test="creditCardCount != null and creditCardCount != ''">#{creditCardCount}, </if>
+		<if  test="creditCardCount == null or creditCardCount == ''">-1,</if>
+		TERMINAL_CARD_QUOTA=
+		<if test="terminalCardQuota != null and terminalCardQuota != ''">#{terminalCardQuota}*100, </if>
+		<if  test="terminalCardQuota == null or terminalCardQuota == ''">-1,</if>
+		TRANSFER_PER_CARD_QUOTA=
+		<if test="transferPerCardQuota != null and transferPerCardQuota != ''">#{transferPerCardQuota}*100, </if>
+		<if  test="transferPerCardQuota == null or transferPerCardQuota == ''">-1,</if>
+		TRANSFER_CARD_QUOTA=
+		<if test="transferCardQuota != null and transferCardQuota != ''">#{transferCardQuota}*100, </if>
+		<if  test="transferCardQuota == null or transferCardQuota == ''">-1,</if>
+		TRANSFER_CARD_COUNT=
+		<if test="transferCardCount != null and transferCardCount != ''">#{transferCardCount}, </if>
+		<if  test="transferCardCount == null or transferCardCount == ''">-1,</if>
+		TERMINAL_TRANSFER_CARD_QUOTA= 
+		<if test="terminalTransferCardQuota != null and terminalTransferCardQuota != ''">#{terminalTransferCardQuota}*100, </if>
+		<if  test="terminalTransferCardQuota == null or terminalTransferCardQuota == ''">-1,</if>
+		PAY_CREDIT_PER_CARD_QUOTA=
+		<if test="payCreditPerCardQuota != null and payCreditPerCardQuota != ''">#{payCreditPerCardQuota}*100, </if>
+		<if  test="payCreditPerCardQuota == null or payCreditPerCardQuota == ''">-1,</if>
+		PAY_CREDIT_CARD_QUOTA=
+		<if test="payCreditCardQuota != null and payCreditCardQuota != ''">#{payCreditCardQuota}*100, </if>
+		<if  test="payCreditCardQuota == null or payCreditCardQuota == ''">-1,</if>
+		PAY_CREDIT_CARD_COUNT=
+		<if test="payCreditCardCount != null and payCreditCardCount != ''">#{payCreditCardCount}, </if>
+		<if  test="payCreditCardCount == null or payCreditCardCount == ''">-1,</if>
+		QUERY_CREDIT_CARD_COUNT=
+		<if test="queryCreditCardCount != null and queryCreditCardCount != ''">#{queryCreditCardCount}, </if>
+		<if  test="queryCreditCardCount == null or queryCreditCardCount == ''">-1,</if>
+		QUERY_DEBIT_CARD_COUNT=
+		<if test="queryDebitCardCount != null and queryDebitCardCount != ''">#{queryDebitCardCount}, </if>
+		<if  test="queryDebitCardCount == null or queryDebitCardCount == ''">-1,</if>
+		TERMINAL_D0_DAY_QUOTA=
+		<if test="terminalD0DayQuota != null and terminalD0DayQuota != ''">#{terminalD0DayQuota}*100, </if>
+		<if  test="terminalD0DayQuota == null or terminalD0DayQuota == ''">-1,</if>
+		TRANS_TIME_BEGIN=#{transTimeBegin},
+		TRANS_TIME_END=#{transTimeEnd}
+   		WHERE MER_TYPE=#{merType} AND MER_SYS_ID=#{merSysId}
+		
+	</update>
+</mapper>

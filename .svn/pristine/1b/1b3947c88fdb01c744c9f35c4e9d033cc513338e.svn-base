@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SubMerRateDao">
+	<resultMap id="subMerRate" type="com.bypay.domain.SubMerRate">
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="rateType" column="RATE_TYPE" />
+		<result property="teransRate" column="TRANS_RATE" />
+		<result property="transRateH" column="TRANS_RATE_H" />
+		<result property="transHighestFee" column="TRANS_HIGHEST_FEE" />
+		<result property="lowestFee" column="LOWEST_FEE" />
+		<result property="agentL1Rate" column="AGENT_L1_RATE" />
+		<result property="agentL1RateH" column="AGENT_L1_RATE_H" />
+		<result property="agentL1HighestFee" column="AGENT_L1_HIGHEST_FEE" />
+		<result property="agentL1ProfitRate" column="AGENT_L1_PROFIT_RATE" />
+		<result property="agentL2Rate" column="AGENT_L2_RATE" />
+		<result property="agentL2RateH" column="AGENT_L2_RATE_H" />
+		<result property="agentL2HigestFee" column="AGENT_L2_HIGHEST_FEE" />
+		<result property="agentL2ProfitRate" column="AGENT_L2_PROFIT_RATE" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="status" column="STATUS" />
+		<result property="subMerTract" column="SUB_MER_TRACT" />
+		<result property="reserued" column="RESERVED" />
+		<result property="subMerName" column="SUB_MER_NAME" />
+		<result property="transRateNoTop" column="TRANS_RATE_NO_TOP" />
+	</resultMap>
+	<!-- 查询指定的单条子商户交易费率信息，用于子商户的详情显示 -->
+	<select id="selectSubMerRateGetById" parameterType="com.bypay.domain.SubMerRate" resultMap="subMerRate">
+		select 
+		RATE_TYPE,
+		TRANS_RATE,
+		TRANS_HIGHEST_FEE,
+		AGENT_L1_RATE,
+		AGENT_L1_HIGHEST_FEE,
+		AGENT_L1_PROFIT_RATE,
+		AGENT_L2_RATE,
+		AGENT_L2_HIGHEST_FEE,
+		AGENT_L2_PROFIT_RATE,
+		AGENT_L1_RATE_H,
+		AGENT_L2_RATE_H,
+		TRANS_RATE_NO_TOP 
+		from SUB_MER_RATE	
+		where SUB_MER_ID=#{subMerId} AND STATUS='1'
+	</select>
+	<!-- 查询指定的单条子商户交易费率信息，用于子商户的修改费率信息 -->
+	<select id="selectListSubMerRateGetById" parameterType="com.bypay.domain.SubMerRate" resultMap="subMerRate">
+		select 
+		STATUS,
+		RATE_TYPE,
+		TRANS_RATE,
+		TRANS_RATE_H,
+		TRANS_HIGHEST_FEE,
+		AGENT_L1_RATE,
+		AGENT_L1_HIGHEST_FEE,
+		AGENT_L1_PROFIT_RATE,
+		AGENT_L2_RATE,
+		AGENT_L2_HIGHEST_FEE,
+		AGENT_L2_PROFIT_RATE,
+		AGENT_L1_RATE_H,
+		AGENT_L2_RATE_H,
+		TRANS_RATE_NO_TOP 
+		from SUB_MER_RATE	
+		where SUB_MER_ID=#{subMerId} 
+		<if test="rateType!=null and rateType!=''">
+		AND RATE_TYPE=#{rateType} 
+		</if>
+		order by STATUS  desc
+	</select>
+	<select id="selectSubMerRateById" parameterType="com.bypay.domain.SubMerRate" resultMap="subMerRate">
+		select SMR.*,SMI.SUB_MER_NAME from SUB_MER_RATE SMR LEFT JOIN SUB_MER_INFO SMI ON SMI.SUB_MER_ID = SMR.SUB_MER_ID
+		where SMR.SUB_MER_ID=#{subMerId} AND SMR.STATUS = 1
+	</select>
+	<!-- 添加商户交易费率信息 -->
+	<insert id="insertSubMerRateInfo" parameterType="java.util.Map" >
+		INSERT INTO SUB_MER_RATE (SUB_MER_ID, RATE_TYPE,
+		TRANS_RATE, TRANS_RATE_H, TRANS_HIGHEST_FEE, LOWEST_FEE,
+		AGENT_L1_RATE, AGENT_L1_RATE_H,AGENT_L1_HIGHEST_FEE,AGENT_L1_PROFIT_RATE,AGENT_L1_NO_TOP,
+		AGENT_L2_RATE, AGENT_L2_RATE_H, AGENT_L2_HIGHEST_FEE,AGENT_L2_PROFIT_RATE,AGENT_L2_NO_TOP,
+		CREATE_TIME,STATUS)
+		VALUES(#{subMerId},#{rateType},
+		#{transRate}, #{transRateH}, #{transHighestFee},#{lowestFee},
+		#{agentL1Rate}, #{agentL1RateH}, #{agentL1HighestFee},#{agentL1ProfitRate},#{agentL1NoTop},
+		#{agentL2Rate}, #{agentL2RateH}, #{agentL2HighestFee},#{agentL2ProfitRate},#{agentL2NoTop},
+		#{createTime},#{status})
+	</insert>
+	
+	<update id="updateSubMerRate" parameterType="com.bypay.domain.SubMerRate">
+		UPDATE SUB_MER_RATE
+		<set>
+		<if test="teransRate != null and teransRate != ''">
+			TRANS_RATE = #{teransRate},
+		</if>
+		<if test="transRateH != null and transRateH != ''">
+			TRANS_RATE_H = #{transRateH},
+		</if>
+		<if test="transHighestFee != null and transHighestFee != ''">
+			TRANS_HIGHEST_FEE = #{transHighestFee},
+		</if>
+		<if test="agentL1Rate != null and agentL1Rate != ''">
+			AGENT_L1_RATE = #{agentL1Rate},
+		</if>
+		<if test="agentL1HighestFee != null and agentL1HighestFee != ''">
+			AGENT_L1_HIGHEST_FEE = #{agentL1HighestFee},
+		</if>
+		<if test="agentL1ProfitRate != null and agentL1ProfitRate != ''">
+			AGENT_L1_PROFIT_RATE = #{agentL1ProfitRate},
+		</if>
+		<if test="agentL2Rate != null and agentL2Rate != ''">
+			AGENT_L2_RATE = #{agentL2Rate},
+		</if>
+		<if test="agentL2HigestFee != null and agentL2HigestFee != ''">
+			AGENT_L2_HIGHEST_FEE = #{agentL2HigestFee},
+		</if>
+		<if test="agentL2ProfitRate != null and agentL2ProfitRate != ''">
+			AGENT_L2_PROFIT_RATE = #{agentL2ProfitRate},
+		</if>
+		<if test="agentL1NoTop != null and agentL1NoTop != ''">
+			AGENT_L1_NO_TOP = #{agentL1NoTop},
+		</if>
+		<if test="agentL2NoTop != null and agentL2NoTop != ''">
+			AGENT_L2_NO_TOP = #{agentL2NoTop},
+		</if>
+		</set>
+		WHERE SUB_MER_ID = #{subMerId}
+	</update>
+	
+	<update id="updateSubMerRateRateType" parameterType="com.bypay.domain.SubMerRate">
+		UPDATE SUB_MER_RATE
+		SET STATUS = #{status}
+		WHERE SUB_MER_ID = #{subMerId}
+		<if test="rateType != null and rateType != ''">
+		AND RATE_TYPE = #{rateType}
+		</if>
+	</update>
+	<!-- 子商户上线修改交易费率的可用通道 -->
+	<update id="updateSubMerRateSubMerTract" parameterType="com.bypay.domain.SubMerRate">
+		UPDATE SUB_MER_RATE SET SUB_MER_TRACT=#{subMerTract} WHERE SUB_MER_ID=#{subMerId}
+		 AND STATUS=#{status}
+	</update>
+	<!-- 查询指定的单条子商户交易费率信息，用于子商户的详情显示 -->
+	<select id="getSubMerRateBySubMerId" parameterType="com.bypay.domain.SubMerRate" resultMap="subMerRate">	
+		select * from SUB_MER_RATE where SUB_MER_ID=#{subMerId}
+	</select>
+</mapper>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.OrderFrozenDao">
+	<resultMap id="orderFrozen" type="com.bypay.domain.OrderFrozen">
+		<result property="id" column="ID" />
+		<result property="orderId" column="ORDER_ID" />
+		<result property="subMerId" column="SUB_MER_ID" />
+		<result property="frozenStatus" column="FROZEN_STATUS" />
+		<result property="status" column="STATUS" />
+		<result property="frozenTime" column="FROZEN_TIME" />
+		<result property="returnTime" column="RETURN_TIME" />
+		<result property="deductionTime" column="DEDUCTION_TIME" />
+		<result property="reserved1" column="RESERVED1" />
+		<result property="reserved2" column="RESERVED2" />
+		<result property="reserved3" column="RESERVED3" />
+	</resultMap>
+	<select id="selectOrderFrozen" parameterType="java.util.Map" resultMap="orderFrozen">
+		SELECT * FROM ORDER_FROZEN OF
+		<where>
+			<if test="orderFrozen.orderId != null and orderFrozen.orderId != ''">
+				OF.ORDER_ID = #{orderFrozen.orderId}
+			</if>
+			<if test="orderFrozen.subMerId != null and orderFrozen.subMerId != ''">
+				AND SUB_MER_ID = #{orderFrozen.subMerId}
+			</if>
+		</where>
+		ORDER BY FROZEN_TIME DESC
+	</select>
+	
+	<select id="selectOrderFrozenCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM ORDER_FROZEN OF
+		<where>
+			<if test="orderFrozen.orderId != null and orderFrozen.orderId != ''">
+				OF.ORDER_ID = #{orderFrozen.orderId}
+			</if>
+			<if test="orderFrozen.subMerId != null and orderFrozen.subMerId != ''">
+				AND SUB_MER_ID = #{orderFrozen.subMerId}
+			</if>
+		</where>
+	</select>
+	
+	<select id="selectOrderFrozenByOrderId" parameterType="String" resultMap="orderFrozen">
+		SELECT * FROM ORDER_FROZEN WHERE ORDER_ID = #{orderId}
+	</select>
+	
+	<insert id="insertOrderFrozen" parameterType="com.bypay.domain.OrderFrozen">
+		INSERT INTO ORDER_FROZEN(ORDER_ID,SUB_MER_ID,FROZEN_STATUS,FROZEN_TIME,RESERVED1)
+		VALUES(#{orderId},#{subMerId},#{frozenStatus},#{frozenTime},#{reserved1})
+	</insert>
+	
+	<update id="updateOrderFrozen" parameterType="com.bypay.domain.OrderFrozen">
+		UPDATE ORDER_FROZEN
+		<set>
+			<if test="orderId != null and orderId != ''">
+				ORDER_ID = #{orderId}
+			</if>
+			<if test="frozenTime != null and frozenTime != ''">
+				,FROZEN_TIME = #{frozenTime}
+			</if>
+			<if test="returnTime != null and returnTime != ''">
+				,RETURN_TIME = #{returnTime}
+			</if>
+			<if test="deductionTime != null and deductionTime != ''">
+				,DEDUCTION_TIME = #{deductionTime}
+			</if>
+			<if test="frozenStatus != null and frozenStatus != ''">
+				,FROZEN_STATUS = #{frozenStatus}
+			</if>
+			<if test="status != null and status != ''">
+				,STATUS = #{status}
+			</if>
+		</set>
+		WHERE ORDER_ID = #{orderId}
+	</update>
+ </mapper>

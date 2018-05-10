@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SumMerProfitDao">
+	<resultMap id="sumMerProfit" type="com.bypay.domain.SumMerProfit">
+		<result property="id" column="id" />
+		<result property="merSysId" column="merSysId" />
+		<result property="sumAmt" column="sumAmt" />
+		<result property="sumMerProfit" column="sumMerProfit" />
+		<result property="sumAgent1Profit" column="sumAgent1Profit" />
+		<result property="sumAgent2Profit" column="sumAgent2Profit" />
+		<result property="sumAgent3Profit" column="sumAgent3Profit" />
+		<result property="sumAgent4Profit" column="sumAgent4Profit" />
+		<result property="sumAgent5Profit" column="sumAgent5Profit" />
+		<result property="sumAgent6Profit" column="sumAgent6Profit" />
+		<result property="sumAgent7Profit" column="sumAgent7Profit" />
+		<result property="sumAgent8Profit" column="sumAgent8Profit" />
+		<result property="sumAgent9Profit" column="sumAgent9Profit" />
+		<result property="sumAgent10Profit" column="sumAgent10Profit" />
+		<result property="createDate" column="createDate" />
+		<result property="transType" column="transType" />
+		<result property="payfor" column="payfor" />
+		
+	</resultMap>
+
+	<resultMap type="java.util.HashMap" id="sumInfo">
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="createDate" column="CREATE_DATE" />
+		<result property="transType" column="TRANSTYPE" />
+		<result property="sumMerAmt" column="sumMerAmt" />
+		<result property="sumMerProfit" column="sumMerProfit" />
+		<result property="agent1Profit" column="agent1Profit" />
+		<result property="agent2Profit" column="agent2Profit" />
+		<result property="agent3Profit" column="agent3Profit" />
+		<result property="agent4Profit" column="agent4Profit" />
+		<result property="agent5Profit" column="agent5Profit" />
+		<result property="agent6Profit" column="agent6Profit" />
+		<result property="agent7Profit" column="agent7Profit" />
+		<result property="agent8Profit" column="agent8Profit" />
+		<result property="agent9Profit" column="agent9Profit" />
+		<result property="agent10Profit" column="agent10Profit" />
+		<result property="ids" column="ids" />
+	</resultMap>
+	
+	<select id="getSumList"  resultMap="sumInfo"  parameterType="java.util.Map">
+		SELECT MER_SYS_ID,CREATE_DATE,TRANSTYPE,SUM(MER_AMT) as sumMerAmt,SUM(MER_PROFIT) as sumMerProfit,SUM(AGENT1_PROFIT) as agent1Profit,SUM(AGENT2_PROFIT) as agent2Profit,
+		SUM(AGENT3_PROFIT) as agent3Profit,SUM(AGENT4_PROFIT) as agent4Profit
+		,SUM(AGENT5_PROFIT) as agent5Profit
+		,SUM(AGENT6_PROFIT) as agent6Profit
+		,SUM(AGENT7_PROFIT) as agent7Profit
+		,SUM(AGENT8_PROFIT) as agent8Profit
+		,SUM(AGENT9_PROFIT) as agent9Profit
+		,SUM(AGENT10_PROFIT) as agent10Profit
+		 from ORDER_PROFIT where CREATE_DATE=#{createDate}
+		GROUP BY MER_SYS_ID,TRANSTYPE;
+	</select>
+	
+	<insert id="insertMerProfit"  parameterType="com.bypay.domain.SumMerProfit">
+		INSERT INTO SUM_MER_PROFIT (merSysId, sumAmt, sumMerProfit, sumAgent1Profit, sumAgent2Profit, sumAgent3Profit, sumAgent4Profit,
+		sumAgent5Profit, 
+		sumAgent6Profit, 
+		sumAgent7Profit, 
+		sumAgent8Profit, 
+		sumAgent9Profit, 
+		sumAgent10Profit, 
+		 createDate, transType, payfor)
+		VALUES (#{merSysId}, #{sumAmt}, #{sumMerProfit}, #{sumAgent1Profit}, #{sumAgent2Profit}, #{sumAgent3Profit}, #{sumAgent4Profit},
+		#{sumAgent5Profit},
+		#{sumAgent6Profit},
+		#{sumAgent7Profit},
+		#{sumAgent8Profit},
+		#{sumAgent9Profit},
+		#{sumAgent10Profit},
+		 #{createDate}, #{transType}, #{payfor})
+	</insert>
+	
+	<select id="selectSumMerList" parameterType="com.bypay.domain.SumMerProfit" resultMap="sumMerProfit">
+		SELECT *
+		FROM SUM_MER_PROFIT
+		WHERE 1=1
+		<if test="sumMerProfit.createDate != null and sumMerProfit.createDate!= '' ">
+		AND createDate = #{sumMerProfit.createDate}
+		</if>
+		<if test="sumMerProfit.merSysId != null and sumMerProfit.merSysId!= '' ">
+		AND merSysId = #{sumMerProfit.merSysId}
+		</if>
+		ORDER BY id desc limit #{startResult}, #{endResult}
+	</select>
+	
+	<select id="selectSumMerCount" parameterType="com.bypay.domain.SumMerProfit" resultType="int">
+		SELECT count(*)
+		FROM SUM_MER_PROFIT
+		WHERE 1=1
+		<if test="sumMerProfit.createDate != null and sumMerProfit.createDate!= '' ">
+		AND createDate = #{sumMerProfit.createDate}
+		</if>
+		<if test="sumMerProfit.merSysId != null and sumMerProfit.merSysId!= '' ">
+		AND merSysId = #{sumMerProfit.merSysId}
+		</if>
+	</select>
+	
+	<select id="selectById" parameterType="com.bypay.domain.SumMerProfit" resultMap="sumMerProfit">
+		SELECT * FROM SUM_MER_PROFIT WHERE id=#{id}
+	</select>
+	
+	<update id="updateProfit"  parameterType="com.bypay.domain.SumMerProfit" >
+		UPDATE SUM_MER_PROFIT SET payfor=#{payfor}
+		<if test="id != null and id!= '' ">
+		WHERE id=#{id}
+		</if>
+		<if test="ids != null and ids!= '' ">
+		WHERE id in (${ids})
+		</if>
+	</update>
+	
+	<select id="getApplyList"  resultType="java.util.Map"  parameterType="java.util.Map">
+		select SUM(sumMerProfit) as sumMerProfit,GROUP_CONCAT(CAST(id as CHAR) SEPARATOR ',') as ids ,count(*) as count from SUM_MER_PROFIT where merSysId=#{merSysId} and payfor=#{payfor};
+	</select>
+</mapper>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.CheckCreditDao">
+	<resultMap id="checkCredit" type="com.bypay.domain.CheckCredit">
+		<result property="id" column="id" />
+		<result property="mobileNum" column="mobileNum" />
+		<result property="creditCard" column="creditCard" />
+		<result property="idNum" column="idNum" />
+		<result property="userName" column="userName" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+
+	<insert id="insertCheckCredit" parameterType="com.bypay.domain.CheckCredit">
+		INSERT INTO CHECK_CREDIT(mobileNum, creditCard,  idNum, userName, createTime)
+		VALUES(#{mobileNum}, #{creditCard}, #{idNum}, #{userName}, #{createTime})
+	</insert>
+
+</mapper>

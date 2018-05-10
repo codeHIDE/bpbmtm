@@ -1,0 +1,42 @@
+package com.bypay.dao;
+
+import java.util.List;
+import java.util.Map;
+
+import com.bypay.domain.AgenctInfo;
+
+public interface AgenctInfoDao {
+  List<AgenctInfo> selectAgenctInfoAll(Map<String, Object> map);
+  
+  List<AgenctInfo> queryAgenctInfoAll(Map<String, Object> map);
+
+  Integer selectAgenctInfoAllCount(Map<String, Object> map);
+
+  AgenctInfo selectAgenctInfoById(AgenctInfo ai);
+
+  boolean updateStatus(AgenctInfo ai);
+
+  /**
+   * 获取代理商信息
+   * 
+   * @param agentId
+   * @return
+   */
+  AgenctInfo getAgentInfo(String agentId);
+
+  /**
+   * 代理商户LOGO上传成功后修改代理数据库中LOGO字段地址
+   * 
+   * @param info
+   */
+  int updateAgeLogo(AgenctInfo info);
+  /**
+   * 
+   * @Description: 查询二级代理商费率,用于修改一级代理商费率时(做比较判断)
+   * @Auther: lijialiang
+   * @Date: 2014-12-1 下午4:51:27
+   */
+  public AgenctInfo getAgentInfoByRateInfo(Map<String, Object> map);
+  
+
+}

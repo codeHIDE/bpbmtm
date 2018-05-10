@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.SysOpLogDao">
+	<resultMap id="sysOpLog" type="com.bypay.domain.SysOpLog">
+		<result property="id" column="ID" />
+		<result property="loginName" column="LOGIN_NAME" />
+		<result property="opDesc" column="OP_DESC" />
+		<result property="opUrl" column="OP_URL" />
+		<result property="ip" column="IP" />
+		<result property="ua" column="UA" />
+		<result property="opTime" column="OP_TIME" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	
+	<sql id="baseColumn">
+		LOGIN_NAME,OP_DESC,OP_URL,IP,UA,OP_TIME,REMARK
+	</sql>
+	<!-- 添加操作记录 -->
+	<insert id="insertSysOpLog"
+		parameterType="com.bypay.domain.SysOpLog">
+		insert into SYS_OP_LOG(
+		<include refid="baseColumn" />
+		)values(#{loginName},#{opDesc},#{opUrl},#{ip},#{ua},#{opTime},#{remark})
+	</insert>
+	<select id="selectSysOpLog" parameterType="java.util.Map" resultMap="sysOpLog">
+		SELECT <include refid="baseColumn" /> FROM SYS_OP_LOG WHERE
+		OP_TIME >= #{firstOpTime}
+		<if test="lastOpTime != null and lastOpTime != '' ">
+		AND OP_TIME &lt;= #{lastOpTime}
+		</if>
+		<if test="loginName != null and loginName != '' ">
+		AND LOGIN_NAME = #{loginName}
+		</if>
+		<if test="functionName != null and functionName != '' ">
+		AND OP_URL like '%${functionName}%'
+		</if>
+		limit #{page}  , #{pageSize}
+	</select>
+	<select id="selectSysOpLogCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1) FROM SYS_OP_LOG WHERE
+		OP_TIME >= #{firstOpTime}
+		<if test="lastOpTime != null and lastOpTime != '' ">
+		AND OP_TIME &lt;= #{lastOpTime}
+		</if>
+		<if test="loginName != null and loginName != '' ">
+		AND LOGIN_NAME = #{loginName}
+		</if>
+		<if test="functionName != null and functionName != '' ">
+		AND OP_URL like '%${functionName}%'
+		</if>
+	</select>
+</mapper>

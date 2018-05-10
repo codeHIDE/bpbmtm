@@ -1,0 +1,584 @@
+package com.bypay.action;
+
+import it.sauronsoftware.ftp4j.listparsers.EPLFListParser;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import javax.inject.Inject;
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+import com.bypay.common.BaseAction;
+import com.bypay.dao.RulesAllDao;
+import com.bypay.domain.MccCode;
+import com.bypay.domain.RulesAll;
+import com.bypay.domain.TractInfo;
+import com.bypay.domain.TractStatictis;
+import com.bypay.service.MccCodeService;
+import com.bypay.service.TractInfoService;
+import com.bypay.service.TractStatictisService;
+import com.bypay.util.DateUtil;
+import com.bypay.util.PageUtil;
+
+public class TractInfoAction extends BaseAction{
+	@Inject
+	private TractInfoService tractInfoService;
+	private TractInfo tractInfo;
+	private List<TractInfo> tractInfoList;
+	private String tractList;
+	
+	@Inject
+	private TractStatictisService tractStatictisService;
+	private TractStatictis tractStatictis;
+	
+	// ======界面传参数
+	private String tractId;
+	private String tractName;
+	private String transMerId;
+	private String payTract;
+	private String tractType;
+	private String status;
+	private String tractAgency;
+	private String ratesType;
+	
+	private String mcc;					
+	private String integral;				
+	private String tractQuota;
+	
+	// ========分页
+	private int page = 1;
+	private int pageSize = 15;
+	
+	@Inject
+	private RulesAllDao rulesAllDao;
+	private List<RulesAll> rulesAllList;
+	private RulesAll rulesAll;
+	@Inject
+	private MccCodeService mccCodeService;
+	private MccCode mccCode;
+	private List<MccCode> mccCodeList;
+	
+	// 点击添加通道时跳转到添加通道页面的Action
+	public String goAddTract(){
+		tractInfo=new TractInfo();
+		mccCodeList=mccCodeService.selectMccCodeByDesc(mccCode);
+		System.out.println("ssxxsxsxxsx");
+		return "goAddTract";
+	}
+	
+	// 添加通道
+	public String addTractInfo() {
+		int add = 0;
+		if(tractInfo==null){
+			tractInfo=new TractInfo();
+		}
+		if(tractInfo.getTractHighestFee()==null||tractInfo.getTractHighestFee().equals("")){
+			tractInfo.setTractHighestFee("0");
+		}
+		if(tractInfo.getLowestCost()==null||tractInfo.getLowestCost().equals("")){
+			tractInfo.setLowestCost("0");
+		}
+		if(tractInfo.getCreditHighestCost()==null||tractInfo.getCreditHighestCost().equals("")){
+			tractInfo.setCreditHighestCost("0");
+		}
+		if(tractInfo.getDebitHighestCost()==null||tractInfo.getDebitHighestCost().equals("")){
+			tractInfo.setDebitHighestCost("0");
+		}
+		tractInfo.setCreateTime(DateUtil.getDate("yyyy-MM-dd HH:mm:ss")); // 通道创建日期
+		tractInfo.setTransTimeBegin(tractInfo.getTransTimeBegin());
+		tractInfo.setTransTimeEnd(tractInfo.getTransTimeEnd());
+		tractInfo.setStatus("0");
+		tractInfo.setBypayProfit("0");
+		System.out.println("通道开始使用时间"+tractInfo.getTransTimeBegin());
+		System.out.println("通道关闭时间"+tractInfo.getTransTimeEnd());
+		try {
+			add = tractInfoService.insertTractInfo(tractInfo);
+			if (add > 0) {
+//				String insertTractId=tractInfo.getTractId();
+//				TractStatictis tractStatictis=new TractStatictis();
+//				tractStatictis.setTractId(insertTractId);
+//				tractStatictis.setStatictisDate(DateUtil.getDate(DateUtil.getNextDay(new Date()), "yyyyMMdd"));
+//				if(tractInfo.getTractQuota()==null||tractInfo.getTractQuota()==""){
+//					tractStatictis.setPayAmt("0");
+//				}else{
+//					tractStatictis.setPayAmt(tractInfo.getTractQuota());
+//				}
+//				tractStatictis.setUseAmt("0");
+//				tractStatictis.setRefundAmt("0");
+//				int insertTractStatictis=tractStatictisService.insertTractStatictisCount(tractStatictis);
+//				if(insertTractStatictis>0){
+//					System.out.println("插入跑批彪成功！");
+//				}
+				getRequest().setAttribute("addTractInfo", "success");
+				System.out.println("添加通道成功");
+				 tractInfo=new TractInfo();
+			}
+		} catch (Exception e) {
+			getRequest().setAttribute("addTractInfo", "noPass");
+			System.out.println("添加通道失败");
+			 tractInfo=new TractInfo();
+		}
+		System.out.println(add);
+		return "addTractInfo";
+	}
+	
+	
+	// 查询判断添加通道时候的商户好是否存在
+	public void selectTransMerId() {
+		String flag = "false";
+		tractInfo = new TractInfo();
+		tractInfo.setTransMerId(transMerId);
+		tractInfo = tractInfoService.selectTractInfoRepeat(transMerId);
+		if (tractInfo != null) {
+			flag = "true";
+		}
+		try {
+			getResponse().setContentType("text/plain");
+			getResponse().getWriter().write(flag);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	// 通道列表
+	public void selectTractAllList() {
+		if (tractInfo == null) {
+			tractInfo = new TractInfo();
+			tractInfo.setTractId(tractId);
+			try {
+				tractInfo.setTractName(new String(tractName .getBytes("ISO8859-1"), "utf-8"));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+			tractInfo.setTransMerId(transMerId);
+			tractInfo.setTractAgency(tractAgency);
+			tractInfo.setIntegral("-1".equals(integral) ? null : integral);
+			tractInfo.setRatesType("-1".equals(ratesType) ? null : ratesType);
+			tractInfo.setPayTract("-1".equals(payTract) ? null : payTract);
+			tractInfo.setStatus("-1".equals(status) ? null : status);
+		}
+		int count = tractInfoService.selectTractInfoCount(tractInfo);
+		Map map=PageUtil.getPageMap(page, pageSize);
+		map.put("tractInfo", tractInfo);
+		tractInfoList = tractInfoService.selectTractInfoList(map);
+		JSONArray array = JSONArray.fromObject(tractInfoList);
+		JSONObject object = new JSONObject();
+		object.put("Rows", array.toString());
+		object.put("Total", count);
+		tractList = object.toString();
+		System.out.println(tractList);
+		try {
+			getResponse().getWriter().write(tractList);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	// 启动通道
+	public String approveTractInfo() throws Exception {
+		TractInfo tractInfo = new TractInfo();
+		tractInfo.setTractId(getRequest().getParameter("tractId"));
+		tractInfo.setStatus("1");
+		int result = tractInfoService.updateTractInfo(tractInfo);
+		if (result > 0) {
+			getResponse().getWriter().write("succ");
+		} else {
+			getResponse().getWriter().write("fone");
+		}
+		return null;
+	}
+
+	// 暂停通道
+	public String approveTractInfoOFF() throws Exception {
+		TractInfo tractInfo = new TractInfo();
+		tractInfo.setTractId(getRequest().getParameter("tractId"));
+		tractInfo.setStatus("2");
+		int result = tractInfoService.updateTractInfoOFF(tractInfo);
+		if (result > 0) {
+			getResponse().getWriter().write("succOFF");
+		} else {
+			getResponse().getWriter().write("foneOFF");
+		}
+		return null;
+	}
+
+	// 通道审批 显示通道详情
+	public String tractDetail() {
+		tractId = getRequest().getParameter("tractId");
+		tractInfo = tractInfoService.selectTractById(tractId);
+		return "tractDetail";
+	}
+	
+	// 通道详情
+	public String selecttractDetail() {
+		tractId = getRequest().getParameter("tractId");
+		tractInfo = tractInfoService.selectTractById(tractId);
+		return "selecttractDetail";
+	}
+
+	// 查询通道信息，修改通道信息
+	public String updateTractInfoDetail() {
+		tractId = getRequest().getParameter("tractId");
+		tractInfo = tractInfoService.selectTractById(tractId);
+		mccCodeList=mccCodeService.selectMccCodeByDesc(mccCode);
+		return "updateTractInfoDetail";
+	}
+
+	// 通道信息修改
+	public String updatetractInfo() {  
+		mccCodeList=mccCodeService.selectMccCodeByDesc(mccCode);
+		if (tractInfo == null) {
+			tractInfo = new TractInfo();
+			tractInfo.setTractId(getRequest().getParameter("tractId"));
+		}
+		System.out.println(tractInfo.getTractId());
+		if(tractInfo.getRatesType().equals("01")){
+			tractInfo.setTractHighestFee("0");
+			tractInfo.setDebitHighestCost("0");
+			tractInfo.setCreditHighestCost("0");
+		}
+		int result = tractInfoService.updateTract(tractInfo);
+		if (result > 0) {
+			System.out.println("修改成功");
+			getRequest().setAttribute("updatetractInfo", "success");
+			
+		}
+		tractId = getRequest().getParameter("tractId");
+		tractInfo = tractInfoService.selectTractById(tractId);
+		return "updateTractInfoDetail";
+	}
+	
+	public void insertRulesAll(){
+		try {
+			String group = getRequest().getParameter("tractRules");
+			JSONObject jsonObj = JSONObject.fromObject(group);
+			System.out.println(group);
+			rulesAll = new RulesAll();
+			rulesAll.setStatus("0");
+			rulesAll.setStartTime(jsonObj.getString("yjBeginTime").replace(":", ""));
+			rulesAll.setEndTime(jsonObj.getString("yjEndTime").replace(":", ""));
+			rulesAll.setTractDay(jsonObj.getString("klTract").replace(";", ","));
+			rulesAll.setTractHight(jsonObj.getString("fdTract").replace(";", ","));
+			rulesAll.setReserved1("规则描述");
+			int i = rulesAllDao.insertRulesAll(rulesAll);
+			if(i != 1){
+				getResponse().getWriter().write("添加失败");
+			}else{
+				getResponse().getWriter().write("添加成功");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public String insertRulesAllInit(){
+		try {
+			tractInfo = new TractInfo();
+			tractInfo.setNightFlag("1");
+			tractInfoList = tractInfoService.selectTractInfoByRatesType(tractInfo);
+			JSONArray object = JSONArray.fromObject(tractInfoList);
+			tractList = object.toString();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "insertRulesAllInit";
+	}
+	public void selectRulesAllList(){
+		try {
+			Map map=PageUtil.getPageMap(page, pageSize);
+			int count = rulesAllDao.selectRulesAllListCount(map);
+			rulesAllList = rulesAllDao.selectRulesAllList(map);
+			JSONArray array = JSONArray.fromObject(rulesAllList);
+			JSONObject object = new JSONObject();
+			object.put("Rows", array.toString());
+			object.put("Total", count);
+			tractList = object.toString();
+			System.out.println(tractList);
+			try {
+				getResponse().getWriter().write(tractList);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public void indexRulesAll(){
+		try {
+			if(rulesAll == null){
+				getResponse().getWriter().write("fone");
+				return;
+			}
+			RulesAll rulesAll1 = new RulesAll();
+			rulesAll1.setStatus("0");
+			int i = rulesAllDao.updateRulesAllStatus(rulesAll1);
+			i = rulesAllDao.updateRulesAllStatus(rulesAll);
+			if(i != 1){
+				getResponse().getWriter().write("fone");
+			}else{
+				getResponse().getWriter().write("succ");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	public void delectRulesAll(){
+		try {
+			if(rulesAll == null){
+				getResponse().getWriter().write("fone");
+				return;
+			}
+			int i = rulesAllDao.deleteRulesAllById(rulesAll);
+			if(i != 1){
+				getResponse().getWriter().write("fone");
+			}else{
+				getResponse().getWriter().write("succ");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+//	
+//	//查询通道信息跑批用
+//	public void selectAllTractInfoByStatictis(){
+//		tractInfoList=tractInfoService.selectTractInfoAllSettle(tractInfo);
+//		for(int i=0; i<tractInfoList.size();i++){
+//			tractStatictis.setTractId(tractInfoList.get(i).getTractId());
+//			tractStatictis.setStatictidDate(DateUtil.getDate(DateUtil.getNextDay(new Date()), "yyyyMMdd"));
+//			tractStatictis.setPayAmt(tractInfoList.get(i).getTractQuota());
+//			tractStatictis.setUseAmt("0");
+//			tractStatictis.setRefundAmt("0");
+//			int insert=tractStatictisService.insertTractStatictisCount(tractStatictis);
+//			if(insert>0){
+//				System.out.println("插入成功！");
+//			}
+//			
+//		}
+//		
+//	}
+	
+	
+	// 更新通道
+	public String updateReserved() throws Exception {
+		TractInfo tractInfo = new TractInfo();
+		tractInfo.setTractId(getRequest().getParameter("tractId"));
+		tractInfo.setReserved(this.getParameterForString("reserved"));
+		int result = tractInfoService.updateReserved(tractInfo);
+		if (result > 0) {
+			getResponse().getWriter().write("succ");
+		} else {
+			getResponse().getWriter().write("fone");
+		}
+		return null;
+	}
+	
+
+	
+
+
+	public TractInfo getTractInfo() {
+		return tractInfo;
+	}
+
+	public void setTractInfo(TractInfo tractInfo) {
+		this.tractInfo = tractInfo;
+	}
+
+	public List<TractInfo> getTractInfoList() {
+		return tractInfoList;
+	}
+
+	public void setTractInfoList(List<TractInfo> tractInfoList) {
+		this.tractInfoList = tractInfoList;
+	}
+
+	public String getTractList() {
+		return tractList;
+	}
+
+	public void setTractList(String tractList) {
+		this.tractList = tractList;
+	}
+
+	public String getTractId() {
+		return tractId;
+	}
+
+	public void setTractId(String tractId) {
+		this.tractId = tractId;
+	}
+
+	public String getTractName() {
+		return tractName;
+	}
+
+	public void setTractName(String tractName) {
+		this.tractName = tractName;
+	}
+
+	public String getTransMerId() {
+		return transMerId;
+	}
+
+	public void setTransMerId(String transMerId) {
+		this.transMerId = transMerId;
+	}
+
+	public String getPayTract() {
+		return payTract;
+	}
+
+	public void setPayTract(String payTract) {
+		this.payTract = payTract;
+	}
+
+	public String getTractType() {
+		return tractType;
+	}
+
+	public void setTractType(String tractType) {
+		this.tractType = tractType;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public int getPage() {
+		return page;
+	}
+
+	public void setPage(int page) {
+		this.page = page;
+	}
+
+	public int getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(int pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	public String getMcc() {
+		return mcc;
+	}
+
+	public void setMcc(String mcc) {
+		this.mcc = mcc;
+	}
+
+	public String getIntegral() {
+		return integral;
+	}
+
+	public void setIntegral(String integral) {
+		this.integral = integral;
+	}
+
+	public String getTractQuota() {
+		return tractQuota;
+	}
+
+	public void setTractQuota(String tractQuota) {
+		this.tractQuota = tractQuota;
+	}
+
+	public MccCode getMccCode() {
+		return mccCode;
+	}
+
+	public void setMccCode(MccCode mccCode) {
+		this.mccCode = mccCode;
+	}
+
+	public List<MccCode> getMccCodeList() {
+		return mccCodeList;
+	}
+
+	public void setMccCodeList(List<MccCode> mccCodeList) {
+		this.mccCodeList = mccCodeList;
+	}
+
+	public String getTractAgency() {
+		return tractAgency;
+	}
+
+	public void setTractAgency(String tractAgency) {
+		this.tractAgency = tractAgency;
+	}
+
+	public String getRatesType() {
+		return ratesType;
+	}
+
+	public void setRatesType(String ratesType) {
+		this.ratesType = ratesType;
+	}
+
+	public TractInfoService getTractInfoService() {
+		return tractInfoService;
+	}
+
+	public void setTractInfoService(TractInfoService tractInfoService) {
+		this.tractInfoService = tractInfoService;
+	}
+
+	public TractStatictisService getTractStatictisService() {
+		return tractStatictisService;
+	}
+
+	public void setTractStatictisService(TractStatictisService tractStatictisService) {
+		this.tractStatictisService = tractStatictisService;
+	}
+
+	public TractStatictis getTractStatictis() {
+		return tractStatictis;
+	}
+
+	public void setTractStatictis(TractStatictis tractStatictis) {
+		this.tractStatictis = tractStatictis;
+	}
+
+	public RulesAllDao getRulesAllDao() {
+		return rulesAllDao;
+	}
+
+	public void setRulesAllDao(RulesAllDao rulesAllDao) {
+		this.rulesAllDao = rulesAllDao;
+	}
+
+	public List<RulesAll> getRulesAllList() {
+		return rulesAllList;
+	}
+
+	public void setRulesAllList(List<RulesAll> rulesAllList) {
+		this.rulesAllList = rulesAllList;
+	}
+
+	public RulesAll getRulesAll() {
+		return rulesAll;
+	}
+
+	public void setRulesAll(RulesAll rulesAll) {
+		this.rulesAll = rulesAll;
+	}
+
+	public MccCodeService getMccCodeService() {
+		return mccCodeService;
+	}
+
+	public void setMccCodeService(MccCodeService mccCodeService) {
+		this.mccCodeService = mccCodeService;
+	}
+	
+	
+
+}

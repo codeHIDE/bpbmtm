@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.MerSettleStatictisDao">
+	<resultMap id="merSettleStatictis" type="com.bypay.domain.MerSettleStatictis">
+		<result property="id" column="ID" />
+		<result property="mid" column="MID" />
+		<result property="merType" column="MER_TYPE" />
+		<result property="merSysId" column="MER_SYS_ID" />
+		<result property="merName" column="MER_NAME" />
+		<result property="accountNum" column="ACCOUNT_NUM" />
+		<result property="accountName" column="ACCOUNT_NAME" />
+		<result property="accountAgencyId" column="ACCOUNT_AGENCY_ID" />
+		<result property="settleDate" column="SETTLE_DATE" />
+		<result property="sumAmt" column="SUM_AMT" />
+		<result property="clearAmt" column="CLEAR_AMT" />
+		<result property="sumTransFee" column="SUM_TRANS_FEE" />
+		<result property="createTime" column="CREATE_TIME" />
+		<result property="createDate" column="CREATE_Date" />
+		<result property="clearStatus" column="CLEAR_STATUS" />
+		<result property="clearOrderId" column="CLEAR_ORDER_ID" />
+		<result property="faileAmt" column="FAILE_AMT" />
+		<result property="bpSerialNumber" column="BP_SERIAL_NUMBER" />
+		<result property="countFee" column="COUNT_FEE" />
+		<result property="subMerName" column="SUB_MER_NAME" />
+		<result property="settAgency" column="SETT_AGENCY"></result>
+		<result property="clearDesc" column="CLEAR_DESC"></result>
+		<result property="t0Amt" column="T0_AMT"></result>
+		<result property="d1MerRate" column="D1_MER_RATE"></result>
+		<result property="d1MerProfit" column="D1_MER_PROFIT"></result>
+		<result property="d1MerGain" column="D1_MER_GAIN"></result>
+		<result property="reserved" column="RESERVED"></result>
+		<result property="reserved1" column="RESERVED1"></result>
+		<result property="reserved2" column="RESERVED2"></result>
+		<result property="reserved3" column="RESERVED3"></result>
+		<result property="d1HfProfit" column="D1_HF_PROFIT"></result>
+		<result property="t0HfProfit" column="T0_HF_PROFIT"></result>
+		<result property="t0MerGain" column="T0_MER_GAIN"></result>
+		<result property="bankName" column="BANK_NAME"></result>
+		<result property="merProfitRate" column="MER_PROFIT_RATE"></result>
+		<result property="billCycle" column="BILL_CYCLE"></result>   
+	</resultMap>
+	<select id="getClearFaile" parameterType="com.bypay.domain.MerSettleStatictis" resultMap="merSettleStatictis">
+		SELECT 
+		<!-- MER_SETTLE_STATICTIS -->
+		MSS.ID,MSS.MID,MSS.MER_SYS_ID,MSS.SETTLE_DATE,MSS.CLEAR_STATUS,MSS.CLEAR_AMT,MSS.FAILE_AMT,MSS.SUM_AMT,MSS.CLEAR_DESC,
+		<!-- 机构表 -->
+		MI.MER_NAME,
+		<!-- 银行码表 -->
+		BBB.BANK_NAME,BBB.CODE AS ACCOUNT_AGENCY_ID,
+		<!-- 子商户表 -->
+		SMI.SETT_ACCOUNT_NAME AS ACCOUNT_NAME,SMI.SETT_ACCOUNT_NO AS ACCOUNT_NUM,SMI.SUB_MER_NAME
+		FROM 
+		MER_SETTLE_STATICTIS MSS 
+		LEFT JOIN SUB_MER_INFO 			SMI 	ON MSS.MID = SMI.SUB_MER_ID
+		LEFT JOIN BANK_BEHALF_BRANCH 	BBB 	ON BBB.CODE = SMI.SETT_AGENCY
+		LEFT JOIN MER_INFO 				MI 		ON MI.MER_SYS_ID = MSS.MER_SYS_ID
+		<where>
+			<if test="merSysId != null and merSysId != ''">
+				MSS.MER_SYS_ID = #{merSysId}
+			</if>
+			<if test="mid != null and mid != ''">
+				AND MSS.MID = #{mid}
+			</if>
+			<if test="settleDate != null and settleDate != ''">
+				AND MSS.SETTLE_DATE = #{settleDate}
+			</if>
+			<if test="clearStatus != null and clearStatus != '' and clearStatus != -1">
+				AND MSS.CLEAR_STATUS = #{clearStatus}
+			</if>
+			<if test="merType != null and merType != '' and merType != -1">
+				AND MSS.MER_TYPE = #{merType}
+			</if>
+			<if test="id != null and id != ''">
+				AND MSS.ID = #{id}
+			</if>
+		</where>
+	</select>
+	
+	<select id="seleteMerSettleStatictisReportCount" parameterType="java.util.Map" resultType="int">
+		SELECT COUNT(1)
+	 	FROM MER_SETTLE_STATICTIS MSS LEFT JOIN MER_TRANS MT ON MT.MER_SYS_ID = MSS.MER_SYS_ID
+	 	LEFT JOIN BANK_BEHALF_BRANCH BBB ON BBB.CODE = MSS.ACCOUNT_AGENCY_ID
+		<where>
+			<if test="merSysId != null and merSysId != ''">
+				MER_SYS_ID = #{merSysId}
+			</if>
+			<if test="settleDate1 != null and settleDate1 != ''">
+				AND SETTLE_DATE >= #{settleDate1}
+			</if>
+			<if test="settleDate2 != null and settleDate2 != ''">
+				AND SETTLE_DATE &lt;= #{settleDate2}
+			</if>
+			<if test="settleType == '01'">
+				AND (COUNT_FEE IS NOT NULL OR COUNT_FEE != 0)
+			</if>
+			<if test="settleType == '-1'">
+				AND (COUNT_FEE IS NULL OR COUNT_FEE = 0)
+				AND (RESERVED IS NULL OR RESERVED = 0)
+			</if>
+			<if test="clearStatus != null and clearStatus != ''">
+				AND CLEAR_STATUS = #{clearStatus}
+			</if>
+		</where>
+	</select>
+	<select id="seleteMerSettleStatictisReport" parameterType="java.util.Map" resultMap="merSettleStatictis">
+		SELECT MSS.SETTLE_DATE,MSS.RESERVED1,MSS.MID,MSS.MER_SYS_ID,MSS.CLEAR_AMT,MSS.CLEAR_STATUS,MSS.CLEAR_DESC,
+		MSS.ACCOUNT_NUM,MSS.D1_MER_RATE,MSS.RESERVED,MSS.D1_MER_GAIN,MSS.COUNT_FEE,
+		MT.MER_PROFIT_RATE,BBB.BANK_NAME,MSS.ID,MSS.T0_MER_GAIN
+	 	FROM MER_SETTLE_STATICTIS MSS LEFT JOIN MER_TRANS MT ON MT.MER_SYS_ID = MSS.MER_SYS_ID
+	 	LEFT JOIN BANK_BEHALF_BRANCH BBB ON BBB.CODE = MSS.ACCOUNT_AGENCY_ID
+		<where>
+			<if test="merSysId != null and merSysId != ''">
+				MSS.MER_SYS_ID = #{merSysId}
+			</if>
+			<if test="settleDate1 != null and settleDate1 != ''">
+				AND MSS.RESERVED1 >= #{settleDate1}
+			</if>
+			<if test="settleDate2 != null and settleDate2 != ''">
+				AND MSS.RESERVED1 &lt;= #{settleDate2}
+			</if>
+			<if test="settleType == '01'">
+				AND (MSS.COUNT_FEE IS NOT NULL OR MSS.COUNT_FEE != 0)
+			</if>
+			<if test="settleType == '-1'">
+				AND (MSS.COUNT_FEE IS NULL OR MSS.COUNT_FEE = 0)
+				AND (MSS.RESERVED IS NULL OR MSS.RESERVED = 0)
+			</if>
+			<if test="clearStatus != null and clearStatus != '' and clearStatus != -1">
+				AND MSS.CLEAR_STATUS = #{clearStatus}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 日交易金额、手续费统计 -->
+	<select id="dayMerAmtFee" resultMap="merSettleStatictis" parameterType="java.util.Map">
+			SELECT SETTLE_DATE, SUM(SUM_AMT) SUM_AMT, SUM(SUM_TRANS_FEE) SUM_TRANS_FEE
+			FROM MER_SETTLE_STATICTIS 
+			where SETTLE_DATE between #{startTime} and #{endTime}
+			<if test="mid != null and mid != ''">
+				AND MID = #{mid}
+			</if>
+			<if test="merType != null and merType != ''">
+				AND MER_TYPE = #{merType}
+			</if>
+			group by SETTLE_DATE 
+			order by SETTLE_DATE asc
+	</select> 
+	<select id="selectMerSettleStatictisListAmt" parameterType="com.bypay.domain.MerSettleStatictis" resultMap="merSettleStatictis">
+		SELECT SUM(SUM_AMT) AS SUM_AMT,SUM(FAILE_AMT) AS FAILE_AMT,SUM(CLEAR_AMT) AS CLEAR_AMT,SUM(COUNT_FEE) AS COUNT_FEE
+		,SUM(SUM_TRANS_FEE) AS SUM_TRANS_FEE,CLEAR_STATUS FROM MER_SETTLE_STATICTIS WHERE CLEAR_STATUS IN (0,1,2,3,6,9) AND MER_TYPE = 1
+		<if test="merSysId != null and merSysId != ''">
+			AND MER_SYS_ID = #{merSysId}
+		</if>
+		<if test="settleDate != null and settleDate != ''">
+			AND SETTLE_DATE = #{settleDate}
+		</if>
+		GROUP BY CLEAR_STATUS
+	</select>
+	<select id="selectSubMerInfoLeftMerSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis" resultMap="merSettleStatictis">
+		SELECT SMI.SETT_ACCOUNT_NAME AS ACCOUNT_NAME,SMI.SETT_ACCOUNT_NO AS ACCOUNT_NUM,SMI.SETT_AGENCY AS ACCOUNT_AGENCY_ID
+		,MSS.* FROM SUB_MER_INFO SMI LEFT JOIN MER_SETTLE_STATICTIS MSS ON SMI.SUB_MER_ID = MSS.MID WHERE MSS.ID = #{id}
+	</select>
+	
+	<!-- 根据商户号，商户类型为0，清算日期修改清分状态 -->
+	<update id="updateClearStatus" parameterType="com.bypay.domain.MerSettleStatictis">
+		update MER_SETTLE_STATICTIS SET
+		CLEAR_STATUS = #{clearStatus}
+		where MID = #{mid} and MER_TYPE = #{merType} and SETTLE_DATE = #{settleDate}
+	</update>
+	
+	<!-- 根据ID查询清分 -->
+	<select id="selectMerSettleStatictisById" resultMap="merSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT MSS.* FROM MER_SETTLE_STATICTIS MSS
+		WHERE MER_TYPE=0
+		<if test="merSettleStatictis.settleDate != null and merSettleStatictis.settleDate != ''">
+		AND	MSS.SETTLE_DATE = #{merSettleStatictis.settleDate}
+		</if>
+		<if test="merSettleStatictis.merSysId != null and merSettleStatictis.merSysId != ''">
+		AND MSS.MER_SYS_ID = #{merSettleStatictis.merSysId}
+		</if>
+		<if test="merSettleStatictis.clearStatus != null and merSettleStatictis.clearStatus != '' and merSettleStatictis.clearStatus != -1">
+		AND MSS.CLEAR_STATUS = #{merSettleStatictis.clearStatus}
+		</if>
+	</select>
+	<!-- 查询商户清分，机构与子商户共同用 -->
+	<select id="selectMerSettleStatictisListNew" resultMap="merSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT MSS.*
+		FROM MER_SETTLE_STATICTIS MSS 
+		WHERE MER_TYPE=#{merType}
+		<if test="settleDate != null and settleDate != ''">
+		AND	MSS.SETTLE_DATE = #{settleDate}
+		</if>
+		<if test="merSysId != null and merSysId != ''">
+		AND MSS.MER_SYS_ID = #{merSysId}
+		</if>
+		<if test="clearStatus != null and clearStatus != '' and clearStatus != -1">
+		AND MSS.CLEAR_STATUS = #{clearStatus}
+		</if>
+	</select>
+	<!-- 查询所有清分 -->
+	<select id="selectMerSettleStatictisList" resultMap="merSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT MSS.*,SMI.BILL_CYCLE FROM MER_SETTLE_STATICTIS MSS LEFT JOIN SUB_MER_INFO SMI ON SMI.SUB_MER_ID = MSS.MID
+		WHERE MER_TYPE=#{merSettleStatictis.merType}
+		<if test="merSettleStatictis.settleDate != null and merSettleStatictis.settleDate != ''">
+		AND	MSS.SETTLE_DATE = #{merSettleStatictis.settleDate}
+		</if>
+		<if test="merSettleStatictis.merSysId != null and merSettleStatictis.merSysId != ''">
+		AND MSS.MER_SYS_ID = #{merSettleStatictis.merSysId}
+		</if>
+		<if test="merSettleStatictis.mid != null and merSettleStatictis.mid != ''">
+		AND MSS.MID = #{merSettleStatictis.mid}
+		</if>
+		<if test="merSettleStatictis.clearStatus != null and merSettleStatictis.clearStatus != '' and merSettleStatictis.clearStatus != -1">
+		AND MSS.CLEAR_STATUS = #{merSettleStatictis.clearStatus}
+		</if>
+		<!-- limit #{page}  , #{pageSize} -->
+	</select>
+	
+	<!-- 查询所有清分,无需分页 -->
+	<select id="selectMerSettleStatictisListNotPage" resultMap="merSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT MSS.* FROM MER_SETTLE_STATICTIS MSS
+		WHERE MER_TYPE=#{merSettleStatictis.merType}
+		<if test="merSettleStatictis.settleDate != null and merSettleStatictis.settleDate != ''">
+		AND	MSS.SETTLE_DATE = #{merSettleStatictis.settleDate}
+		</if>
+		<if test="merSettleStatictis.merSysId != null and merSettleStatictis.merSysId != ''">
+		AND MSS.MER_SYS_ID = #{merSettleStatictis.merSysId}
+		</if>
+		<if test="merSettleStatictis.clearStatus != null and merSettleStatictis.clearStatus != '' and merSettleStatictis.clearStatus != -1">
+		AND MSS.CLEAR_STATUS = #{merSettleStatictis.clearStatus}
+		</if>
+	</select>
+	
+	<!-- 查询所有清分的总条数 -->
+	<select id="selectMerSettleStatictisListCount" resultType="java.lang.Integer" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT COUNT(1) FROM MER_SETTLE_STATICTIS MSS
+		WHERE MER_TYPE=#{merSettleStatictis.merType}
+		<if test="merSettleStatictis.settleDate != null and merSettleStatictis.settleDate != ''">
+		AND	MSS.SETTLE_DATE = #{merSettleStatictis.settleDate}
+		</if>
+		<if test="merSettleStatictis.merSysId != null and merSettleStatictis.merSysId != ''">
+		AND MSS.MER_SYS_ID = #{merSettleStatictis.merSysId}
+		</if>
+		<if test="merSettleStatictis.clearStatus != null and merSettleStatictis.clearStatus != '' and merSettleStatictis.clearStatus != -1">
+		AND MSS.CLEAR_STATUS = #{merSettleStatictis.clearStatus}
+		</if>
+	</select>
+	
+	<select id="selectMerSettleStatictisByMid" resultType="java.util.Map" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT max(SETTLE_DATE) as maxTime,min(SETTLE_DATE) as minTime,sum(SUM_AMT) as sumAmt 
+		FROM MER_SETTLE_STATICTIS where MID = #{mid} and MER_TYPE=#{merType}
+	</select>
+	
+	<update id="updateMerSettleStatictisStatusById" parameterType="com.bypay.domain.MerSettleStatictis">
+		UPDATE MER_SETTLE_STATICTIS 
+		SET
+		CLEAR_STATUS = #{clearStatus}
+		<if test="reserved1 != null and reserved1 != ''">
+   		,RESERVED1=#{reserved1}
+   		</if>
+   		<if test="reserved2 != null and reserved2 != ''">
+   		,RESERVED2=#{reserved2}
+   		</if>
+		where ID=#{id}
+	</update>
+	
+	<update id="updateMerSettleStatictisById" parameterType="com.bypay.domain.MerSettleStatictis">
+		UPDATE MER_SETTLE_STATICTIS 
+		SET
+		FAILE_AMT = #{faileAmt},
+		CLEAR_STATUS = #{clearStatus},
+		BP_SERIAL_NUMBER = #{bpSerialNumber}
+		WHERE ID = #{id}
+	</update>
+	
+	<select id="selectMerSettleStatictisByIdNew"  resultMap="merSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT * FROM MER_SETTLE_STATICTIS WHERE ID = #{id}
+	</select>
+	
+	<select id="selectMerSettleStatictisStatusByMerSysIdNew" resultMap="merSettleStatictis"	parameterType="com.bypay.domain.MerSettleStatictis">
+		SELECT CLEAR_STATUS FROM MER_SETTLE_STATICTIS WHERE MER_SYS_ID = #{merSysId} AND SETTLE_DATE = #{settleDate} AND MER_TYPE=1
+		<if test="clearStatus != null and clearStatus != '' and clearStatus == 1 ">
+			AND (CLEAR_STATUS = 1 OR CLEAR_STATUS = 9)
+		</if>
+		<if test="clearStatus != null and clearStatus != '' and clearStatus == 2 ">
+			AND CLEAR_STATUS != 1
+		</if>
+		GROUP BY CLEAR_STATUS
+	</select>
+	
+	<!-- 按每日统计成功交易的金额、手续费 -->
+	<select id="getSucAmtStatistics" resultMap="merSettleStatictis" parameterType="java.util.Map">
+			SELECT SETTLE_DATE, SUM_AMT 
+			FROM MER_SETTLE_STATICTIS 
+			where SETTLE_DATE between #{startTime} and #{endTime}
+			<if test="mid != null and mid != ''">
+				AND MID = #{mid} and MER_TYPE = 1
+			</if>
+			order by SETTLE_DATE asc
+	</select> 
+	<insert id="insertMerSettleStatictis" parameterType="com.bypay.domain.MerSettleStatictis">
+		INSERT INTO MER_SETTLE_STATICTIS(MID, MER_TYPE, MER_SYS_ID, MER_NAME, ACCOUNT_NUM, ACCOUNT_NAME,
+		 ACCOUNT_AGENCY_ID, SETTLE_DATE, SUM_AMT, SUM_TRANS_FEE, CLEAR_AMT, CREATE_DATE, CREATE_TIME,
+		  CLEAR_STATUS, CLEAR_ORDER_ID, FAILE_AMT, BP_SERIAL_NUMBER, COUNT_FEE) 
+	    VALUES( #{mid}, #{merType}, #{merSysId}, #{merName}, #{accountNum}, #{accountName}, #{accountAgencyId}
+	    , #{settleDate}, #{sumAmt}, #{sumTransFee}, #{clearAmt}, #{createDate}, #{createTime}, #{clearStatus},
+	     #{clearOrderId}, #{faileAmt}, #{bpSerialNumber}, #{countFee})
+	</insert>
+	
+</mapper>

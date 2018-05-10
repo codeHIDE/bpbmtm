@@ -1,0 +1,232 @@
+package com.bypay.dao.impl;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.SubMerTerminalDao;
+import com.bypay.domain.SubMerTerminal;
+import com.bypay.domain.clientTool.TerminalEnable;
+@Repository("SubMerTerminalDao")
+public class SubMerTerminalDaoImpl implements SubMerTerminalDao {
+
+	@Inject
+	private SqlSessionTemplate sqlSessionTemplate;
+	
+	/*
+	 * 根据子商户号获取设备信息
+	 */
+	public SubMerTerminal selectTerminalBySubMerId(String subMerId) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("selectTerminalBySubMerId", subMerId);
+	}
+	
+	//查询一个子商户的所有设备信息
+	@SuppressWarnings("unchecked")
+	public List<SubMerTerminal> selectSubMerTerminalAll(SubMerTerminal smi) {
+		return sqlSessionTemplate.selectList("selectSubMerTerminalAll", smi);
+	}
+	//查询指定id的子商户设备信息
+	public SubMerTerminal selectSubMerTerminalOne(SubMerTerminal subMerTerminal) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("selectSubMerTerminalOne",subMerTerminal);
+	}
+	
+	public SqlSessionTemplate getSqlSessionTemplate() {
+		return sqlSessionTemplate;
+	}
+	public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+		this.sqlSessionTemplate = sqlSessionTemplate;
+	}
+	/**
+	 * 重置终端信息密码
+	 */
+	@SuppressWarnings("unchecked")
+	public boolean updateTreminalPwd(String pwd,String numBer) {
+		Map m=new HashMap<String, String>();
+		m.put("pwd", pwd);
+		m.put("number", numBer);
+		if(sqlSessionTemplate.update("updateTreminalPwd", m)>0)
+			return true;
+		else
+			return false;
+	}
+	/**
+	 * 重置终端信息状态
+	 */
+	@SuppressWarnings("unchecked")
+	public boolean updateTreminalStatus(String Status,String numBer) {
+		Map m=new HashMap<String, String>();
+		m.put("pwd", Status);
+		m.put("number", numBer);
+		if(sqlSessionTemplate.update("updateTreminalStatus", m)>0)
+			return true;
+		else
+			return false;
+	}
+	
+
+	/**
+	 * 修改子商户设备信息
+	 */
+	@Override
+	public boolean updateSubMerTerminal(SubMerTerminal subMerTerminal) {
+		if(sqlSessionTemplate.update("updateSubMerTerminal", subMerTerminal) > 0)
+			return true; 
+		else
+			return false;
+	}
+	@Override
+	public SubMerTerminal getSubMerTerminal(SubMerTerminal terminalId) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("getSubMerTerminal",terminalId);
+	}
+	@Override
+	public Integer reset(SubMerTerminal subMerTerminal) {
+		return sqlSessionTemplate.update("reset",subMerTerminal);
+	}
+	@Override
+	public List<SubMerTerminal> selectSubMerTerminal(Map map) {
+		return sqlSessionTemplate.selectList("selectSubMerTerminal",map);
+	}
+	@Override
+	public Integer selectSubMerTerminalCount(Map map) {
+		return (Integer) sqlSessionTemplate.selectOne("selectSubMerTerminalCount",map);
+	}
+	
+	//修改商户状态
+	@Override
+	public int updateStatus(TerminalEnable terminalId) {
+		return sqlSessionTemplate.update("updateTerminalStatus", terminalId);
+	}
+	@Override
+	public SubMerTerminal selectSubMerTerminalByTerminalId(
+			SubMerTerminal subMerTerminal) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("selectSubMerTerminalByTerminalId",subMerTerminal);
+	}
+	/**
+	 * 根据商户号、终端号获取子商户终端信息
+	 */
+	@Override
+	public SubMerTerminal getSubMerTerInfo(SubMerTerminal terminal) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("getSubMerTerInfo",terminal);
+	}
+	
+	@Override
+	public SubMerTerminal getSubMerTerMer(SubMerTerminal terminal) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("getSubMerTerMer",terminal);
+	}
+	/**
+	 * 修改子商户设备的版本信息
+	 */
+	@Override
+	public boolean updateSubMerTerminalVersion(SubMerTerminal terminal) {
+		if(sqlSessionTemplate.update("updateSubMerTerminalVersion", terminal) > 0){
+			return true; 
+		} else {
+			return false;
+		}
+			
+	}
+	
+	//根据 子商户号 终端号 手机 查询有没有此终端
+	@Override
+	public SubMerTerminal selectSubMerTerminalByUpdatePwd(SubMerTerminal subMerTerminal) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("selectSubMerTerminalByUpdatePwd", subMerTerminal);
+	}
+	
+	//更新终端密码
+	@Override
+	public int updatePwd(SubMerTerminal subMerTerminal) {
+		return sqlSessionTemplate.update("updatePwd", subMerTerminal); 
+	}
+	/**
+	 * 修改设备最近登录时间
+	 */
+	@Override
+	public void updateSubMerByLastLoginTime(SubMerTerminal subMerTerminal) {
+		sqlSessionTemplate.update("updateSubMerByLastLoginTime", subMerTerminal); 
+	}
+	@Override
+	public int insertSubMerTerminal(SubMerTerminal smt) {
+		return sqlSessionTemplate.insert("insertSubMerTerminal", smt);
+	}
+	//修改登录名字
+	@Override
+	public int updateSubMerTerminalLoginName(SubMerTerminal subMerTerminal) {
+		return sqlSessionTemplate.update("updateSubMerTerminalLoginName", subMerTerminal);
+	}
+	@Override
+	public Integer resetMerSysIdByTsn(SubMerTerminal subMerTerminal) {
+		return sqlSessionTemplate.update("resetMerSysIdByTsn",subMerTerminal);
+	}
+	@Override
+	public int updateTreminalStatusBySubMerId(String status, String subMerId) {
+		SubMerTerminal subMerTerminal=new SubMerTerminal();
+		subMerTerminal.setStatus(status);
+		subMerTerminal.setSubMerId(subMerId);
+		return sqlSessionTemplate.update("updateTreminalStatusBySubMerId", subMerTerminal);
+	}
+	//根据子商户号查询 TSN
+	@Override
+	public SubMerTerminal getSubMerTerminalTSN(String subMerId) {
+		return (SubMerTerminal) sqlSessionTemplate.selectOne("getSubMerTerminalTSN", subMerId);
+	}
+
+	/**
+	 * 根据登录名/手机号查询信息
+	 */
+	@Override
+	public List<SubMerTerminal> selectSubMerTerminalByPhone(String phone) {
+		return sqlSessionTemplate.selectList("selectSubMerTerminalByPhone", phone);
+	}
+
+  @Override
+  public Integer resetSubMerInfo(SubMerTerminal subMerTerminal) {
+    return sqlSessionTemplate.update("resetSubMerInfo",subMerTerminal);
+  }
+  
+  /**
+   * 设备信息，清除商户号，登录账户号、密码
+   */
+  @Override
+  public Integer updateLoginInfoAndSubId(SubMerTerminal subMerTerminal) {
+      return sqlSessionTemplate.update("updateLoginInfoAndSubId", subMerTerminal);
+  }
+  
+  /**
+   * 根据机构商号返回 机构商号、统计下属终端数、终端开通数 syw 2015.08.06
+   */
+  @SuppressWarnings("rawtypes")
+  @Override
+  public List<SubMerTerminal> queryCountMerPusineTer(Map map) {
+	  return sqlSessionTemplate.selectList("queryCountMerPusineTer", map);
+  }
+	
+  /**
+   * 将终端号分配给代理商
+   */
+  @Override
+  public Boolean cloneTer(SubMerTerminal smi) {
+    try {
+      if (sqlSessionTemplate.update("updateCloneTer", smi) > 0)
+        return true;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return false;
+  }
+  
+  @Override
+  public Integer cleanLogin(SubMerTerminal subMerTerminal) {
+	  return sqlSessionTemplate.update("updateCleanLogin", subMerTerminal);
+  }
+  
+  @Override
+  public  int insertBatchSubMerTerminal(List<SubMerTerminal> smts){
+	  return sqlSessionTemplate.insert("insertBatchSubMerTerminal", smts);
+  }  
+
+}

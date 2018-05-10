@@ -1,0 +1,40 @@
+#han xin
+#TerminalUrl=http://192.168.1.77:8980/hftxposp/PosDealAction!transPayEntrance.ac
+#ExcelUrl=/usr/local/New_ProjectFiles/New_ReportFiles
+#hui fu
+#TerminalUrl=http://172.16.1.101:8280/bpposp/PosDealAction!transPayEntrance.ac
+TerminalUrl=http://172.16.1.101:8280/bpposp/PosDealAction!transPayEntrance.ac
+ExcelUrl=/usr/local/New_ProjectFiles/New_ReportFiles
+
+cashOutT0=/usr/local/New_ProjectFiles/New_ReportFiles/cashOutT0
+sftp.host=222.92.117.85
+sftp.port=8070
+sftp.username=YsePay
+sftp.password=20150526Yse#!
+sftp.upload.dir=/T0/
+
+
+#cashOutT0=D\:\\cashOutT0
+#sftp.host=192.168.1.101
+#sftp.port=22
+#sftp.username=root
+#sftp.password=tangkai
+#sftp.upload.dir=/root/
+
+
+#busUrl=http://10.0.3.174/lbcp/businessAction!doBusiness.ac
+#busUrl=http://210.51.61.174/lbcp/businessAction!doBusiness.ac
+#busUrl=http://192.168.1.31:8280/BPBCP/businessAction!doBusiness.ac
+#settleUrl=/pages/settleMent
+#tractId = 20038
+#tractId = 30006
+#notifyCerPath=D\:\\dev\\cert\\700000000000001-qjj.cer
+#backUrl=http\://192.168.12.167\:8080/bmtm1.0/notifyGateWay\!notifyIssued.ac
+#HF
+#TerminalUrl=http://192.168.12.84:8080/hftxposp/PosDealAction!transPayEntrance.ac
+#1.0
+#TerminalUrl=http://192.168.12.84:8080/posPlatform2.0/PosDealAction!transPayEntrance.ac
+
+#busUrl=http://192.168.1.190:8080/BPBCPNEW/businessAction!doBusiness.ac
+#SC
+#busUrl=http\://210.51.61.174/lbcp/businessAction\!doBusiness.ac

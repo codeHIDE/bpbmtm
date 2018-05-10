@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.WaresInfoDao">
+	<resultMap id="waresInfo" type="com.bypay.domain.WaresInfo">
+		<result property="waresId" column="waresId" />
+		<result property="waresName" column="waresName" />
+		<result property="merchantId" column="merchantId" />
+		<result property="waresPrice" column="waresPrice" />
+		<result property="waresShowPrice" column="waresShowPrice" />
+		<result property="waresType" column="waresType" />
+		<result property="waresStock" column="waresStock" />
+		<result property="createTime" column="createTime" />
+	</resultMap>
+
+	<select id="selectWaresInfo"  resultMap="waresInfo" parameterType="java.util.Map">
+		SELECT *
+		FROM WARES_INFO
+		WHERE 1=1
+		<if test="waresInfo.waresName != null and waresInfo.waresName != '' ">
+		AND waresName like '%${waresInfo.waresName}%'
+		</if>
+		<if test="waresInfo.merchantId!= null and waresInfo.merchantId!= '' ">
+		AND merchantId = #{waresInfo.merchantId}
+		</if>
+		ORDER BY waresId desc limit #{page}  , #{pageSize}
+	</select>
+	
+	<select id="selectWaresInfoCount" resultType="int" parameterType="java.util.Map">
+		SELECT COUNT(1)
+		FROM WARES_INFO
+		WHERE 1=1
+		<if test="waresInfo.waresName != null and waresInfo.waresName != '' ">
+		AND waresName like '%${waresInfo.waresName}%'
+		</if>
+		<if test="waresInfo.merchantId!= null and waresInfo.merchantId!= '' ">
+		AND merchantId = #{waresInfo.merchantId}
+		</if>
+	</select>
+	
+	<insert id="insertWares"  parameterType="com.bypay.domain.WaresInfo">
+	 	INSERT WARES_INFO(waresName,merchantId,waresPrice,waresShowPrice,waresType,waresStock,createTime)
+	 	values(#{waresName},#{merchantId},#{waresPrice},#{waresShowPrice},#{waresType},#{waresStock},#{createTime})
+	</insert>
+	
+	
+</mapper>

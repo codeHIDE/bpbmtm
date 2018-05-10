@@ -1,0 +1,198 @@
+package com.bypay.domain.clientTool;//
+
+import javax.xml.bind.annotation.XmlAccessType;//
+import javax.xml.bind.annotation.XmlAccessorType;//
+import javax.xml.bind.annotation.XmlElement;//
+import javax.xml.bind.annotation.XmlRootElement;//
+
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlRootElement(name="bppos")
+public class AccountRegist extends BeanParent {
+
+	@XmlElement
+	private String terminalId;//终端代码
+	@XmlElement
+	private String factoryId;//厂商号
+	@XmlElement
+	private String merchantName;//商户名
+	@XmlElement
+	private String legalManName;//法人姓名
+	@XmlElement
+	private String legalManIdcard;//法人身份证号
+	@XmlElement
+	private String mobileNum;//手机号
+	@XmlElement
+	private String personalMerRegNo;//营业执照
+	@XmlElement
+	private String taxNo;//税务登记号
+	@XmlElement
+	private String occNo;//组织代码号
+	@XmlElement
+	private String settleAccountType;//结算账户类型
+	@XmlElement
+	private String settleAccount;//结算账户名
+	@XmlElement
+	private String settleAccountNo;//结算账户号
+	@XmlElement
+	private String settleAgency;//开户行
+	@XmlElement
+	private String accountPwd;//密码
+	@XmlElement
+	private String terminalInFo;//终端信息
+	@XmlElement
+	private String merchantId;//商户代码
+	@XmlElement
+	private String subMerAddress;		//子商户地址
+	
+	//辅助添加的字段
+	@XmlElement
+	private String accountName;
+	
+	@XmlElement
+	private String lineNum;
+	
+	@XmlElement
+	private String openBank;
+	
+	@XmlElement
+	private String os;
+	@XmlElement
+	private String version;
+	
+	public String getVersion() {
+		return version;
+	}
+	public void setVersion(String version) {
+		this.version = version;
+	}
+	public String getOs() {
+		return os;
+	}
+	public void setOs(String os) {
+		this.os = os;
+	}
+	public String getSubMerAddress() {
+		return subMerAddress;
+	}
+	public void setSubMerAddress(String subMerAddress) {
+		this.subMerAddress = subMerAddress;
+	}
+	public String getAccountName() {
+		return accountName;
+	}
+	public void setAccountName(String accountName) {
+		this.accountName = accountName;
+	}
+	public String getFactoryId() {
+		return factoryId;
+	}
+	public void setFactoryId(String factoryId) {
+		this.factoryId = factoryId;
+	}
+	public String getTerminalId() {
+		return terminalId;//
+	}
+	public void setTerminalId(String terminalId) {
+		this.terminalId = terminalId;//
+	}
+	public String getMerchantName() {
+		return merchantName;//
+	}
+	public void setMerchantName(String merchantName) {
+		this.merchantName = merchantName;//
+	}
+	public String getLegalManName() {
+		return legalManName;//
+	}
+	public void setLegalManName(String legalManName) {
+		this.legalManName = legalManName;//
+	}
+	public String getLegalManIdcard() {
+		return legalManIdcard;//
+	}
+	public void setLegalManIdcard(String legalManIdcard) {
+		this.legalManIdcard = legalManIdcard;//
+	}
+	public String getMobileNum() {
+		return mobileNum;//
+	}
+	public void setMobileNum(String mobileNum) {
+		this.mobileNum = mobileNum;//
+	}
+	public String getPersonalMerRegNo() {
+		return personalMerRegNo;//
+	}
+	public void setPersonalMerRegNo(String personalMerRegNo) {
+		this.personalMerRegNo = personalMerRegNo;//
+	}
+	public String getTaxNo() {
+		return taxNo;//
+	}
+	public void setTaxNo(String taxNo) {
+		this.taxNo = taxNo;//
+	}
+	public String getOccNo() {
+		return occNo;//
+	}
+	public void setOccNo(String occNo) {
+		this.occNo = occNo;//
+	}
+	public String getSettleAccountType() {
+		return settleAccountType;//
+	}
+	public void setSettleAccountType(String settleAccountType) {
+		this.settleAccountType = settleAccountType;//
+	}
+	public String getSettleAccount() {
+		return settleAccount;//
+	}
+	public void setSettleAccount(String settleAccount) {
+		this.settleAccount = settleAccount;//
+	}
+	public String getSettleAccountNo() {
+		return settleAccountNo;//
+	}
+	public void setSettleAccountNo(String settleAccountNo) {
+		this.settleAccountNo = settleAccountNo;//
+	}
+	public String getSettleAgency() {
+		return settleAgency;//
+	}
+	public void setSettleAgency(String settleAgency) {
+		this.settleAgency = settleAgency;//
+	}
+	public String getAccountPwd() {
+		return accountPwd;//
+	}
+	public void setAccountPwd(String accountPwd) {
+		this.accountPwd = accountPwd;//
+	}
+	public String getTerminalInFo() {
+		return terminalInFo;//
+	}
+	public void setTerminalInFo(String terminalInFo) {
+		this.terminalInFo = terminalInFo;//
+	}
+	public String getMerchantId() {
+		return merchantId;//
+	}
+	public void setMerchantId(String merchantId) {
+		this.merchantId = merchantId;//
+	}
+	public String getLineNum() {
+		return lineNum;
+	}
+	public void setLineNum(String lineNum) {
+		this.lineNum = lineNum;
+	}
+	public String getOpenBank() {
+		return openBank;
+	}
+	public void setOpenBank(String openBank) {
+		this.openBank = openBank;
+	}
+
+	
+	
+}

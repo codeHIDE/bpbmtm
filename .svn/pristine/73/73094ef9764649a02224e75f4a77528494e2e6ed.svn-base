@@ -1,0 +1,57 @@
+package com.bypay.dao.impl;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Repository;
+
+import com.bypay.common.ibatis3.SqlSessionTemplate;
+import com.bypay.dao.MobileUserDao;
+import com.bypay.domain.MobileUser;
+@Repository("mobileUserDao")
+public class MobileUserDaoImpl implements MobileUserDao {
+	@Inject
+	  private SqlSessionTemplate sqlSessionTemplate;
+
+	  // get set
+	  public SqlSessionTemplate getSqlSessionTemplate() {
+	    return sqlSessionTemplate;
+	  }
+
+	  public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
+	    this.sqlSessionTemplate = sqlSessionTemplate;
+	  }
+	  @Override
+	  public int insertMobileUser(MobileUser mobileUser) {
+	    return sqlSessionTemplate.insert("insertMobileUser", mobileUser);
+	  }
+	  @Override
+		public MobileUser getMobileUser(MobileUser mobileUser) {
+			return (MobileUser) sqlSessionTemplate.selectOne("selectMobileUser",mobileUser);
+		}
+	  
+	  /**
+		 * 修改设备最近登录时间
+		 */
+		@Override
+		public void updateUserEavFail(MobileUser mobileUser) {
+			sqlSessionTemplate.update("updateUserEavFail", mobileUser); 
+		}
+		
+		@Override
+		public void updateUserByLastLoginTime(MobileUser mobileUser) {
+			sqlSessionTemplate.update("updateUserByLastLoginTime", mobileUser); 
+		}
+		
+		@Override
+		public void updateMobileUser(MobileUser mobileUser) {
+			sqlSessionTemplate.update("updateMobileUser", mobileUser); 
+		}
+		
+		@Override
+		public boolean updateTerminal(MobileUser mobileUser) {
+			if(sqlSessionTemplate.update("updateTerminal", mobileUser)>0)
+				return true;
+			else
+				return false;
+		}
+}

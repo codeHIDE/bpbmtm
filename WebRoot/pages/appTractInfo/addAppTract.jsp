@@ -1,0 +1,371 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8"
+	pageEncoding="UTF-8"%>
+<%@ include file="/common/taglibs.jsp"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>配置应用通道</title>
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css?332'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Aqua/css/ligerui-all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/Gray/css/all.css'/>" rel="stylesheet" type="text/css" />
+		<link href="<s:url value='/js/jqui/ligerUI/skins/ligerui-icons.css'/>" rel="stylesheet" type="text/css" />
+		<script src="<s:url value='/js/jqui/jquery/jquery-1.5.2.min.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/core/base.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerToolBar.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDialog.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerGrid.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDrag.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerResizable.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerGrid.showFilter.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerDateEditor.js'/>" type="text/javascript"></script>
+		<script src="<s:url value='/js/jquery/jquery-ui-1.7.1.custom.min.js'/>"></script>
+		<script src="<s:url value='/js/My97DatePicker_1/WdatePicker.js'/>"></script>
+		<script src="<s:url value='/js/CheckLength.js'/>" type="text/javascript"></script> 
+		<script src="<s:url value='/js/common.js'/>"></script>
+	    <script src="<s:url value='/js/jqui/ligerUI/js/plugins/ligerCheckBox.js'/>" type="text/javascript"></script>
+	    <script type="text/javascript">
+	    	var flag=false;
+		$(function(){
+			$("#transTimeBegin").ligerDateEditor({ showTime: true,format: "hh:mm:ss"});
+            $("#transTimeEnd").ligerDateEditor({ showTime: true,format: "hh:mm:ss"});
+		});
+	       
+        $(function () {
+       			if(${requestScope.addAppTractInfo=='success'}){
+					alert("添加通道成功！");
+					}
+            $("#chk1").change(function () 
+            { alert(this.checked); 
+            });
+
+            $('input:checkbox').ligerCheckBox();
+
+            $("#btnMul").click(function () {
+                var str = "";
+                $("#table2 input:chekcbox").each(function () {
+                    str += this.checked + ",";
+                });
+                alert(str);
+            });
+        });
+        function checkDate() {
+        	var payTract=$('#payTract').val();
+				if(payTract==-1){
+					alert("请选择支付通道");
+					return false;
+				}else if(payTract=='CSTP'){
+					var spid = $("#spid").val();
+					if(spid=='0000'){
+						alert("请选择SPID");
+						return false;
+					}
+				}
+				if(	
+					len('transMerId',20,'N','支付商户号')	&&
+					len('appTractName',60,'All','通道名称')   &&
+					len('transRateCost',10,'NS','扣率成本') &&
+					len('transLowestCost',10,'N','最低成本') &&
+					len('transHighestCost',10,'N','最高成本') &&
+					len('bypayProfit',10,'NS','平台分润') &&
+					len('perCardQuota',10,'N','单卡单笔限额') &&
+					len('cardQuota',10,'N','单卡单日限额') &&
+					len('cardCount',2,'N','单卡单日次数') &&
+					len('terminalId',10,'EN','交易终端号')
+					){
+						var gw_type = document.getElementsByName('appTractInfo.tractType'); 
+						for(i=0;i<gw_type.length;i++){
+							if(gw_type[i].checked){
+								var gw_type_flag = '1';
+							}
+						}
+						if(gw_type_flag!='1'){
+							alert('请选择通道类型');
+							$("#gw_type").focus();
+							return false;
+						}else{
+							return true;
+						}
+					}
+					return false;
+        }
+        function adda(){
+        	var check = checkDate();
+        	if(check == true) {
+        		window.parent.$.ligerDialog.confirm('确定添加?', function (yes) {
+					if(yes){
+						$.ajax({
+		                    type: "POST",
+		                    dataType: "html",
+		                    url: '<s:url value="/appTractInfo!addAppTractInfo.ac"/>', 
+		                    data: $('#addTract').serialize(),
+		                    success: function (data) {
+		                       if(data=="succ"){
+		                       		alert("添加成功!");
+		                       }else if(data=="er"){
+		                       		alert("已存在此支付商户号!");
+		                       }else {
+		                       		alert("添加失败!");
+		                       }
+		                    },
+		                    error: function(data) {
+		                    	alert("添加失败!");
+		                    }
+		               });
+					}
+				})
+        	}
+        	
+		}
+			
+    </script>
+		<style type="">
+			tr{
+				height:30px;
+			}
+			td{
+				width:120px;
+			}
+			
+			.inputTable input[type="text"]{
+				border: solid 1px #CCCCCC;
+			}
+			
+			.inputborder{
+				border: solid 1px #CCCCCC;
+			}
+			
+		</style>
+	
+	</head>
+	<body style="padding: 4px; overflow: hidden;">
+		<div id="content">
+			<s:if test="message!=null">
+				<span><s:property value="message" /></span>
+			</s:if>
+			<div class="box_system">
+				<form id="addTract" method="post"  >
+					<table width="96%" border="0" cellpadding="0" cellspacing="0">
+						<tr>
+							<td style="text-align: right;">
+								支付商户号：
+							</td>
+							<td>
+							<div class="l-text" >
+								<input type="text" class="l-text-field"  value="<s:property value="appTractInfo.transMerId"/>"
+									name="appTractInfo.transMerId" id="transMerId" />
+							</div>
+							</td>
+							<td width="150px" style="text-align: right;">
+								通道名称：
+							</td>
+							<td>
+								<div class="l-text" >
+								<input type="text"  class="l-text-field"  value="<s:property value="appTractInfo.appTractName"/>"
+									name="appTractInfo.appTractName" id="appTractName" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">
+								支付通道：
+							</td>
+							<td>
+								<select name="appTractInfo.payTract" id="payTract">
+									<option value="-1">
+										---请选择---
+									</option>
+									<option value="CSTP">
+										CSTP
+									</option>
+									<option value="BJPOSP">
+										BJPOSP
+									</option>
+									<option value="SUPATM">
+										SUPATM
+									</option>
+									<option value="UMSBJ">
+										UMSBJ
+									</option>
+								</select>
+							</td>
+							<td width="150px" style="text-align: right;">
+									扩展信息：
+								</td>
+								<td>
+								<div class="l-text" style="float:left;">
+									<input type="text" class="l-text-field" value="<s:property value="appTractInfo.remark"/>"
+										name="appTractInfo.remark" id="remark" />
+										</div>
+								</td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">
+								交易终端号：
+							</td>
+							<td style="text-align: left;">
+								<div class="l-text" style="float: left;">
+									<input type="text"  class="l-text-field" name="appTractInfo.terminalId" id="terminalId" 
+									value="<s:property value="appTractInfo.terminalId"/>"/>
+								</div>
+								<span style="color: red;float: left;">&nbsp;&nbsp;（默认为：00000000）</span>
+							</td>
+							<td style="text-align: right;">
+								SPID：
+							</td>
+							<td style="text-align: left;">
+									<select name="appTractInfo.spid" id="spid" style="width:135px">
+										<option value="0000">请选择</option>
+										<option value="0013">上海</option>
+										<option value="0359">四川</option>
+										<option value="0358">安徽</option>
+										<option value="0297">深圳</option>
+									</select>
+							</td>
+						</tr>
+							<tr>
+								<td width="150px" style="text-align: right;">
+									通道类型：
+								</td>
+								<td>
+									<label><input name="appTractInfo.tractType" type="radio"  id="tractType" value="01" />还款</label> 
+									<label><input name="appTractInfo.tractType" type="radio"  id="tractType" value="02" />转账</label> 
+									<label><input name="appTractInfo.tractType" type="radio"  id="tractType" value="03" />余额查询</label> 
+									<label><input name="appTractInfo.tractType" type="radio"  id="tractType" value="04" />手机冲值</label> 
+									<!-- 
+									<input type="checkbox" value="01" name="appTractInfo.tractType" id="tractType" />
+								还款
+									<input type="checkbox" value="02" name="appTractInfo.tractType" id="tractType" />
+								转账
+									<input type="checkbox" value="03" name="appTractInfo.tractType" id="tractType" />
+								余额查询
+								<input type="checkbox" value="04" name="appTractInfo.tractType" id="tractType" />
+								手机冲值
+								 -->
+								</td>
+								<td style="text-align: right;">
+									信息验证域：
+								</td>
+								<td style="text-align: left;">
+									<s:checkboxlist id="reserved" theme="simple" name="appTractInfo.reserved" list="#{'1':'身份证','2':'姓名','3':'手机号'}"></s:checkboxlist>
+								</td>
+						</tr>
+						<tr>
+							<td style="text-align:center" colspan="6">
+								------------------------------费率信息------------------------------
+							</td>
+						</tr>
+						<tr>
+							<td width="150px" style="text-align: right;">
+								扣率成本：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="appTractInfo.transRateCost"/>"
+									name="appTractInfo.transRateCost" id="transRateCost" />
+									</div><div style="width:10px;float:left;">&nbsp;%</div>
+							 </td>
+								<td width="150px" style="text-align: right;">
+									平台分润比：
+								</td>
+								<td>
+								<div class="l-text" style="float:left;">
+									<input type="text" class="l-text-field" value="<s:property value="appTractInfo.bypayProfit"/>"
+										name="appTractInfo.bypayProfit" id="bypayProfit" />
+										</div><div style="width:10px;float:left;">&nbsp;%</div>
+									</td>
+						</tr>
+							<tr>
+							<td width="150px" style="text-align: right;">
+								最低成本：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="appTractInfo.transLowestCost"/>"
+									name="appTractInfo.transLowestCost" id="transLowestCost" />
+									</div><div style="width:10px;float:left;">&nbsp;元</div>
+								</td>
+							<td width="150px" style="text-align: right;">
+								最高成本：
+							</td>
+							<td>
+							<div class="l-text" style="float:left;">
+								<input type="text" class="l-text-field" value="<s:property value="appTractInfo.transHighestCost"/>"
+									name="appTractInfo.transHighestCost" id="transHighestCost" />
+								</div><div style="width:10px;float:left;">&nbsp;元</div>
+								</td>
+						</tr>
+						<tr>
+							<td style="text-align:center" colspan="6">
+								------------------------------风控信息------------------------------
+							</td>
+						</tr>
+					
+						<tr>
+								<td width="150px" style="text-align: right;">
+									单卡单笔限额：
+								</td>
+								<td>
+								<div class="l-text" style="float:left;">
+									<input type="text" class="l-text-field" value="<s:property value="appTractInfo.perCardQuota"/>"
+										name="appTractInfo.perCardQuota" id="perCardQuota" />
+										</div><div style="width:10px;float:left;">&nbsp;元</div>
+									</td>
+								<td width="150px" style="text-align: right;">
+									单卡单日限额：
+								</td>
+								<td>
+								<div class="l-text" style="float:left;">
+									<input type="text" class="l-text-field" value="<s:property value="appTractInfo.cardQuota"/>"
+										name="appTractInfo.cardQuota" id="cardQuota" />
+								</div><div style="width:10px;float:left;">&nbsp;元</div>
+							</td>
+						</tr>
+						<tr>
+								<td width="150px" style="text-align: right;">
+									单卡单日次数：
+								</td>
+								<td>
+								<div class="l-text" style="float:left;">
+									<input type="text" class="l-text-field" value="<s:property value="appTractInfo.cardCount"/>"
+										name="appTractInfo.cardCount" id="cardCount" />
+								</div><div style="width:10px;float:left;">&nbsp;次</div>
+									</td>
+						</tr>
+						<tr>
+							<td style="text-align:center" colspan="6">
+								------------------------------配置时间-----------------------------
+							</td>
+						</tr>
+						<tr>
+							<td style="text-align: right;">
+								通道启用时间：
+							</td>
+							<td style="text-align: left;">
+								<input type="text" name="appTractInfo.transTimeBegin" id="transTimeBegin" value="${param.transTimeBegin}" />
+							</td>
+							<td style="text-align: right;">
+								通道关闭时间：
+							</td>
+							<td style="text-align: left;">
+								<input type="text" name="appTractInfo.transTimeEnd" id="transTimeEnd" value="${param.transTimeEnd}" />
+							</td>
+						</tr>
+						<tr>
+							<td colspan="4" align="center">
+								<input type="button" value="确认配置" id="btn" onclick="adda()" class="btn1" />
+							</td>
+						</tr>
+					</table>
+				</form>
+			</div>
+		</div>
+		<s:if test="#request.addAppTractInfo == 'success'">
+			<script>
+				alert("添加通道成功!");
+			</script>
+		</s:if>
+	</body>
+</html>

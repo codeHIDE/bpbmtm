@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper        PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"  
+"http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bypay.dao.TransLogInfoDao">
+	<resultMap id="transLogInfo" type="com.bypay.domain.TransLogInfo" >
+		<result property="transId" column="transId" />
+		<result property="intTxnDt" column="intTxnDt" />
+		<result property="intTxnTm" column="intTxnTm" />
+		<result property="chTxnDt" column="chTxnDt" />
+		<result property="chTxnTm" column="chTxnTm" />
+		<result property="msgTypeId" column="msgTypeId" />
+		<result property="tradeCode" column="tradeCode" />
+		<result property="tradeType" column="tradeType" />
+		<result property="serverCode" column="serverCode" />
+		<result property="serverTypeCode" column="serverTypeCode" />
+		<result property="merId" column="merId" />
+		<result property="termId" column="termId" />
+		<result property="batchId" column="batchId" />
+		<result property="termSeqId" column="termSeqId" />
+		<result property="referenceNo" column="referenceNo" />
+		<result property="chMerId" column="chMerId" />
+		<result property="chTermId" column="chTermId" />
+		<result property="chBatchId" column="chBatchId" />
+		<result property="chTermSeqId" column="chTermSeqId" />
+		<result property="settleDt" column="settleDt" />
+		<result property="authNo" column="authNo" />
+		<result property="issNo" column="issNo" />
+		<result property="acqNo" column="acqNo" />
+		<result property="expireDt" column="expireDt" />
+		<result property="transAmt" column="transAmt" />
+		<result property="transScore" column="transScore" />
+		<result property="realTransAmt" column="realTransAmt" />
+		<result property="couponValue" column="couponValue" />
+		<result property="cardNo" column="cardNo" />
+		<result property="mbAvailBal" column="mbAvailBal" />
+		<result property="mbAvailScore" column="mbAvailScore" />
+		<result property="memberId" column="memberId" />
+		<result property="transStat" column="transStat" />
+		<result property="cancelStat" column="cancelStat" />
+		<result property="replyCd" column="replyCd" />
+		<result property="secondReplyCd" column="secondReplyCd" />
+		<result property="agentNo" column="agentNo" />
+		<result property="orgNo" column="orgNo" />
+		<result property="payChannel" column="payChannel" />
+		<result property="payAccount" column="payAccount" />
+		<result property="checkStatus" column="checkStatus" />
+		<result property="merchantFee" column="merchantFee" />
+		<result property="merchantBill" column="merchantBill" />
+		<result property="splitAmt" column="splitAmt" />
+		<result property="origTermSeqId" column="origTermSeqId" />
+		<result property="chAddId" column="chAddId" />
+		<result property="digtSignature" column="digtSignature" />
+		<result property="cardTypeFlag" column="cardTypeFlag" />
+		<result property="actId" column="actId" />
+		<result property="alipayOrderId" column="alipayOrderId" />
+		<result property="couponNo" column="couponNo" />
+		<result property="expFlag" column="expFlag" />
+		<result property="lastUpdTs" column="lastUpdTs" />
+		<result property="alipayPayType" column="alipayPayType" />
+		<result property="t0Code" column="t0Code" />
+		<result property="t0TransNo" column="t0TransNo" />
+		<result property="t0Amt" column="t0Amt" />
+	</resultMap>
+
+
+	<sql id="coreColumn">
+		 transLogId, intTxnDt, intTxnTm, chTxnDt, chTxnTm, transSource, transType, msgTypeId, tradeCode, serverCode, serverTypeCode,
+		 cardSeriNo, trackingNo, origTrackingNo, referenceNo, merId, termId, orgNo, agentNo, batchId, chMerId, chTermId, chBatchId, chTrackingNo, 
+		 settleDt, transAmt, cardNo, authNo, userDefine60, issNo, acqNo, expireDt, transStat, cancelStat, chAddId, replyCd, checkStatus, cardTypeFlag, 
+		 dcdata, merchantFee, merchantSettle, orgSettle, channelSettle, lastUpdTs
+	</sql>
+	
+	
+	<select id="selectCoreTransLog"  resultMap="coreTransLog" parameterType="java.util.Map">
+		select 
+			<include refid="coreColumn" />
+			from core_trans_log
+			<include refid="coreWhere"/>
+		limit #{page},#{pageSize}
+	</select>
+	
+	<resultMap type="java.util.HashMap" id="sumInfo">
+		<result property="count" column="COUNT" />
+		<result property="sumMerAmt" column="SUM_MER_AMT" />
+		<result property="sumTransFee" column="SUM_TRANS_FEE" />
+	</resultMap>
+	
+	<sql id="coreWhere">
+			where core_trans_log.transSource!='201'
+			<if test="subMerId!=null and subMerId!=''">
+				AND merId=#{subMerId}
+			</if>
+			<if test="orderStatus!=null and orderStatus!='' and orderStatus!='-1'">
+				AND transStat=#{orderStatus}
+			</if>
+			<if test="merSysId!=null and merSysId!=''">
+				AND orgNo=#{merSysId}
+			</if>
+			<if test="terminalId!=null and terminalId!=''">
+				AND termId=#{terminalId}
+			</if>
+			<if test="cardNo!=null and cardNo!=''">
+				AND cardNo=#{cardNo}
+				<!-- AND EXT like '%${cardNo}%' -->
+			</if>
+			<if test="refundStatus!=null and refundStatus!='' and refundStatus!='-1'">
+				AND cancelStat=#{refundStatus}
+			</if>
+			<if test="startTime!=null and startTime!='' and endTime!=null and endTime!=''">
+				AND intTxnDt between #{startTime} and #{endTime}
+			</if>
+			<if test="transMerId!=null and transMerId!=''">
+				AND chMerId=#{transMerId}
+			</if>
+			<if test="t0Status!=null and t0Status!='' and t0Status!='-1'">
+				AND core_trans_log.transSource=#{t0Status}
+			</if>
+			ORDER BY transLogId desc	
+	</sql>
+	
+	<select id="selectCoreTransLogCount" resultMap="sumInfo" parameterType="java.util.Map">
+		select  
+			count(*) as COUNT,
+	        SUM(transAmt) as SUM_MER_AMT
+	        <if test="orderStatus!=null and orderStatus==2">
+	        	, SUM(merchantFee) as SUM_TRANS_FEE 
+			</if>
+			from core_trans_log
+			<include refid="coreWhere"/>
+	</select>
+	
+	<insert id="insertCoreTransLog"  parameterType="com.bypay.domain.RuleInfo">
+	 	INSERT INTO core_trans_log (userTypeId,transType,transFee,costFee,typeName)
+	 	values(#{userTypeId},#{transType},#{transFee},#{costFee},#{typeName})
+	</insert>
+</mapper>
